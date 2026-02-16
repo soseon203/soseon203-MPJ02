@@ -656,8 +656,8 @@ function resetGame(){
   G.enemies=[];G.enemiesSpawned=0;G.enemiesToSpawn=0;G.enemiesKilled=0;
   G.autoTimer=0;G.regenTimer=0;G.evolutionStage=0;
   // 업그레이드 초기화
-  G.unlockedUpgrades=['damage'];
-  G.upgrades={damage:{level:0}};
+  G.unlockedUpgrades=['damage','auto'];
+  G.upgrades={damage:{level:0},auto:{level:0}};
   G.rageStacks=0;G.rageTimer=0;G.comboCount=0;G.comboTimer=0;
   G.upgradeShieldActive=false;G.upgradeShieldTimer=0;G.empTimer=0;
   G.rebirthUsed=false;
@@ -915,6 +915,28 @@ function initEvents(){
   document.getElementById('pause-reset').addEventListener('click',()=>{
     togglePause();
     resetGame();
+  });
+
+  // 일시정지 메뉴 내 추가 버튼 (모바일)
+  document.getElementById('pause-lang').addEventListener('click',()=>{
+    const newLang=LANG==='ko'?'en':'ko';
+    setLang(newLang);
+    document.getElementById('lang-label').textContent=newLang==='ko'?'EN':'KO';
+    document.getElementById('pause-lang').textContent='🌐 '+(newLang==='ko'?'EN':'KO');
+    applyI18nHTML();
+    rebuildUpgradeGrid();
+    updateSkillDisplay();
+    updateUI();
+    updateEnemyRoster();
+  });
+  document.getElementById('pause-ranking').addEventListener('click',()=>showRankingPopup());
+  document.getElementById('pause-sound').addEventListener('click',()=>{
+    sfx.init();
+    const on=sfx.toggle();
+    document.getElementById('sound-btn').querySelector('.top-btn-icon').textContent=on?'🔊':'🔇';
+    document.getElementById('sound-btn').classList.toggle('muted',!on);
+    document.getElementById('pause-sound').textContent=(on?'🔊 ':'🔇 ')+t('ui.sound');
+    document.getElementById('pause-sound').classList.toggle('muted',!on);
   });
 
   window.addEventListener('keydown',(e)=>{

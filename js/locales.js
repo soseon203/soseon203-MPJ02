@@ -658,6 +658,10 @@ function applyI18nHTML(){
   s('upgrade-subtitle').textContent=t('pop.upg_sub');
   s('pause-resume').textContent=t('pop.pause_resume');
   s('pause-reset').textContent=t('pop.pause_reset');
+  // pause extra (모바일 메뉴)
+  s('pause-lang').textContent='🌐 '+(LANG==='ko'?'EN':'KO');
+  s('pause-ranking').textContent='🏆 '+t('ui.ranking');
+  s('pause-sound').textContent='🔊 '+t('ui.sound');
   // footer
   const footer=document.getElementById('game-footer');
   if(footer){

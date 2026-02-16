@@ -14,8 +14,8 @@ const G={
   stormTimer:0, staticTimer:0, skillSelecting:false, paused:false,
   currentWaveType:'normal',
   // 업그레이드 시스템 (동적)
-  unlockedUpgrades:['damage'],
-  upgrades:{damage:{level:0}},
+  unlockedUpgrades:['damage','auto'],
+  upgrades:{damage:{level:0},auto:{level:0}},
   upgradeSelecting:false,
   // 신규 업그레이드 전용 상태
   rageStacks:0, rageTimer:0,
