@@ -1,0 +1,38 @@
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Noto Sans KR','Malgun Gothic',sans-serif;background:#05051a;color:#ddd;min-height:100vh;line-height:1.7}
+a{color:#00d4ff;text-decoration:none}
+a:hover{text-decoration:underline}
+
+/* ── 헤더 ── */
+.page-header{text-align:center;padding:24px 16px 16px;border-bottom:1px solid rgba(255,255,255,.08)}
+.page-header .logo{font-size:1.3em;font-weight:900;background:linear-gradient(90deg,#ffee00,#00d4ff,#b44aff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:2px}
+.page-header .back-link{display:inline-block;margin-top:8px;font-size:.82em;color:#00d4ff;opacity:.7;transition:opacity .2s}
+.page-header .back-link:hover{opacity:1;text-decoration:none}
+
+/* ── 본문 ── */
+.page-body{max-width:680px;margin:0 auto;padding:32px 20px 48px}
+.page-body h1{font-size:1.5em;font-weight:900;color:#fff;margin-bottom:20px;text-shadow:0 0 20px rgba(0,212,255,.2)}
+.page-body h2{font-size:1.1em;font-weight:700;color:#00d4ff;margin:28px 0 10px;padding-bottom:6px;border-bottom:1px solid rgba(0,212,255,.15)}
+.page-body h3{font-size:.95em;font-weight:700;color:#ffee00;margin:18px 0 8px}
+.page-body p{font-size:.88em;color:rgba(255,255,255,.7);margin-bottom:12px}
+.page-body ul,.page-body ol{font-size:.86em;color:rgba(255,255,255,.65);margin:0 0 14px 22px}
+.page-body li{margin-bottom:5px}
+.page-body strong{color:#fff;font-weight:700}
+.page-body code{background:rgba(255,255,255,.08);padding:1px 6px;border-radius:4px;font-size:.9em}
+.page-body .highlight-box{background:rgba(0,212,255,.06);border:1px solid rgba(0,212,255,.2);border-radius:10px;padding:14px 16px;margin:16px 0;font-size:.85em;color:rgba(255,255,255,.75)}
+.page-body .update-date{font-size:.75em;color:rgba(255,255,255,.35);margin-bottom:24px}
+
+/* ── 푸터 ── */
+.page-footer{text-align:center;padding:24px 16px 32px;border-top:1px solid rgba(255,255,255,.08);margin-top:40px}
+.page-footer-links{display:flex;flex-wrap:wrap;justify-content:center;gap:8px 16px;font-size:.78em}
+.page-footer-links a{color:rgba(255,255,255,.4);transition:color .2s}
+.page-footer-links a:hover{color:#00d4ff;text-decoration:none}
+.page-footer-links a.current{color:#00d4ff;font-weight:700}
+.page-footer .copyright{margin-top:12px;font-size:.7em;color:rgba(255,255,255,.25)}
+
+/* ── 반응형 ── */
+@media(max-width:480px){
+  .page-body{padding:24px 16px 40px}
+  .page-body h1{font-size:1.25em}
+  .page-body h2{font-size:1em}
+}
