@@ -70,7 +70,7 @@ function renderRanking(sortBy){
   const list=loadRanking();
   const container=document.getElementById('ranking-list');
   if(list.length===0){
-    container.innerHTML='<div class="rank-empty">기록이 없습니다</div>';
+    container.innerHTML='<div class="rank-empty">'+t('ui.no_records')+'</div>';
     return;
   }
   const sorted=[...list];
@@ -79,7 +79,7 @@ function renderRanking(sortBy){
   else sorted.sort((a,b)=>b.wave-a.wave||b.kills-a.kills);
 
   const scoreKey=sortBy==='kills'?'kills':sortBy==='energy'?'energy':'wave';
-  const scoreLabel=sortBy==='kills'?'처치':sortBy==='energy'?'에너지':'웨이브';
+  const scoreLabel=sortBy==='kills'?t('go.kills'):sortBy==='energy'?t('go.energy'):t('go.wave');
 
   container.innerHTML='';
   sorted.forEach((e,i)=>{
@@ -95,7 +95,7 @@ function renderRanking(sortBy){
       <div class="rank-pos ${posClass}">${pos<=3?['🥇','🥈','🥉'][pos-1]:pos}</div>
       <div class="rank-info">
         <div class="rank-name" style="color:${evo.color}">${escapeHtml(e.name)}</div>
-        <div class="rank-detail">W${e.wave} · ${formatNum(e.kills)}킬 · Lv.${(e.evoStage||0)+1} · 스킬 ${e.skills||0}개 · ${dateStr}</div>
+        <div class="rank-detail">${tf('ui.rank_detail',{wave:e.wave,kills:formatNum(e.kills),evo:(e.evoStage||0)+1,skills:e.skills||0,date:dateStr})}</div>
       </div>
       <div class="rank-score">
         <div class="rank-score-value">${formatNum(e[scoreKey])}</div>
@@ -152,70 +152,71 @@ function recalcStats(){
 }
 function getUpgradeDesc(id){
   const lv=upLv(id);
-  switch(id){
-    case'damage':return`데미지 ${1+lv} → ${2+lv}`;
-    case'auto':return`초당 ${(lv*0.35).toFixed(1)} → ${((lv+1)*0.35).toFixed(1)}회`;
-    case'chain':return`체인 ${lv} → ${lv+1}체`;
-    case'hp':return`HP ${100+lv*20} → ${100+(lv+1)*20}`;
-    case'crit':{const c=lv*3,n=(lv+1)*3;return`크리 ${c}% → ${n}%`}
-    case'range':return`범위 +${lv*5} → +${(lv+1)*5}`;
-    case'quick':return`쿨타임 -${lv*8}ms → -${(lv+1)*8}ms`;
-    case'barrier':return`감소 ${lv} → ${lv+1}`;
-    case'overload':return`데미지 +${lv*8}% → +${(lv+1)*8}%`;
-    case'harvest':return`에너지 +${lv*10}% → +${(lv+1)*10}%`;
-    case'regen':return`재생 +${(lv*0.5).toFixed(1)} → +${((lv+1)*0.5).toFixed(1)}/초`;
-    case'splash':return`스플래시 ${lv*5}% → ${(lv+1)*5}%`;
-    case'slow_aura':return`감속 ${lv*5}% → ${(lv+1)*5}%`;
-    case'crit_dmg':return`크리 배율 +${(lv*0.25).toFixed(2)} → +${((lv+1)*0.25).toFixed(2)}`;
-    case'chain_dmg':return`체인 +${lv*10}% → +${(lv+1)*10}%`;
-    case'auto_dmg':return`자동 +${lv*15}% → +${(lv+1)*15}%`;
-    case'vampiric':return`회복 ${lv*2} → ${(lv+1)*2}/킬`;
-    case'dodge_up':return`회피 ${lv*3}% → ${(lv+1)*3}%`;
-    case'victory':return`보너스 +${lv*15} → +${(lv+1)*15}`;
-    case'multi':return`추가 ${lv} → ${lv+1}체`;
-    case'rage':return`+${lv*10}%/스택 → +${(lv+1)*10}%/스택`;
-    case'absorption':return`변환 ${lv*5}% → ${(lv+1)*5}%`;
-    case'thorns_up':return`반사 ${lv*20}% → ${(lv+1)*20}%`;
-    case'fortune':return`행운 ${lv*5}% → ${(lv+1)*5}%`;
-    case'chain_range':return`범위 +${lv*30} → +${(lv+1)*30}`;
-    case'penetrate':return`관통 ${lv*20}% → ${(lv+1)*20}%`;
-    case'emp':return`EMP ${lv*30}% → ${(lv+1)*30}%`;
-    case'combo':return`보너스 +${lv*3} → +${(lv+1)*3}/콤보`;
-    case'auto_shield':return`충전 ${Math.max(5,12-lv)}초 → ${Math.max(5,12-(lv+1))}초`;
-    case'rapid_fire':return`속도 +${lv*20}% → +${(lv+1)*20}%`;
-    // ── 신규 업그레이드 ──
-    case'click_amp':return`클릭 +${lv*3} → +${(lv+1)*3}`;
-    case'tough_skin':return`HP +${lv*15} → +${(lv+1)*15}`;
-    case'wave_heal':return`회복 ${lv*10} → ${(lv+1)*10}/웨이브`;
-    case'energy_flat':return`에너지 +${lv*2} → +${(lv+1)*2}/킬`;
-    case'auto_acc':return`자동 +${lv} → +${lv+1}`;
-    case'precision':return`크리배율 +${(lv*0.15).toFixed(2)} → +${((lv+1)*0.15).toFixed(2)}`;
-    case'shield_wall':return`감소 ${lv*8}% → ${(lv+1)*8}%`;
-    case'boss_hunter':return`보스 +${lv*15}% → +${(lv+1)*15}%`;
-    case'bolt_size':return`범위 +${lv*10} → +${(lv+1)*10}`;
-    case'recover':return`재생 +${lv*2} → +${(lv+1)*2}/초`;
-    case'double_tap':return`확률 ${lv*12}% → ${(lv+1)*12}%`;
-    case'resilience':return`재생 ${lv>0?'2':'1'}배 → ${(lv+1)>0?'2':'1'}배`;
-    case'weak_point':return`+${lv*15}% → +${(lv+1)*15}%`;
-    case'elite_hunter':return`에너지 +${lv*50}% → +${(lv+1)*50}%`;
-    case'iron_core':return`감소 ${lv*5}% → ${(lv+1)*5}%`;
-    case'chain_crit':return`크리 ${lv*5}% → ${(lv+1)*5}%`;
-    case'hp_boost':return`HP +${lv*30} → +${(lv+1)*30}`;
-    case'splash_range':return`범위 +${lv*20}% → +${(lv+1)*20}%`;
-    case'cooldown':return`쿨다운 -${lv}초 → -${lv+1}초`;
-    case'energy_shield':return`감소 ${lv*15}% → ${(lv+1)*15}%`;
-    case'execute':return`+${lv*50}% → +${(lv+1)*50}%`;
-    case'lifeline':return`회복 ${lv*2} → ${(lv+1)*2}/크리`;
-    case'surge':return`데미지 +${lv*6}% → +${(lv+1)*6}%`;
-    case'field_expand':return`범위 +${lv*8} → +${(lv+1)*8}`;
-    case'bonus_wave':return`보스 +${lv*80}% → +${(lv+1)*80}%`;
-    case'plasma':return`폭발 ${lv*20}% → ${(lv+1)*20}%`;
-    case'rebirth':return`부활 HP ${lv*20}% → ${(lv+1)*20}%`;
-    case'final_strike':return`고정 +${lv*5} → +${(lv+1)*5}`;
-    case'energy_storm':return`데미지 +${lv*15}% → +${(lv+1)*15}%`;
-    case'titan_guard':return`HP +${lv*50}, 감소 +${lv*2} → HP +${(lv+1)*50}, 감소 +${(lv+1)*2}`;
-    default:return'';
-  }
+  const _V={
+    damage:{cur:1+lv,next:2+lv},
+    auto:{cur:(lv*0.35).toFixed(1),next:((lv+1)*0.35).toFixed(1)},
+    chain:{cur:lv,next:lv+1},
+    hp:{cur:100+lv*20,next:100+(lv+1)*20},
+    crit:{cur:lv*3,next:(lv+1)*3},
+    range:{cur:lv*5,next:(lv+1)*5},
+    quick:{cur:lv*8,next:(lv+1)*8},
+    barrier:{cur:lv,next:lv+1},
+    overload:{cur:lv*8,next:(lv+1)*8},
+    harvest:{cur:lv*10,next:(lv+1)*10},
+    regen:{cur:(lv*0.5).toFixed(1),next:((lv+1)*0.5).toFixed(1)},
+    splash:{cur:lv*5,next:(lv+1)*5},
+    slow_aura:{cur:lv*5,next:(lv+1)*5},
+    crit_dmg:{cur:(lv*0.25).toFixed(2),next:((lv+1)*0.25).toFixed(2)},
+    chain_dmg:{cur:lv*10,next:(lv+1)*10},
+    auto_dmg:{cur:lv*15,next:(lv+1)*15},
+    vampiric:{cur:lv*2,next:(lv+1)*2},
+    dodge_up:{cur:lv*3,next:(lv+1)*3},
+    victory:{cur:lv*15,next:(lv+1)*15},
+    multi:{cur:lv,next:lv+1},
+    rage:{cur:lv*10,next:(lv+1)*10},
+    absorption:{cur:lv*5,next:(lv+1)*5},
+    thorns_up:{cur:lv*20,next:(lv+1)*20},
+    fortune:{cur:lv*5,next:(lv+1)*5},
+    chain_range:{cur:lv*30,next:(lv+1)*30},
+    penetrate:{cur:lv*20,next:(lv+1)*20},
+    emp:{cur:lv*30,next:(lv+1)*30},
+    combo:{cur:lv*3,next:(lv+1)*3},
+    auto_shield:{cur:Math.max(5,12-lv),next:Math.max(5,12-(lv+1))},
+    rapid_fire:{cur:lv*20,next:(lv+1)*20},
+    click_amp:{cur:lv*3,next:(lv+1)*3},
+    tough_skin:{cur:lv*15,next:(lv+1)*15},
+    wave_heal:{cur:lv*10,next:(lv+1)*10},
+    energy_flat:{cur:lv*2,next:(lv+1)*2},
+    auto_acc:{cur:lv,next:lv+1},
+    precision:{cur:(lv*0.15).toFixed(2),next:((lv+1)*0.15).toFixed(2)},
+    shield_wall:{cur:lv*8,next:(lv+1)*8},
+    boss_hunter:{cur:lv*15,next:(lv+1)*15},
+    bolt_size:{cur:lv*10,next:(lv+1)*10},
+    recover:{cur:lv*2,next:(lv+1)*2},
+    double_tap:{cur:lv*12,next:(lv+1)*12},
+    resilience:{cur:lv>0?'2':'1',next:(lv+1)>0?'2':'1'},
+    weak_point:{cur:lv*15,next:(lv+1)*15},
+    elite_hunter:{cur:lv*50,next:(lv+1)*50},
+    iron_core:{cur:lv*5,next:(lv+1)*5},
+    chain_crit:{cur:lv*5,next:(lv+1)*5},
+    hp_boost:{cur:lv*30,next:(lv+1)*30},
+    splash_range:{cur:lv*20,next:(lv+1)*20},
+    cooldown:{cur:lv,next:lv+1},
+    energy_shield:{cur:lv*15,next:(lv+1)*15},
+    execute:{cur:lv*50,next:(lv+1)*50},
+    lifeline:{cur:lv*2,next:(lv+1)*2},
+    surge:{cur:lv*6,next:(lv+1)*6},
+    field_expand:{cur:lv*8,next:(lv+1)*8},
+    bonus_wave:{cur:lv*80,next:(lv+1)*80},
+    plasma:{cur:lv*20,next:(lv+1)*20},
+    rebirth:{cur:lv*20,next:(lv+1)*20},
+    final_strike:{cur:lv*5,next:(lv+1)*5},
+    energy_storm:{cur:lv*15,next:(lv+1)*15},
+    titan_guard:{cur:lv*50,next:(lv+1)*50,curR:lv*2,nextR:(lv+1)*2}
+  };
+  const v=_V[id];
+  if(!v)return'';
+  return tf('ud.'+id,v);
 }
 
 const PAT_INFO={
@@ -573,7 +574,7 @@ function damageEnemy(enemy,dmg,x,y,isChain,isCrit){
     if(enemy.shieldHp<=0){enemy.shieldHp=0;addShockwave(enemy.x,enemy.y,'#6688cc',50)}
     if(dmg<=0){
       enemy.flash=1;
-      showFloatText(x||enemy.x,y||enemy.y,'방패!','chain');
+      showFloatText(x||enemy.x,y||enemy.y,t('msg.shield_block'),'chain');
       return;
     }
   }
@@ -715,7 +716,7 @@ function killEnemy(enemy){
       e2.hp=Math.min(e2.maxHp*2,e2.hp+Math.ceil(enemy.maxHp*0.2));
       e2.size=Math.min(e2.size*1.05,e2.size>30?e2.size:30);
       addSparks(e2.x,e2.y,3,'#dd4444');
-      showFloatText(e2.x,e2.y-10,'흡수!','critical');
+      showFloatText(e2.x,e2.y-10,t('msg.absorb'),'critical');
     }
   });
 

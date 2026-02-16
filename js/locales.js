@@ -33,6 +33,21 @@ I18N.ko['ui.wave_waiting']='대기 중...';
 I18N.ko['ui.none']='없음';
 I18N.ko['ui.enemy_roster']='출현 적';
 I18N.ko['ui.retry']='다시 시작';
+I18N.ko['ui.ranking']='랭킹';
+I18N.ko['ui.nickname_prompt']='닉네임을 입력하세요';
+I18N.ko['ui.nickname_ph']='닉네임 (최대 12자)';
+I18N.ko['ui.save_rank']='기록 저장';
+I18N.ko['ui.rank_saved']='기록이 저장되었습니다!';
+I18N.ko['ui.view_rank']='🏆 랭킹 보기';
+I18N.ko['ui.rank_wave']='웨이브';
+I18N.ko['ui.rank_kills']='처치수';
+I18N.ko['ui.rank_energy']='에너지';
+I18N.ko['ui.close']='닫기';
+I18N.ko['ui.clear_rank']='기록 초기화';
+I18N.ko['ui.privacy']='개인정보처리방침';
+I18N.ko['ui.terms']='이용약관';
+I18N.ko['ui.about']='소개';
+I18N.ko['ui.help']='도움말';
 
 I18N.en['ui.title']='Lightning Raising';
 I18N.en['ui.sound']='Sound';
@@ -47,6 +62,25 @@ I18N.en['ui.wave_waiting']='Waiting...';
 I18N.en['ui.none']='None';
 I18N.en['ui.enemy_roster']='Enemies';
 I18N.en['ui.retry']='Retry';
+I18N.en['ui.ranking']='Ranking';
+I18N.en['ui.nickname_prompt']='Enter your nickname';
+I18N.en['ui.nickname_ph']='Nickname (max 12)';
+I18N.en['ui.save_rank']='Save Record';
+I18N.en['ui.rank_saved']='Record saved!';
+I18N.en['ui.view_rank']='🏆 View Ranking';
+I18N.en['ui.rank_wave']='Wave';
+I18N.en['ui.rank_kills']='Kills';
+I18N.en['ui.rank_energy']='Energy';
+I18N.en['ui.close']='Close';
+I18N.en['ui.clear_rank']='Clear Records';
+I18N.ko['ui.no_records']='기록이 없습니다';
+I18N.ko['ui.rank_detail']='W{wave} · {kills}킬 · Lv.{evo} · 스킬 {skills}개 · {date}';
+I18N.en['ui.no_records']='No records';
+I18N.en['ui.rank_detail']='W{wave} · {kills} kills · Lv.{evo} · {skills} skills · {date}';
+I18N.en['ui.privacy']='Privacy Policy';
+I18N.en['ui.terms']='Terms of Service';
+I18N.en['ui.about']='About';
+I18N.en['ui.help']='Help';
 
 // ================================================================
 //  Game Over 라벨
@@ -572,32 +606,42 @@ I18N.en['ud.titan_guard']='HP +{cur}, Red +{curR} → HP +{next}, Red +{nextR}';
 // ================================================================
 function applyI18nHTML(){
   document.title=t('ui.title');
+  document.documentElement.lang=LANG;
   const s=id=>document.getElementById(id);
+  // top buttons
   s('sound-btn').querySelector('.top-btn-label').textContent=t('ui.sound');
   s('sound-btn').title=t('ui.sound');
   s('pause-btn').querySelector('.top-btn-label').textContent=t('ui.pause');
   s('pause-btn').title=t('ui.pause');
-  // stats row
-  document.querySelectorAll('.stat-label').forEach(el=>{
-    const map={'데미지':'ui.damage','자동/초':'ui.auto_per_sec','처치':'ui.kills',
-               'Damage':'ui.damage','Auto/s':'ui.auto_per_sec','Kills':'ui.kills'};
-    const k=map[el.textContent];
-    if(k) el.textContent=t(k);
-  });
+  if(s('ranking-btn')){
+    s('ranking-btn').querySelector('.top-btn-label').textContent=t('ui.ranking');
+    s('ranking-btn').title=t('ui.ranking');
+  }
+  // stats row — use data-i18n keys
+  const statLabels=document.querySelectorAll('.stat-label');
+  if(statLabels[0])statLabels[0].textContent=t('ui.damage');
+  if(statLabels[1])statLabels[1].textContent=t('ui.auto_per_sec');
+  if(statLabels[2])statLabels[2].textContent=t('ui.kills');
   s('energy-unit').textContent=t('ui.energy');
-  // game over labels
-  document.querySelectorAll('.go-stat-label').forEach(el=>{
-    const map={'웨이브':'go.wave','처치':'go.kills','에너지':'go.energy','진화':'go.evo','데미지':'go.damage','자동/초':'go.auto',
-               'Wave':'go.wave','Kills':'go.kills','Energy':'go.energy','Evolution':'go.evo','Damage':'go.damage','Auto/s':'go.auto'};
-    const k=map[el.textContent];
-    if(k) el.textContent=t(k);
-  });
-  document.querySelectorAll('.go-section-title').forEach(el=>{
-    const map={'업그레이드 현황':'go.upgrades','획득 스킬':'go.skills','Upgrades':'go.upgrades','Skills':'go.skills'};
-    const k=map[el.textContent];
-    if(k) el.textContent=t(k);
-  });
+  // game over labels (순서 고정)
+  const goLabels=document.querySelectorAll('.go-stat-label');
+  const goKeys=['go.wave','go.kills','go.energy','go.evo','go.damage','go.auto'];
+  goLabels.forEach((el,i)=>{if(goKeys[i])el.textContent=t(goKeys[i])});
+  const secTitles=document.querySelectorAll('.go-section-title');
+  const secKeys=['go.upgrades','go.skills','ui.nickname_prompt'];
+  secTitles.forEach((el,i)=>{if(secKeys[i])el.textContent=t(secKeys[i])});
   s('go-retry').textContent=t('ui.retry');
+  // nickname / ranking
+  if(s('go-nickname'))s('go-nickname').placeholder=t('ui.nickname_ph');
+  if(s('go-save-rank'))s('go-save-rank').textContent=t('ui.save_rank');
+  if(s('go-rank-saved'))s('go-rank-saved').textContent=t('ui.rank_saved');
+  if(s('go-view-rank'))s('go-view-rank').textContent=t('ui.view_rank');
+  // ranking popup
+  const rankTabs=document.querySelectorAll('.rank-tab');
+  const tabKeys=['ui.rank_wave','ui.rank_kills','ui.rank_energy'];
+  rankTabs.forEach((el,i)=>{if(tabKeys[i])el.textContent=t(tabKeys[i])});
+  if(s('ranking-close'))s('ranking-close').textContent=t('ui.close');
+  if(s('ranking-clear'))s('ranking-clear').textContent=t('ui.clear_rank');
   // popups
   s('evolution-content').querySelector('h2').textContent=t('pop.evo_title');
   s('evo-ok').textContent=t('pop.evo_ok');
@@ -607,4 +651,11 @@ function applyI18nHTML(){
   s('upgrade-subtitle').textContent=t('pop.upg_sub');
   s('pause-resume').textContent=t('pop.pause_resume');
   s('pause-reset').textContent=t('pop.pause_reset');
+  // footer
+  const footer=document.getElementById('game-footer');
+  if(footer){
+    const links=footer.querySelectorAll('a');
+    const fKeys=['ui.privacy','ui.terms','ui.about','ui.help'];
+    links.forEach((el,i)=>{if(fKeys[i])el.textContent=t(fKeys[i])});
+  }
 }
