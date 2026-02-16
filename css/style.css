@@ -252,16 +252,17 @@ body{font-family:'Noto Sans KR','Malgun Gothic',sans-serif;background:#05051a;co
   .roster-item{font-size:.48em;padding:1px 5px 1px 3px;gap:2px}
   .roster-title{font-size:.42em}
   /* 하단 패널 컴팩트 */
-  #bottom-panel{padding:4px 6px 6px}
-  #energy-display{margin-bottom:4px}
-  #energy-value{font-size:1.2em}
-  #energy-unit{font-size:.65em}
-  #upgrades-grid{gap:4px;max-height:28vh}
-  .upgrade-btn{padding:6px;border-radius:8px}
-  .upgrade-name{font-size:.7em}
-  .upgrade-desc{font-size:.52em;margin-bottom:2px}
-  .upgrade-cost{font-size:.62em}
-  .upgrade-level{font-size:.52em;padding:0px 5px}
+  #bottom-panel{padding:2px 4px 4px}
+  #energy-display{margin-bottom:2px}
+  #energy-value{font-size:1em}
+  #energy-unit{font-size:.6em}
+  #upgrades-grid{gap:3px;max-height:25vh}
+  .upgrade-btn{padding:4px 5px;border-radius:6px}
+  .upgrade-name{font-size:.62em;margin-bottom:0}
+  .upgrade-desc{font-size:.46em;margin-bottom:1px;line-height:1.2}
+  .upgrade-bottom{margin-top:1px}
+  .upgrade-cost{font-size:.55em}
+  .upgrade-level{font-size:.46em;padding:0px 4px}
   .hotkey-badge{display:none}
   /* 팝업 컴팩트 */
   #game-over{padding:12px 8px;gap:6px}
