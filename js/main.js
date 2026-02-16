@@ -1009,6 +1009,11 @@ function initLanding(){
     document.getElementById('landing-screen').classList.add('hidden');
     startGame();
   });
+  // 랜딩에서도 랭킹 닫기·탭 작동하도록
+  document.getElementById('ranking-close').addEventListener('click',()=>hideRankingPopup());
+  document.querySelectorAll('.rank-tab').forEach(tab=>{
+    tab.addEventListener('click',()=>showRankingPopup(tab.dataset.sort));
+  });
 }
 
 function startGame(){

@@ -4,21 +4,21 @@ body{font-family:'Noto Sans KR','Malgun Gothic',sans-serif;background:#05051a;co
 #landing-screen{position:fixed;top:0;left:0;width:100%;height:100%;z-index:200;display:flex;align-items:center;justify-content:center;background:#05051a}
 #landing-screen.hidden{display:none}
 #landing-bg{position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;object-position:center}
-#landing-overlay{position:absolute;top:0;left:0;width:100%;height:100%;background:linear-gradient(0deg,rgba(5,5,26,.85) 0%,rgba(5,5,26,.3) 40%,rgba(5,5,26,.1) 60%,rgba(5,5,26,.4) 100%)}
+#landing-overlay{position:absolute;top:0;left:0;width:100%;height:100%;background:linear-gradient(0deg,rgba(5,5,26,.95) 0%,rgba(5,5,26,.7) 30%,rgba(5,5,26,.5) 55%,rgba(5,5,26,.65) 100%)}
 #landing-content{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:16px;width:90%;max-width:360px;padding-bottom:20px}
 #landing-start{background:linear-gradient(135deg,#00d4ff,#b44aff);border:none;color:#fff;padding:18px 60px;border-radius:30px;font-size:1.3em;font-weight:900;cursor:pointer;letter-spacing:2px;box-shadow:0 0 30px rgba(0,212,255,.4),0 4px 15px rgba(0,0,0,.5);transition:all .3s;animation:startPulse 2s ease-in-out infinite}
 #landing-start:hover{transform:translateY(-3px) scale(1.05);box-shadow:0 0 50px rgba(0,212,255,.6),0 8px 25px rgba(0,0,0,.5)}
 #landing-start:active{transform:translateY(1px) scale(.98)}
 @keyframes startPulse{0%,100%{box-shadow:0 0 30px rgba(0,212,255,.4),0 4px 15px rgba(0,0,0,.5)}50%{box-shadow:0 0 45px rgba(180,74,255,.5),0 4px 15px rgba(0,0,0,.5)}}
-#landing-nav{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
-.landing-btn{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.2);color:#fff;padding:10px 20px;border-radius:20px;font-size:.85em;font-weight:600;cursor:pointer;transition:all .2s;white-space:nowrap}
-.landing-btn:hover{background:rgba(255,255,255,.15);border-color:rgba(0,212,255,.5);transform:translateY(-1px)}
+#landing-nav{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;width:100%}
+.landing-btn{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.25);color:#fff;padding:10px 8px;border-radius:20px;font-size:.85em;font-weight:600;cursor:pointer;transition:all .2s;white-space:nowrap;text-align:center;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.landing-btn:hover{background:rgba(255,255,255,.18);border-color:rgba(0,212,255,.5);transform:translateY(-1px)}
 #landing-bottom{display:flex;flex-direction:column;align-items:center;gap:10px;margin-top:8px}
-#landing-lang{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.7);padding:8px 18px;border-radius:18px;font-size:.78em;cursor:pointer;transition:all .2s}
-#landing-lang:hover{background:rgba(255,255,255,.12);color:#fff}
+#landing-lang{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.25);color:#fff;padding:10px 24px;border-radius:20px;font-size:.85em;font-weight:600;cursor:pointer;transition:all .2s;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+#landing-lang:hover{background:rgba(255,255,255,.18);border-color:rgba(0,212,255,.5);transform:translateY(-1px)}
 #landing-links{display:flex;gap:14px;font-size:.65em}
-#landing-links a{color:rgba(255,255,255,.3);text-decoration:none;transition:color .2s}
-#landing-links a:hover{color:rgba(255,255,255,.6)}
+#landing-links a{color:rgba(255,255,255,.4);text-decoration:none;transition:color .2s}
+#landing-links a:hover{color:rgba(255,255,255,.7)}
 #game-container{position:relative;height:100vh;width:100vw;overflow:hidden;display:none}
 #game-container.active{display:block}
 #game-container.shake{animation:shake .12s ease-out}
