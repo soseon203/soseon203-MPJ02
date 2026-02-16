@@ -307,17 +307,17 @@ function update(dt){
         // dodge: 15% 회피 (스킬) + dodge_up 업그레이드
         const totalDodge=(hasSkill('dodge')?0.15:0)+upLv('dodge_up')*0.03;
         if(totalDodge>0&&Math.random()<totalDodge){
-          showFloatText(cx,cy-20,'회피!','chain');
+          showFloatText(cx,cy-20,t('msg.dodge'),'chain');
           addSparks(cx,cy,4,'#44ddff');
           sfx.hit();
         }else if(G.upgradeShieldActive){
           G.upgradeShieldActive=false;G.upgradeShieldTimer=0;
-          showFloatText(cx,cy-20,'실드!','chain');
+          showFloatText(cx,cy-20,t('msg.shield'),'chain');
           addShockwave(cx,cy,'#6644ff',80);
           sfx.hit();
         }else if(G.shieldActive){
           G.shieldActive=false;G.shieldTimer=0;
-          showFloatText(cx,cy-20,'실드!','chain');
+          showFloatText(cx,cy-20,t('msg.shield'),'chain');
           addShockwave(cx,cy,'#4488ff',80);
           sfx.hit();
         }else{
@@ -413,14 +413,14 @@ function update(dt){
           if(bossDist<250){
             const _bDodge=(hasSkill('dodge')?0.15:0)+upLv('dodge_up')*0.03;
             if(_bDodge>0&&Math.random()<_bDodge){
-              showFloatText(cx,cy-20,'회피!','chain');
+              showFloatText(cx,cy-20,t('msg.dodge'),'chain');
             }else if(G.upgradeShieldActive){
               G.upgradeShieldActive=false;G.upgradeShieldTimer=0;
-              showFloatText(cx,cy-20,'실드!','chain');
+              showFloatText(cx,cy-20,t('msg.shield'),'chain');
               addShockwave(cx,cy,'#6644ff',80);
             }else if(G.shieldActive){
               G.shieldActive=false;G.shieldTimer=0;
-              showFloatText(cx,cy-20,'실드!','chain');
+              showFloatText(cx,cy-20,t('msg.shield'),'chain');
               addShockwave(cx,cy,'#4488ff',80);
             }else{
               G.hp-=quakeDmg;
@@ -444,15 +444,15 @@ function update(dt){
       if(pd<30){
         const _pDodge=(hasSkill('dodge')?0.15:0)+upLv('dodge_up')*0.03;
         if(_pDodge>0&&Math.random()<_pDodge){
-          showFloatText(cx,cy-20,'회피!','chain');
+          showFloatText(cx,cy-20,t('msg.dodge'),'chain');
           addSparks(cx,cy,3,'#44ddff');
         }else if(G.upgradeShieldActive){
           G.upgradeShieldActive=false;G.upgradeShieldTimer=0;
-          showFloatText(cx,cy-20,'실드!','chain');
+          showFloatText(cx,cy-20,t('msg.shield'),'chain');
           addShockwave(cx,cy,'#6644ff',60);
         }else if(G.shieldActive){
           G.shieldActive=false;G.shieldTimer=0;
-          showFloatText(cx,cy-20,'실드!','chain');
+          showFloatText(cx,cy-20,t('msg.shield'),'chain');
           addShockwave(cx,cy,'#4488ff',60);
         }else{
           let pDmg=Math.max(1,p.damage-upLv('barrier'));
@@ -504,7 +504,7 @@ function startWave(){
 
   if(wc.isBoss){
     sfx.bossAlert();
-    showWavePopup('⚠ BOSS WAVE '+G.wave);
+    showWavePopup('⚠ BOSS WAVE '+G.wave,'boss');
     const bw=gameCanvas.width/dpr,bh=gameCanvas.height/dpr;
     screenShake(true);
     addShockwave(bw/2,bh/2,'#ff2244',200);
@@ -517,9 +517,9 @@ function startWave(){
     }
   }else{
     sfx.waveStart();
-    const WAVE_NAMES={swarm:'떼거지',elite:'정예',rush:'돌격',fortress:'요새',mixed:'혼합',chaos:'혼돈',nightmare:'악몽',normal:''};
-    const label=WAVE_NAMES[wc.waveType]||'';
-    showWavePopup('WAVE '+G.wave+(label?' ['+label+']':''));
+    const wKey='wave.'+wc.waveType;
+    const label=wc.waveType!=='normal'?t(wKey):'';
+    showWavePopup('WAVE '+G.wave+(label?' ['+label+']':''),wc.waveType);
   }
 }
 
@@ -532,7 +532,7 @@ function waveClear(){
     const bonus=Math.floor(5+G.wave*3);
     G.energy+=bonus;G.totalEnergy+=bonus;
     const bw=gameCanvas.width/dpr,bh=gameCanvas.height/dpr;
-    showFloatText(bw/2,bh/2-40,'+'+bonus+' 보너스','energy-gain');
+    showFloatText(bw/2,bh/2-40,'+'+bonus+' '+t('msg.bonus'),'energy-gain');
   }
   // wave_heal: 웨이브 클리어 시 HP 회복
   if(upLv('wave_heal')>0){
@@ -546,7 +546,7 @@ function waveClear(){
     const vBonus=upLv('victory')*15;
     G.energy+=vBonus;G.totalEnergy+=vBonus;
     const bw=gameCanvas.width/dpr,bh=gameCanvas.height/dpr;
-    showFloatText(bw/2,bh/2-55,'+'+vBonus+' 승전','energy-gain');
+    showFloatText(bw/2,bh/2-55,'+'+vBonus+' '+t('msg.victory'),'energy-gain');
   }
   // 업그레이드 선택 (홀수 웨이브 클리어 시)
   const shouldSelect=G.wave%2===1||G.wave===1;
@@ -581,7 +581,7 @@ function gameOver(){
 
   const evo=EVOLUTIONS[G.evolutionStage];
   // 호칭
-  document.getElementById('go-evo-name').textContent=evo.name;
+  document.getElementById('go-evo-name').textContent=t('evo.'+G.evolutionStage);
   document.getElementById('go-evo-name').style.color=evo.color;
   // 핵심 스탯
   document.getElementById('go-wave').textContent=G.wave;
@@ -599,21 +599,21 @@ function gameOver(){
     const data=getUpgradeData(id);
     if(!data)return;
     const d=document.createElement('div');d.className='go-upg-item';
-    d.innerHTML=`<span class="go-upg-name">${data.icon} ${data.name}</span><span class="go-upg-lv">Lv.${lv}</span>`;
+    d.innerHTML=`<span class="go-upg-name">${data.icon} ${t('up.'+id)}</span><span class="go-upg-lv">Lv.${lv}</span>`;
     upgEl.appendChild(d);
   });
   // 획득 스킬
   const skillEl=document.getElementById('go-skill-list');
   skillEl.innerHTML='';
   if(G.specialSkills.length===0){
-    skillEl.innerHTML='<span style="font-size:.7em;color:rgba(255,255,255,.3)">없음</span>';
+    skillEl.innerHTML='<span style="font-size:.7em;color:rgba(255,255,255,.3)">'+t('ui.none')+'</span>';
   }else{
     G.specialSkills.forEach(id=>{
       const sk=SKILL_POOL.find(s=>s.id===id);
       if(!sk)return;
       const tag=document.createElement('span');tag.className='go-skill-tag';
-      tag.textContent=sk.icon+' '+sk.name;
-      tag.title=sk.desc;
+      tag.textContent=sk.icon+' '+t('sk.'+sk.id);
+      tag.title=t('sk.'+sk.id+'_d');
       skillEl.appendChild(tag);
     });
   }
@@ -755,7 +755,7 @@ function handleClick(px,py){
     addExplosion(p.x,p.y,8,'#ff8844');
     sfx.zap(0.5);
     G.bossProjectiles.splice(hitProj,1);
-    showFloatText(px,py,'파괴!','chain');
+    showFloatText(px,py,t('msg.destroy'),'chain');
   }else{
     const alive=G.enemies.filter(e=>e.hp>0);
     if(alive.length===0){
@@ -845,6 +845,18 @@ function initEvents(){
 
   // 업그레이드 버튼은 rebuildUpgradeGrid에서 동적으로 이벤트 바인딩
 
+  document.getElementById('lang-btn').addEventListener('click',e=>{
+    e.stopPropagation();
+    const newLang=LANG==='ko'?'en':'ko';
+    setLang(newLang);
+    document.getElementById('lang-label').textContent=newLang==='ko'?'EN':'KO';
+    applyI18nHTML();
+    rebuildUpgradeGrid();
+    updateSkillDisplay();
+    updateUI();
+    updateEnemyRoster();
+  });
+
   document.getElementById('sound-btn').addEventListener('click',e=>{
     e.stopPropagation();sfx.init();
     const on=sfx.toggle();
@@ -862,12 +874,14 @@ function initEvents(){
   document.getElementById('go-retry').addEventListener('click',()=>resetGame());
 
   // 랭킹: 닉네임 저장
-  document.getElementById('go-save-rank').addEventListener('click',()=>{
+  document.getElementById('go-save-rank').addEventListener('click',async()=>{
     const nick=document.getElementById('go-nickname').value.trim();
     if(!nick){document.getElementById('go-nickname').focus();return}
-    addRankEntry(nick);
-    document.getElementById('go-nickname').disabled=true;
     document.getElementById('go-save-rank').disabled=true;
+    document.getElementById('go-nickname').disabled=true;
+    try{
+      await addRankEntry(nick);
+    }catch(e){console.warn('Rank save error:',e)}
     document.getElementById('go-rank-saved').style.display='block';
   });
   document.getElementById('go-nickname').addEventListener('keydown',e=>{
@@ -894,14 +908,6 @@ function initEvents(){
 
   // 랭킹: 닫기
   document.getElementById('ranking-close').addEventListener('click',()=>hideRankingPopup());
-
-  // 랭킹: 기록 초기화
-  document.getElementById('ranking-clear').addEventListener('click',()=>{
-    if(confirm('모든 랭킹 기록을 삭제하시겠습니까?')){
-      clearRanking();
-      renderRanking('wave');
-    }
-  });
 
   document.getElementById('pause-btn').addEventListener('click',()=>togglePause());
 
@@ -952,18 +958,75 @@ function initEvents(){
 // ================================================================
 //  시작
 // ================================================================
-function init(){
+// ================================================================
+//  랜딩 화면
+// ================================================================
+function getLandingBg(lang){
+  if(window.innerWidth<768)return 'img/main_mob.jpg';
+  return lang==='ko'?'img/main_kor.jpg':'img/main_eng.jpg';
+}
+
+function toggleLandingLang(){
+  const newLang=LANG==='ko'?'en':'ko';
+  setLang(newLang);
+  document.title=t('ui.title');
+  const bg=document.getElementById('landing-bg');
+  bg.src=getLandingBg(newLang);
+  const startBtn=document.getElementById('landing-start');
+  startBtn.textContent=newLang==='ko'?'⚡ 게임 시작':'⚡ PLAY';
+  const langBtn=document.getElementById('landing-lang');
+  langBtn.textContent=newLang==='ko'?'🌐 English':'🌐 한국어';
+  // 네비 버튼 텍스트
+  const navBtns=document.querySelectorAll('.landing-btn');
+  const labels=newLang==='ko'?['🏆 랭킹','❓ 도움말','📖 소개']:['🏆 Ranking','❓ Help','📖 About'];
+  navBtns.forEach((b,i)=>{if(labels[i])b.textContent=labels[i]});
+  // 하단 링크 텍스트
+  const landLinks=document.querySelectorAll('#landing-links a');
+  if(landLinks[0])landLinks[0].textContent=t('ui.privacy');
+  if(landLinks[1])landLinks[1].textContent=t('ui.terms');
+}
+
+function initLanding(){
+  // 초기 이미지: 모바일이면 main_mob, 아니면 언어별
+  document.getElementById('landing-bg').src=getLandingBg(LANG);
+  window.addEventListener('resize',()=>{
+    if(!document.getElementById('landing-screen').classList.contains('hidden')){
+      document.getElementById('landing-bg').src=getLandingBg(LANG);
+    }
+  });
+  // 초기 언어 반영
+  if(LANG==='en'){
+    document.title=t('ui.title');
+    document.getElementById('landing-start').textContent='⚡ PLAY';
+    document.getElementById('landing-lang').textContent='🌐 한국어';
+    const navBtns=document.querySelectorAll('.landing-btn');
+    ['🏆 Ranking','❓ Help','📖 About'].forEach((l,i)=>{if(navBtns[i])navBtns[i].textContent=l});
+    const landLinks=document.querySelectorAll('#landing-links a');
+    if(landLinks[0])landLinks[0].textContent=t('ui.privacy');
+    if(landLinks[1])landLinks[1].textContent=t('ui.terms');
+  }
+  document.getElementById('landing-start').addEventListener('click',()=>{
+    document.getElementById('landing-screen').classList.add('hidden');
+    startGame();
+  });
+}
+
+function startGame(){
+  document.getElementById('game-container').classList.add('active');
+  const footer=document.getElementById('game-footer');
+  if(footer)footer.classList.add('hidden');
   loadGame();
   recalcStats();
+  applyI18nHTML();
   rebuildUpgradeGrid();
   resize();
   initEvents();
   initOrbitals();
   updateSkillDisplay();
   updateUI();
-  // 브라우저 닫을 때 세이브 삭제 (항상 처음부터 시작)
   window.addEventListener('beforeunload',()=>{localStorage.removeItem('lightningGame2')});
   setInterval(saveGame,30000);
   requestAnimationFrame(gameLoop);
 }
-init();
+
+initLanding();

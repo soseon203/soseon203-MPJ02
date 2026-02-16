@@ -1,124 +1,198 @@
 <!DOCTYPE html>
 <html lang="ko">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>라이트닝 키우기</title>
-<link rel="stylesheet" href="css/style.css?v=13">
-</head>
-<body>
-<div id="game-container">
-  <canvas id="bg-canvas"></canvas>
-  <div id="top-panel">
-    <div id="game-title">⚡ LIGHTNING RAISING</div>
-    <div id="top-buttons">
-      <button class="top-btn" id="lang-btn" title="Language"><span class="top-btn-icon">🌐</span><span class="top-btn-label" id="lang-label">EN</span></button>
-      <button class="top-btn" id="ranking-btn" title="랭킹"><span class="top-btn-icon">🏆</span><span class="top-btn-label">랭킹</span></button>
-      <button class="top-btn" id="sound-btn" title="사운드"><span class="top-btn-icon">🔊</span><span class="top-btn-label">사운드</span></button>
-      <button class="top-btn" id="pause-btn" title="일시정지"><span class="top-btn-icon">⏸</span><span class="top-btn-label">일시정지</span></button>
-    </div>
-    <div id="evolution-badge">Lv.1 전기 불꽃</div>
-    <div id="wave-info">
-      <span id="wave-badge">WAVE 1</span>
-      <span id="enemy-count">적: 0/0</span>
-    </div>
-    <div id="hp-bar-container">
-      <div id="hp-bar"></div>
-      <div id="hp-text">100 / 100</div>
-    </div>
-    <div id="stats-row">
-      <div class="stat-item"><span class="stat-label">데미지</span><span class="stat-value" id="stat-dmg">1</span></div>
-      <div class="stat-item"><span class="stat-label">자동/초</span><span class="stat-value" id="stat-auto">0</span></div>
-      <div class="stat-item"><span class="stat-label">처치</span><span class="stat-value" id="stat-kills">0</span></div>
-    </div>
-    <div id="active-skills"></div>
-  </div>
-  <div id="enemy-roster"></div>
-  <div id="game-area">
-    <canvas id="game-canvas"></canvas>
-    <canvas id="fx-canvas"></canvas>
-    <div id="click-feedback"></div>
-  </div>
-  <div id="bottom-panel">
-    <div id="energy-display">
-      <span>⚡</span>
-      <span id="energy-value">0</span>
-      <span id="energy-unit">에너지</span>
-    </div>
-    <div id="upgrades-grid"></div>
-  </div>
-</div>
-<div id="wave-popup"><div id="wave-popup-text"></div></div>
-<div id="game-over">
-  <h1>GAME OVER</h1>
-  <div id="go-title-row"><span id="go-evo-icon">⚡</span> <span id="go-evo-name"></span></div>
-  <div id="go-stats-grid">
-    <div class="go-stat"><div class="go-stat-label">웨이브</div><div class="go-stat-value" id="go-wave">-</div></div>
-    <div class="go-stat"><div class="go-stat-label">처치</div><div class="go-stat-value" id="go-kills">-</div></div>
-    <div class="go-stat"><div class="go-stat-label">에너지</div><div class="go-stat-value" id="go-energy">-</div></div>
-    <div class="go-stat"><div class="go-stat-label">진화</div><div class="go-stat-value" id="go-evo-stage">-</div></div>
-    <div class="go-stat"><div class="go-stat-label">데미지</div><div class="go-stat-value" id="go-dmg">-</div></div>
-    <div class="go-stat"><div class="go-stat-label">자동/초</div><div class="go-stat-value" id="go-auto">-</div></div>
-  </div>
-  <div id="go-upgrades-section">
-    <div class="go-section-title">업그레이드 현황</div>
-    <div id="go-upgrade-detail"></div>
-  </div>
-  <div id="go-skills-section">
-    <div class="go-section-title">획득 스킬</div>
-    <div id="go-skill-list"></div>
-  </div>
-  <div id="go-nickname-section">
-    <div class="go-section-title">닉네임을 입력하세요</div>
-    <div id="go-nickname-row">
-      <input type="text" id="go-nickname" maxlength="12" placeholder="닉네임 (최대 12자)" autocomplete="off" spellcheck="false">
-      <button id="go-save-rank">기록 저장</button>
-    </div>
-    <div id="go-rank-saved" style="display:none">기록이 저장되었습니다!</div>
-  </div>
-  <div id="go-buttons-row">
-    <button id="go-retry">다시 시작</button>
-    <button id="go-view-rank">🏆 랭킹 보기</button>
-  </div>
-</div>
-<div id="evolution-popup"><div id="evolution-content"><h2>⚡ 진화!</h2><h1 id="evo-name"></h1><p id="evo-desc"></p><button id="evo-ok">계속하기</button></div></div>
-<div id="skill-popup"><div id="skill-content"><h2>⚡ 특수 스킬 획득!</h2><p id="skill-subtitle">보스를 처치했습니다! 스킬 1개를 선택하세요.</p><div id="skill-choices"></div></div></div>
-<div id="upgrade-popup"><div id="upgrade-content"><h2>⚡ 새 업그레이드 해금!</h2><p id="upgrade-subtitle">업그레이드 1개를 선택하여 슬롯에 추가하세요.</p><div id="upgrade-choices"></div></div></div>
-<div id="ranking-popup">
-  <div id="ranking-content">
-    <h2>🏆 RANKING</h2>
-    <div id="ranking-tabs">
-      <button class="rank-tab active" data-sort="wave">웨이브</button>
-      <button class="rank-tab" data-sort="kills">처치수</button>
-      <button class="rank-tab" data-sort="energy">에너지</button>
-    </div>
-    <div id="ranking-list"></div>
-    <div id="ranking-buttons">
-      <button id="ranking-close">닫기</button>
-      <button id="ranking-clear">기록 초기화</button>
-    </div>
-  </div>
-</div>
-<div id="pause-popup">
-  <h1>⏸ PAUSED</h1>
-  <div id="pause-buttons">
-    <button id="pause-resume">계속하기</button>
-    <button id="pause-reset">처음부터</button>
-  </div>
-</div>
-<footer id="game-footer">
-  <a href="privacy.html">개인정보처리방침</a>
-  <a href="terms.html">이용약관</a>
-  <a href="about.html">소개</a>
-  <a href="help.html">도움말</a>
-</footer>
 
-<script src="js/locales.js?v=13"></script>
-<script src="js/sound.js?v=13"></script>
-<script src="js/config.js?v=13"></script>
-<script src="js/game.js?v=13"></script>
-<script src="js/render.js?v=13"></script>
-<script src="js/ui.js?v=13"></script>
-<script src="js/main.js?v=13"></script>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>라이트닝 키우기</title>
+  <meta property="og:title" content="라이트닝 키우기 - Lightning Raising">
+  <meta property="og:description" content="번개를 진화시키며 끝없는 웨이브에 도전하는 HTML5 캐주얼 게임">
+  <meta property="og:image" content="img/og_kor.jpg">
+  <meta property="og:type" content="website">
+  <meta name="description" content="번개를 진화시키며 끝없는 웨이브에 도전하는 HTML5 캐주얼 게임">
+  <link rel="icon" type="image/png" href="img/favicon.png">
+  <link rel="stylesheet" href="css/style.css?v=15">
+</head>
+
+<body>
+  <div id="landing-screen">
+    <img id="landing-bg" src="img/main_kor.jpg" alt="Lightning Raising">
+    <div id="landing-overlay"></div>
+    <div id="landing-content">
+      <button id="landing-start">⚡ 게임 시작</button>
+      <div id="landing-nav">
+        <button class="landing-btn" onclick="showRankingPopup()">🏆 랭킹</button>
+        <button class="landing-btn" onclick="location.href='help.html'">❓ 도움말</button>
+        <button class="landing-btn" onclick="location.href='about.html'">📖 소개</button>
+      </div>
+      <div id="landing-bottom">
+        <button id="landing-lang" onclick="toggleLandingLang()">🌐 English</button>
+        <div id="landing-links">
+          <a href="privacy.html">개인정보처리방침</a>
+          <a href="terms.html">이용약관</a>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div id="game-container">
+    <canvas id="bg-canvas"></canvas>
+    <div id="top-panel">
+      <div id="game-title">⚡ LIGHTNING RAISING</div>
+      <div id="top-buttons">
+        <button class="top-btn" id="lang-btn" title="Language"><span class="top-btn-icon">🌐</span><span
+            class="top-btn-label" id="lang-label">EN</span></button>
+        <button class="top-btn" id="ranking-btn" title="랭킹"><span class="top-btn-icon">🏆</span><span
+            class="top-btn-label">랭킹</span></button>
+        <button class="top-btn" id="sound-btn" title="사운드"><span class="top-btn-icon">🔊</span><span
+            class="top-btn-label">사운드</span></button>
+        <button class="top-btn" id="pause-btn" title="일시정지"><span class="top-btn-icon">⏸</span><span
+            class="top-btn-label">일시정지</span></button>
+      </div>
+      <div id="evolution-badge">Lv.1 전기 불꽃</div>
+      <div id="wave-info">
+        <span id="wave-badge">WAVE 1</span>
+        <span id="enemy-count">적: 0/0</span>
+      </div>
+      <div id="hp-bar-container">
+        <div id="hp-bar"></div>
+        <div id="hp-text">100 / 100</div>
+      </div>
+      <div id="stats-row">
+        <div class="stat-item"><span class="stat-label">데미지</span><span class="stat-value" id="stat-dmg">1</span></div>
+        <div class="stat-item"><span class="stat-label">자동/초</span><span class="stat-value" id="stat-auto">0</span>
+        </div>
+        <div class="stat-item"><span class="stat-label">처치</span><span class="stat-value" id="stat-kills">0</span></div>
+      </div>
+      <div id="active-skills"></div>
+    </div>
+    <div id="enemy-roster"></div>
+    <div id="game-area">
+      <canvas id="game-canvas"></canvas>
+      <canvas id="fx-canvas"></canvas>
+      <div id="click-feedback"></div>
+    </div>
+    <div id="bottom-panel">
+      <div id="energy-display">
+        <span>⚡</span>
+        <span id="energy-value">0</span>
+        <span id="energy-unit">에너지</span>
+      </div>
+      <div id="upgrades-grid"></div>
+    </div>
+  </div>
+  <div id="wave-popup">
+    <div id="wave-popup-text"></div>
+  </div>
+  <div id="game-over">
+    <h1>GAME OVER</h1>
+    <div id="go-title-row"><span id="go-evo-icon">⚡</span> <span id="go-evo-name"></span></div>
+    <div id="go-stats-grid">
+      <div class="go-stat">
+        <div class="go-stat-label">웨이브</div>
+        <div class="go-stat-value" id="go-wave">-</div>
+      </div>
+      <div class="go-stat">
+        <div class="go-stat-label">처치</div>
+        <div class="go-stat-value" id="go-kills">-</div>
+      </div>
+      <div class="go-stat">
+        <div class="go-stat-label">에너지</div>
+        <div class="go-stat-value" id="go-energy">-</div>
+      </div>
+      <div class="go-stat">
+        <div class="go-stat-label">진화</div>
+        <div class="go-stat-value" id="go-evo-stage">-</div>
+      </div>
+      <div class="go-stat">
+        <div class="go-stat-label">데미지</div>
+        <div class="go-stat-value" id="go-dmg">-</div>
+      </div>
+      <div class="go-stat">
+        <div class="go-stat-label">자동/초</div>
+        <div class="go-stat-value" id="go-auto">-</div>
+      </div>
+    </div>
+    <div id="go-upgrades-section">
+      <div class="go-section-title">업그레이드 현황</div>
+      <div id="go-upgrade-detail"></div>
+    </div>
+    <div id="go-skills-section">
+      <div class="go-section-title">획득 스킬</div>
+      <div id="go-skill-list"></div>
+    </div>
+    <div id="go-nickname-section">
+      <div class="go-section-title">닉네임을 입력하세요</div>
+      <div id="go-nickname-row">
+        <input type="text" id="go-nickname" maxlength="12" placeholder="닉네임 (최대 12자)" autocomplete="off"
+          spellcheck="false">
+        <button id="go-save-rank">기록 저장</button>
+      </div>
+      <div id="go-rank-saved" style="display:none">기록이 저장되었습니다!</div>
+    </div>
+    <div id="go-buttons-row">
+      <button id="go-retry">다시 시작</button>
+      <button id="go-view-rank">🏆 랭킹 보기</button>
+    </div>
+  </div>
+  <div id="evolution-popup">
+    <div id="evolution-content">
+      <h2>⚡ 진화!</h2>
+      <h1 id="evo-name"></h1>
+      <p id="evo-desc"></p><button id="evo-ok">계속하기</button>
+    </div>
+  </div>
+  <div id="skill-popup">
+    <div id="skill-content">
+      <h2>⚡ 특수 스킬 획득!</h2>
+      <p id="skill-subtitle">보스를 처치했습니다! 스킬 1개를 선택하세요.</p>
+      <div id="skill-choices"></div>
+    </div>
+  </div>
+  <div id="upgrade-popup">
+    <div id="upgrade-content">
+      <h2>⚡ 새 업그레이드 해금!</h2>
+      <p id="upgrade-subtitle">업그레이드 1개를 선택하여 슬롯에 추가하세요.</p>
+      <div id="upgrade-choices"></div>
+    </div>
+  </div>
+  <div id="ranking-popup">
+    <div id="ranking-content">
+      <h2>🏆 RANKING</h2>
+      <div id="ranking-tabs">
+        <button class="rank-tab active" data-sort="wave">웨이브</button>
+        <button class="rank-tab" data-sort="kills">처치수</button>
+        <button class="rank-tab" data-sort="energy">에너지</button>
+      </div>
+      <div id="ranking-list"></div>
+      <div id="ranking-buttons">
+        <button id="ranking-close">닫기</button>
+      </div>
+    </div>
+  </div>
+  <div id="pause-popup">
+    <h1>⏸ PAUSED</h1>
+    <div id="pause-buttons">
+      <button id="pause-resume">계속하기</button>
+      <button id="pause-reset">처음부터</button>
+    </div>
+  </div>
+  <footer id="game-footer">
+    <a href="privacy.html">개인정보처리방침</a>
+    <a href="terms.html">이용약관</a>
+    <a href="about.html">소개</a>
+    <a href="help.html">도움말</a>
+  </footer>
+
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+  <script src="js/firebase-config.js?v=15"></script>
+  <script src="js/locales.js?v=15"></script>
+  <script src="js/sound.js?v=15"></script>
+  <script src="js/config.js?v=15"></script>
+  <script src="js/game.js?v=15"></script>
+  <script src="js/render.js?v=15"></script>
+  <script src="js/ui.js?v=15"></script>
+  <script src="js/main.js?v=15"></script>
 </body>
+
 </html>

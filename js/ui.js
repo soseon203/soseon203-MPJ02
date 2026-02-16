@@ -17,7 +17,7 @@ function showSkillSelection(){
   picks.forEach(skill=>{
     const card=document.createElement('div');
     card.className='skill-card';
-    card.innerHTML=`<div class="skill-icon">${skill.icon}</div><div class="skill-info"><div class="skill-name">${skill.name}</div><div class="skill-desc">${skill.desc}</div></div>`;
+    card.innerHTML=`<div class="skill-icon">${skill.icon}</div><div class="skill-info"><div class="skill-name">${t('sk.'+skill.id)}</div><div class="skill-desc">${t('sk.'+skill.id+'_d')}</div></div>`;
     card.addEventListener('click',()=>selectSkill(skill.id));
     container.appendChild(card);
   });
@@ -47,8 +47,8 @@ function updateSkillDisplay(){
     if(skill){
       const badge=document.createElement('span');
       badge.className='mini-skill';
-      badge.textContent=skill.icon+' '+skill.name;
-      badge.title=skill.desc;
+      badge.textContent=skill.icon+' '+t('sk.'+skill.id);
+      badge.title=t('sk.'+skill.id+'_d');
       el.appendChild(badge);
     }
   });
@@ -75,7 +75,7 @@ function showUpgradeSelection(){
   container.innerHTML='';
   container.classList.add('no-interact');
   picks.forEach(upg=>{
-    const catLabel=upg.cat==='atk'?'공격':upg.cat==='def'?'방어':'유틸';
+    const catLabel=upg.cat==='atk'?t('cat.atk'):upg.cat==='def'?t('cat.def'):t('cat.util');
     const catColor=upg.cat==='atk'?'#ff6644':upg.cat==='def'?'#44bbff':'#ffcc00';
     const card=document.createElement('div');
     card.className='upgrade-choice';
@@ -83,8 +83,8 @@ function showUpgradeSelection(){
     card.innerHTML=`
       <div class="upgrade-choice-icon">${upg.icon}</div>
       <div class="upgrade-choice-info">
-        <div class="upgrade-choice-name">${upg.name}</div>
-        <div class="upgrade-choice-desc">${upg.desc}</div>
+        <div class="upgrade-choice-name">${t('up.'+upg.id)}</div>
+        <div class="upgrade-choice-desc">${t('up.'+upg.id+'_d')}</div>
       </div>
       <div class="upgrade-choice-cat" style="color:${catColor};border-color:${catColor}">${catLabel}</div>`;
     card.addEventListener('click',()=>selectNewUpgrade(upg.id,card));
@@ -140,8 +140,8 @@ function rebuildUpgradeGrid(){
     const hotkey=idx<10?((idx+1)%10).toString():'';
     btn.innerHTML=`
       ${hotkey?`<span class="hotkey-badge">${hotkey}</span>`:''}
-      <div class="upgrade-name">${data.icon} ${data.name}</div>
-      <div class="upgrade-desc">${data.desc}</div>
+      <div class="upgrade-name">${data.icon} ${t('up.'+id)}</div>
+      <div class="upgrade-desc">${t('up.'+id+'_d')}</div>
       <div class="upgrade-bottom">
         <span class="upgrade-cost">${formatNum(getCost(id))}</span>
         <span class="upgrade-level">Lv.${upLv(id)}</span>
@@ -348,16 +348,16 @@ function createRosterCanvas(pattern,isBoss,isElite){
   return c;
 }
 
-let _rosterWave=0,_rosterType='';
+let _rosterWave=0,_rosterType='',_rosterLang='';
 function updateEnemyRoster(){
   const wt=G.currentWaveType||'normal';
-  if(_rosterWave===G.wave&&_rosterType===wt)return;
-  _rosterWave=G.wave;_rosterType=wt;
+  if(_rosterWave===G.wave&&_rosterType===wt&&_rosterLang===LANG)return;
+  _rosterWave=G.wave;_rosterType=wt;_rosterLang=LANG;
   const el=document.getElementById('enemy-roster');
   el.innerHTML='';
   const title=document.createElement('div');
   title.className='roster-title';
-  title.textContent='출현 적';
+  title.textContent=t('ui.enemy_roster');
   el.appendChild(title);
   const patterns=getWavePatterns(G.wave,wt);
   patterns.forEach(p=>{
@@ -366,8 +366,8 @@ function updateEnemyRoster(){
       item.style.borderColor='rgba(255,136,68,.3)';
       const icon=createRosterCanvas('normal',false,true);
       item.appendChild(icon);
-      const nm=document.createElement('span');nm.className='roster-name';nm.style.color='#ff8844';nm.textContent='정예';item.appendChild(nm);
-      const tr=document.createElement('span');tr.className='roster-trait';tr.textContent='강화형';item.appendChild(tr);
+      const nm=document.createElement('span');nm.className='roster-name';nm.style.color='#ff8844';nm.textContent=t('pt.elite');item.appendChild(nm);
+      const tr=document.createElement('span');tr.className='roster-trait';tr.textContent=t('pt.elite_t');item.appendChild(tr);
       el.appendChild(item);return;
     }
     if(p==='boss'){
@@ -375,8 +375,8 @@ function updateEnemyRoster(){
       item.style.borderColor='rgba(255,34,68,.3)';
       const icon=createRosterCanvas('boss',true,false);
       item.appendChild(icon);
-      const nm=document.createElement('span');nm.className='roster-name';nm.style.color='#ff2244';nm.textContent='보스';item.appendChild(nm);
-      const tr=document.createElement('span');tr.className='roster-trait';tr.textContent='지진파';item.appendChild(tr);
+      const nm=document.createElement('span');nm.className='roster-name';nm.style.color='#ff2244';nm.textContent=t('pt.boss');item.appendChild(nm);
+      const tr=document.createElement('span');tr.className='roster-trait';tr.textContent=t('pt.boss_t');item.appendChild(tr);
       el.appendChild(item);return;
     }
     const info=PAT_INFO[p];
@@ -385,8 +385,8 @@ function updateEnemyRoster(){
     item.style.borderColor=info.color+'30';
     const icon=createRosterCanvas(p,false,false);
     item.appendChild(icon);
-    const nm=document.createElement('span');nm.className='roster-name';nm.style.color=info.color;nm.textContent=info.name;item.appendChild(nm);
-    const tr=document.createElement('span');tr.className='roster-trait';tr.textContent=info.trait;item.appendChild(tr);
+    const nm=document.createElement('span');nm.className='roster-name';nm.style.color=info.color;nm.textContent=t('pt.'+p);item.appendChild(nm);
+    const tr=document.createElement('span');tr.className='roster-trait';tr.textContent=t('pt.'+p+'_t');item.appendChild(tr);
     el.appendChild(item);
   });
 }
@@ -402,7 +402,7 @@ function updateUI(){
 
   document.getElementById('wave-badge').textContent='WAVE '+G.wave;
   const alive=G.enemies.filter(e=>e.hp>0).length;
-  document.getElementById('enemy-count').textContent=G.waveState==='active'?`적: ${alive}/${G.enemiesToSpawn-G.enemiesKilled}`:'대기 중...';
+  document.getElementById('enemy-count').textContent=G.waveState==='active'?t('ui.enemy_prefix')+tf('ui.enemy_count',{alive:alive,remain:G.enemiesToSpawn-G.enemiesKilled}):t('ui.wave_waiting');
   updateEnemyRoster();
 
   const hpPct=Math.max(0,G.hp/G.maxHp*100);
@@ -411,21 +411,21 @@ function updateUI(){
   document.getElementById('hp-text').textContent=Math.ceil(G.hp)+' / '+G.maxHp;
 
   const evo=EVOLUTIONS[G.evolutionStage];
-  document.getElementById('evolution-badge').textContent=`Lv.${G.evolutionStage+1} ${evo.name}`;
+  document.getElementById('evolution-badge').textContent=`Lv.${G.evolutionStage+1} ${t('evo.'+G.evolutionStage)}`;
   document.getElementById('evolution-badge').style.color=evo.color;
 
   // 업그레이드 버튼 갱신 (동적)
   document.querySelectorAll('.upgrade-btn').forEach(btn=>{
-    const t=btn.dataset.upgrade;
-    if(!t||!G.upgrades[t])return;
-    const cost=getCost(t);
-    const lv=upLv(t);
+    const uid=btn.dataset.upgrade;
+    if(!uid||!G.upgrades[uid])return;
+    const cost=getCost(uid);
+    const lv=upLv(uid);
     const ok=G.energy>=cost;
     btn.classList.toggle('affordable',ok);
     btn.disabled=!ok;
     btn.querySelector('.upgrade-cost').textContent=formatNum(cost);
     btn.querySelector('.upgrade-level').textContent='Lv.'+lv;
-    btn.querySelector('.upgrade-desc').textContent=getUpgradeDesc(t);
+    btn.querySelector('.upgrade-desc').textContent=getUpgradeDesc(uid);
   });
 }
 
@@ -447,18 +447,15 @@ function buyUpgrade(type){
 // ================================================================
 //  팝업 & 진화
 // ================================================================
-function showWavePopup(text){
+function showWavePopup(text,waveType){
   const el=document.getElementById('wave-popup');
   const tx=document.getElementById('wave-popup-text');
   tx.textContent=text;
+  const _wpColors={boss:'#ff4444',nightmare:'#cc44ff',chaos:'#ff6644',elite:'#ff8844',fortress:'#8899cc',rush:'#44ddff'};
   let col='#ffee00';
   if(text.includes('BOSS'))col='#ff4444';
   else if(text.includes('CLEAR'))col='#00ffaa';
-  else if(text.includes('악몽'))col='#cc44ff';
-  else if(text.includes('혼돈'))col='#ff6644';
-  else if(text.includes('정예'))col='#ff8844';
-  else if(text.includes('요새'))col='#8899cc';
-  else if(text.includes('돌격'))col='#44ddff';
+  else if(waveType&&_wpColors[waveType])col=_wpColors[waveType];
   tx.style.color=col;
   el.classList.remove('show');void el.offsetWidth;
   el.classList.add('show');
@@ -482,9 +479,9 @@ function showEvolution(evo){
   const w=fxCanvas.width/dpr,h=fxCanvas.height/dpr;
   addExplosion(w/2,h/2,40,evo.color);
 
-  document.getElementById('evo-name').textContent=evo.name;
+  document.getElementById('evo-name').textContent=t('evo.'+G.evolutionStage);
   document.getElementById('evo-name').style.color=evo.color;
   document.getElementById('evo-name').style.textShadow=`0 0 30px ${evo.color}`;
-  document.getElementById('evo-desc').textContent=`총 처치 ${EVOLUTIONS[G.evolutionStage].threshold}체 달성!`;
+  document.getElementById('evo-desc').textContent=tf('pop.evo_desc',{count:EVOLUTIONS[G.evolutionStage].threshold});
   document.getElementById('evolution-popup').classList.add('show');
 }

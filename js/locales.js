@@ -44,6 +44,7 @@ I18N.ko['ui.rank_kills']='처치수';
 I18N.ko['ui.rank_energy']='에너지';
 I18N.ko['ui.close']='닫기';
 I18N.ko['ui.clear_rank']='기록 초기화';
+I18N.ko['ui.rank_clear_confirm']='모든 랭킹 기록을 삭제하시겠습니까?';
 I18N.ko['ui.privacy']='개인정보처리방침';
 I18N.ko['ui.terms']='이용약관';
 I18N.ko['ui.about']='소개';
@@ -73,9 +74,12 @@ I18N.en['ui.rank_kills']='Kills';
 I18N.en['ui.rank_energy']='Energy';
 I18N.en['ui.close']='Close';
 I18N.en['ui.clear_rank']='Clear Records';
+I18N.en['ui.rank_clear_confirm']='Delete all ranking records?';
 I18N.ko['ui.no_records']='기록이 없습니다';
+I18N.ko['ui.loading']='불러오는 중...';
 I18N.ko['ui.rank_detail']='W{wave} · {kills}킬 · Lv.{evo} · 스킬 {skills}개 · {date}';
 I18N.en['ui.no_records']='No records';
+I18N.en['ui.loading']='Loading...';
 I18N.en['ui.rank_detail']='W{wave} · {kills} kills · Lv.{evo} · {skills} skills · {date}';
 I18N.en['ui.privacy']='Privacy Policy';
 I18N.en['ui.terms']='Terms of Service';
@@ -608,6 +612,9 @@ function applyI18nHTML(){
   document.title=t('ui.title');
   document.documentElement.lang=LANG;
   const s=id=>document.getElementById(id);
+  // game title + lang button
+  s('game-title').textContent='\u26A1 '+t('ui.title');
+  s('lang-label').textContent=LANG==='ko'?'EN':'KO';
   // top buttons
   s('sound-btn').querySelector('.top-btn-label').textContent=t('ui.sound');
   s('sound-btn').title=t('ui.sound');

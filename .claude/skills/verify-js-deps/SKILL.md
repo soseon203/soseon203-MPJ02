@@ -24,12 +24,14 @@ description: JS 파일 간 전역 함수/변수 참조 무결성을 검증합니
 | File | Purpose |
 |------|---------|
 | `index.html` | 스크립트 로딩 순서 정의 |
+| `js/firebase-config.js` | Firebase 초기화, `initFirebase`, `isFirebaseReady` 정의 |
+| `js/locales.js` | 다국어 지원, `LANG`, `I18N`, `t`, `tf`, `setLang`, `applyI18nHTML` 정의 |
 | `js/sound.js` | SFX 클래스 및 `sfx` 인스턴스 정의 |
-| `js/config.js` | `EVOLUTIONS`, `SKILL_POOL` 상수 정의 |
-| `js/game.js` | `G` 게임 상태, 유틸 함수, 전투 시스템 정의 |
+| `js/config.js` | `EVOLUTIONS`, `SKILL_POOL`, `UPGRADE_POOL` 상수 정의 |
+| `js/game.js` | `G` 게임 상태, 유틸 함수, 전투 시스템, 랭킹 정의 |
 | `js/render.js` | 캔버스 요소, 렌더링/이펙트 함수 정의 |
-| `js/ui.js` | UI 함수 (스킬 선택, 업그레이드, 웨이브 팝업) 정의 |
-| `js/main.js` | 게임 루프, 이벤트, 세이브/로드, 초기화 정의 |
+| `js/ui.js` | UI 함수 (스킬 선택, 업그레이드, 웨이브 팝업, 적 로스터) 정의 |
+| `js/main.js` | 게임 루프, 이벤트, 세이브/로드, 초기화, 랜딩 화면 정의 |
 
 ## Workflow
 
@@ -39,13 +41,13 @@ description: JS 파일 간 전역 함수/변수 참조 무결성을 검증합니
 
 **검사:** 스크립트 태그의 순서가 의존성 방향과 일치하는지 확인합니다.
 
-올바른 순서: sound.js -> config.js -> game.js -> render.js -> ui.js -> main.js
+올바른 순서: firebase-config.js -> locales.js -> sound.js -> config.js -> game.js -> render.js -> ui.js -> main.js
 
 ```bash
 grep -n "src=\"js/" index.html
 ```
 
-**PASS:** 위 순서대로 6개 스크립트가 로드됨
+**PASS:** 위 순서대로 8개 스크립트가 로드됨
 **FAIL:** 순서가 다르거나 파일이 누락됨
 
 ### Step 2: hasSkill() 호출 ID 검증
@@ -106,12 +108,14 @@ grep -ohP "upLv\('[^']+'\)" js/*.js | sort -u
 
 | 정의 파일 | 함수 |
 |-----------|------|
+| `js/firebase-config.js` | `FIREBASE_CONFIG`, `initFirebase`, `isFirebaseReady` |
+| `js/locales.js` | `LANG`, `I18N`, `t`, `tf`, `setLang`, `applyI18nHTML` |
 | `js/sound.js` | `sfx` (인스턴스) |
 | `js/config.js` | `EVOLUTIONS`, `SKILL_POOL`, `UPGRADE_POOL` |
-| `js/game.js` | `G`, `formatNum`, `evoColor`, `getCost`, `hasSkill`, `zapBolts`, `getWaveType`, `getWaveConfig`, `spawnEnemy`, `damageEnemy`, `killEnemy`, `strikeEnemy`, `createZapBolt`, `autoAttack` |
-| `js/render.js` | `gameCanvas`, `ctx`, `fxCanvas`, `fxCtx`, `bgCanvas`, `bgCtx`, `dpr`, `fxEffects`, `frameCount`, `stars`, `resize`, `render`, `renderFx`, `renderBg`, `initOrbitals`, `addShockwave`, `addSparks`, `addExplosion`, `showFloatText`, `screenFlash`, `screenShake` |
-| `js/ui.js` | `showSkillSelection`, `selectSkill`, `updateSkillDisplay`, `updateUI`, `buyUpgrade`, `showWavePopup`, `checkEvolution` |
-| `js/main.js` | `gameLoop`, `update`, `startWave`, `waveClear`, `gameOver`, `resetGame`, `handleClick`, `saveGame`, `loadGame`, `initEvents`, `init` |
+| `js/game.js` | `G`, `clearRanking`, `escapeHtml`, `showRankingPopup`, `hideRankingPopup`, `formatNum`, `evoColor`, `getUpgradeData`, `upLv`, `getCost`, `hasSkill`, `recalcStats`, `getUpgradeDesc`, `getWavePatterns`, `getWaveType`, `getWaveConfig`, `spawnEnemy`, `damageEnemy`, `killEnemy`, `strikeEnemy`, `createZapBolt`, `autoAttack` |
+| `js/render.js` | `gameCanvas`, `ctx`, `fxCanvas`, `fxCtx`, `bgCanvas`, `bgCtx`, `dpr`, `fxEffects`, `frameCount`, `stars`, `resize`, `render`, `renderFx`, `renderBg`, `initStars`, `createOrbital`, `initOrbitals`, `addShockwave`, `addSparks`, `addExplosion`, `showFloatText`, `screenFlash`, `screenShake` |
+| `js/ui.js` | `showSkillSelection`, `selectSkill`, `updateSkillDisplay`, `showUpgradeSelection`, `selectNewUpgrade`, `rebuildUpgradeGrid`, `createRosterCanvas`, `updateEnemyRoster`, `updateUI`, `buyUpgrade`, `showWavePopup`, `checkEvolution`, `showEvolution` |
+| `js/main.js` | `gameLoop`, `update`, `startWave`, `waveClear`, `gameOver`, `togglePause`, `resetGame`, `handleClick`, `saveGame`, `loadGame`, `initEvents`, `getLandingBg`, `toggleLandingLang`, `initLanding`, `startGame`, `init` |
 
 각 파일에서 위 함수 호출을 검색하여 정의 파일보다 앞서 로드되는 파일에서 호출하지 않는지 확인합니다.
 

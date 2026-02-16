@@ -26,24 +26,22 @@ const G={
 };
 
 // ================================================================
-//  랭킹 시스템
+//  랭킹 시스템 (Firebase Firestore + localStorage 캐시)
 // ================================================================
 const RANKING_KEY='lightningRanking';
 const RANKING_MAX=50;
+const RANKING_COLLECTION='rankings';
 
-function loadRanking(){
-  try{
-    const d=localStorage.getItem(RANKING_KEY);
-    return d?JSON.parse(d):[];
-  }catch(e){return[]}
+// localStorage 캐시 (오프라인 폴백)
+function _localLoad(){
+  try{const d=localStorage.getItem(RANKING_KEY);return d?JSON.parse(d):[];}catch(e){return[]}
 }
-
-function saveRanking(list){
+function _localSave(list){
   try{localStorage.setItem(RANKING_KEY,JSON.stringify(list))}catch(e){}
 }
 
-function addRankEntry(nickname){
-  const list=loadRanking();
+// Firestore에 기록 추가
+async function addRankEntry(nickname){
   const entry={
     name:nickname.trim()||'???',
     wave:G.wave,
@@ -55,21 +53,44 @@ function addRankEntry(nickname){
     skills:G.specialSkills.length,
     date:Date.now()
   };
+  // Firestore 저장
+  if(isFirebaseReady()){
+    try{
+      await _db.collection(RANKING_COLLECTION).add(entry);
+    }catch(e){console.warn('Firestore write failed:',e.message)}
+  }
+  // localStorage 캐시에도 저장
+  const list=_localLoad();
   list.push(entry);
   list.sort((a,b)=>b.wave-a.wave||b.kills-a.kills||b.energy-a.energy);
   if(list.length>RANKING_MAX)list.length=RANKING_MAX;
-  saveRanking(list);
+  _localSave(list);
   return entry;
 }
 
-function clearRanking(){
-  localStorage.removeItem(RANKING_KEY);
+// Firestore에서 랭킹 로드
+async function fetchRanking(sortBy){
+  if(!isFirebaseReady()) return _localLoad();
+  try{
+    const field=sortBy==='kills'?'kills':sortBy==='energy'?'energy':'wave';
+    const snap=await _db.collection(RANKING_COLLECTION)
+      .orderBy(field,'desc')
+      .limit(RANKING_MAX)
+      .get();
+    const list=[];
+    snap.forEach(doc=>list.push(doc.data()));
+    _localSave(list);
+    return list;
+  }catch(e){
+    console.warn('Firestore read failed:',e.message);
+    return _localLoad();
+  }
 }
 
-function renderRanking(sortBy){
-  const list=loadRanking();
+// 랭킹 목록 렌더링
+function _renderRankList(list,sortBy){
   const container=document.getElementById('ranking-list');
-  if(list.length===0){
+  if(!list||list.length===0){
     container.innerHTML='<div class="rank-empty">'+t('ui.no_records')+'</div>';
     return;
   }
@@ -103,6 +124,14 @@ function renderRanking(sortBy){
       </div>`;
     container.appendChild(div);
   });
+}
+
+// renderRanking: Firestore에서 비동기 로드 후 렌더링
+async function renderRanking(sortBy){
+  const container=document.getElementById('ranking-list');
+  container.innerHTML='<div class="rank-empty rank-loading">'+t('ui.loading')+'</div>';
+  const list=await fetchRanking(sortBy);
+  _renderRankList(list,sortBy);
 }
 
 function escapeHtml(str){

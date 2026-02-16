@@ -1,6 +1,26 @@
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:'Noto Sans KR','Malgun Gothic',sans-serif;background:#05051a;color:#fff;overflow:hidden;height:100vh;width:100vw;user-select:none;-webkit-user-select:none}
-#game-container{position:relative;height:100vh;width:100vw;overflow:hidden}
+/* ── 랜딩 화면 ── */
+#landing-screen{position:fixed;top:0;left:0;width:100%;height:100%;z-index:200;display:flex;align-items:center;justify-content:center;background:#05051a}
+#landing-screen.hidden{display:none}
+#landing-bg{position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;object-position:center}
+#landing-overlay{position:absolute;top:0;left:0;width:100%;height:100%;background:linear-gradient(0deg,rgba(5,5,26,.85) 0%,rgba(5,5,26,.3) 40%,rgba(5,5,26,.1) 60%,rgba(5,5,26,.4) 100%)}
+#landing-content{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:16px;width:90%;max-width:360px;padding-bottom:20px}
+#landing-start{background:linear-gradient(135deg,#00d4ff,#b44aff);border:none;color:#fff;padding:18px 60px;border-radius:30px;font-size:1.3em;font-weight:900;cursor:pointer;letter-spacing:2px;box-shadow:0 0 30px rgba(0,212,255,.4),0 4px 15px rgba(0,0,0,.5);transition:all .3s;animation:startPulse 2s ease-in-out infinite}
+#landing-start:hover{transform:translateY(-3px) scale(1.05);box-shadow:0 0 50px rgba(0,212,255,.6),0 8px 25px rgba(0,0,0,.5)}
+#landing-start:active{transform:translateY(1px) scale(.98)}
+@keyframes startPulse{0%,100%{box-shadow:0 0 30px rgba(0,212,255,.4),0 4px 15px rgba(0,0,0,.5)}50%{box-shadow:0 0 45px rgba(180,74,255,.5),0 4px 15px rgba(0,0,0,.5)}}
+#landing-nav{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.landing-btn{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.2);color:#fff;padding:10px 20px;border-radius:20px;font-size:.85em;font-weight:600;cursor:pointer;transition:all .2s;white-space:nowrap}
+.landing-btn:hover{background:rgba(255,255,255,.15);border-color:rgba(0,212,255,.5);transform:translateY(-1px)}
+#landing-bottom{display:flex;flex-direction:column;align-items:center;gap:10px;margin-top:8px}
+#landing-lang{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.7);padding:8px 18px;border-radius:18px;font-size:.78em;cursor:pointer;transition:all .2s}
+#landing-lang:hover{background:rgba(255,255,255,.12);color:#fff}
+#landing-links{display:flex;gap:14px;font-size:.65em}
+#landing-links a{color:rgba(255,255,255,.3);text-decoration:none;transition:color .2s}
+#landing-links a:hover{color:rgba(255,255,255,.6)}
+#game-container{position:relative;height:100vh;width:100vw;overflow:hidden;display:none}
+#game-container.active{display:block}
 #game-container.shake{animation:shake .12s ease-out}
 #game-container.big-shake{animation:bigShake .25s ease-out}
 @keyframes shake{0%{transform:translate(2px,1px)}25%{transform:translate(-2px,-1px)}50%{transform:translate(1px,2px)}75%{transform:translate(-1px,-2px)}100%{transform:translate(0,0)}}
@@ -8,7 +28,7 @@ body{font-family:'Noto Sans KR','Malgun Gothic',sans-serif;background:#05051a;co
 #bg-canvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none}
 #top-panel{position:fixed;top:0;left:0;width:100%;z-index:10;text-align:center;padding:10px 10px 8px;background:linear-gradient(180deg,rgba(10,10,40,.92) 0%,rgba(10,10,40,0) 100%);pointer-events:none}
 #top-panel .top-btn{pointer-events:auto}
-#game-title{font-size:1.3em;font-weight:900;background:linear-gradient(90deg,#ffee00,#00d4ff,#b44aff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:2px;margin-bottom:4px}
+#game-title{font-size:1.3em;font-weight:900;background:linear-gradient(90deg,#ffee00,#00d4ff,#b44aff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:2px;margin-bottom:4px;text-transform:uppercase}
 #top-buttons{position:absolute;top:8px;right:8px;display:flex;gap:6px}
 .top-btn{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);color:#fff;border-radius:20px;padding:6px 12px;font-size:.75em;cursor:pointer;display:flex;align-items:center;gap:5px;transition:all .2s;white-space:nowrap}
 .top-btn:hover{background:rgba(255,255,255,.15)}
@@ -195,11 +215,84 @@ body{font-family:'Noto Sans KR','Malgun Gothic',sans-serif;background:#05051a;co
 .rank-score-value{font-size:1em;font-weight:900;color:#ffee00}
 .rank-score-label{font-size:.55em;color:rgba(255,255,255,.35)}
 .rank-empty{color:rgba(255,255,255,.25);font-size:.85em;padding:40px 0}
+.rank-loading{animation:pulse 1s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:.4}50%{opacity:.8}}
 #ranking-buttons{display:flex;gap:8px;justify-content:center;margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,.08)}
 #ranking-close{background:linear-gradient(135deg,#00d4ff,#b44aff);border:none;color:#fff;padding:10px 30px;border-radius:20px;font-size:.9em;font-weight:700;cursor:pointer}
-#ranking-clear{background:rgba(255,255,255,.06);border:1px solid rgba(255,68,68,.3);color:#ff6666;padding:10px 20px;border-radius:20px;font-size:.78em;font-weight:600;cursor:pointer;transition:all .2s}
-#ranking-clear:hover{background:rgba(255,68,68,.12)}
 /* ── 게임 푸터 ── */
 #game-footer{position:fixed;bottom:0;left:0;width:100%;z-index:2;display:flex;justify-content:center;gap:14px;padding:6px 10px;font-size:.65em;pointer-events:auto}
 #game-footer a{color:rgba(255,255,255,.25);text-decoration:none;transition:color .2s}
 #game-footer a:hover{color:rgba(255,255,255,.5)}
+#game-footer.hidden{display:none}
+/* ── 모바일 반응형 ── */
+@media(max-width:600px){
+  /* 상단 패널 컴팩트 */
+  #top-panel{padding:6px 6px 4px}
+  #game-title{font-size:.85em;letter-spacing:1px;margin-bottom:2px}
+  #top-buttons{position:static;display:flex;justify-content:center;gap:4px;margin-bottom:3px}
+  .top-btn{padding:3px 8px;font-size:.65em;border-radius:14px;gap:3px}
+  .top-btn-icon{font-size:1em}
+  .top-btn-label{font-size:.85em;letter-spacing:0}
+  #evolution-badge{font-size:.62em;padding:1px 8px;margin-bottom:3px}
+  #wave-info{gap:8px;margin-bottom:4px;font-size:.7em}
+  #wave-badge{padding:1px 8px;font-size:.9em}
+  #hp-bar-container{max-width:260px;height:14px;margin-bottom:4px}
+  #hp-text{font-size:.62em;line-height:14px}
+  #stats-row{gap:10px;font-size:.68em}
+  .stat-label{font-size:.65em}
+  #active-skills{margin-top:2px;gap:2px}
+  .mini-skill{font-size:.55em;padding:0px 4px}
+  /* 적 로스터 컴팩트 */
+  #enemy-roster{padding:4px 4px;gap:2px;max-height:40vh}
+  .roster-item{font-size:.48em;padding:1px 5px 1px 3px;gap:2px}
+  .roster-title{font-size:.42em}
+  /* 하단 패널 컴팩트 */
+  #bottom-panel{padding:4px 6px 6px}
+  #energy-display{margin-bottom:4px}
+  #energy-value{font-size:1.2em}
+  #energy-unit{font-size:.65em}
+  #upgrades-grid{gap:4px;max-height:28vh}
+  .upgrade-btn{padding:6px;border-radius:8px}
+  .upgrade-name{font-size:.7em}
+  .upgrade-desc{font-size:.52em;margin-bottom:2px}
+  .upgrade-cost{font-size:.62em}
+  .upgrade-level{font-size:.52em;padding:0px 5px}
+  .hotkey-badge{display:none}
+  /* 팝업 컴팩트 */
+  #game-over{padding:12px 8px;gap:6px}
+  #game-over h1{font-size:1.4em}
+  #game-over button{padding:10px 25px;font-size:.85em}
+  #go-stats-grid{gap:4px;max-width:280px}
+  .go-stat{padding:5px 6px;border-radius:8px}
+  .go-stat-label{font-size:.52em}
+  .go-stat-value{font-size:.88em}
+  #go-nickname{width:140px;padding:8px 10px;font-size:.8em}
+  #go-save-rank{padding:8px 14px;font-size:.78em}
+  #wave-popup-text{font-size:1.8em}
+  #evolution-content h1{font-size:1.5em}
+  #evolution-content p{font-size:.75em}
+  #skill-content h2{font-size:1em}
+  .skill-card{padding:9px 10px;gap:7px}
+  .skill-icon{font-size:1.3em;min-width:28px}
+  .skill-name{font-size:.78em}
+  .skill-desc{font-size:.6em}
+  #upgrade-content h2{font-size:1em}
+  .upgrade-choice{padding:9px 10px;gap:7px}
+  .upgrade-choice-icon{font-size:1.3em;min-width:28px}
+  .upgrade-choice-name{font-size:.78em}
+  .upgrade-choice-desc{font-size:.6em}
+  .upgrade-choice-cat{font-size:.48em}
+  /* 랭킹 팝업 */
+  #ranking-content{width:95%}
+  #ranking-content h2{font-size:1.2em}
+  .rank-tab{padding:4px 12px;font-size:.68em}
+  .rank-entry{padding:7px 8px;gap:6px}
+  .rank-name{font-size:.78em}
+  .rank-detail{font-size:.58em}
+  .rank-score-value{font-size:.88em}
+  /* 일시정지 */
+  #pause-popup h1{font-size:1.6em}
+  #pause-buttons{width:170px;gap:8px}
+  #pause-resume{padding:11px 25px;font-size:.95em}
+  #pause-reset{padding:9px 25px;font-size:.8em}
+}

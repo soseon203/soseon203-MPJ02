@@ -7,7 +7,13 @@
       "Bash(npx netlify-cli:*)",
       "Bash(gh auth:*)",
       "Bash(winget install:*)",
-      "Bash(export PATH=\"$PATH:/c/Program Files/GitHub CLI\")"
+      "Bash(export PATH=\"$PATH:/c/Program Files/GitHub CLI\")",
+      "WebFetch(domain:lightning-raising.netlify.app)",
+      "WebFetch(domain:lightning-raising-game.netlify.app)",
+      "WebFetch(domain:lightningcare.xyz)",
+      "WebFetch(domain:699357af013db825ff919edf--lightning-raising-game.netlify.app)",
+      "Bash(del \"f:\\\\MoneyPJ\\\\01\\\\Second\\\\data\\\\dragon-studio-lightning-strike-386161.mp3\")",
+      "Bash(del \"f:\\\\MoneyPJ\\\\01\\\\Second\\\\data\\\\freesound_community-beep-warning-6387.mp3\")"
     ],
     "additionalDirectories": [
       "f:\\MoneyPJ\\01\\Second\\.claude\\skills"

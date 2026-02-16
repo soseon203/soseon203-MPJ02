@@ -15,8 +15,6 @@ class SFX {
       this.comp.connect(this.ctx.destination);
       this.ready=true;
       this._loadZap();
-      this._loadMp3('bossAlert','data/freesound_community-beep-warning-6387.mp3');
-      this._loadMp3('chain','data/dragon-studio-lightning-strike-386161.mp3');
     }catch(e){}
   }
   _loadZap(){
