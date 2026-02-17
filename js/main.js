@@ -983,42 +983,32 @@ function initEvents(){
 // ================================================================
 //  랜딩 화면
 // ================================================================
-function getLandingBg(lang){
-  if(window.innerWidth<768)return 'img/main_mob.jpg';
-  return lang==='ko'?'img/main_kor.jpg':'img/main_eng.jpg';
-}
+
 
 function toggleLandingLang(){
   const newLang=LANG==='ko'?'en':'ko';
   setLang(newLang);
   document.title=t('ui.title');
-  const bg=document.getElementById('landing-bg');
-  bg.src=getLandingBg(newLang);
+  document.getElementById('landing-title').textContent=newLang==='ko'?'⚡ 라이트닝 키우기':'⚡ LIGHTNING RAISING';
   const startBtn=document.getElementById('landing-start');
   startBtn.textContent=newLang==='ko'?'⚡ 게임 시작':'⚡ PLAY';
   const langBtn=document.getElementById('landing-lang');
   langBtn.textContent=newLang==='ko'?'🌐 English':'🌐 한국어';
-  // 네비 버튼 텍스트
   const navBtns=document.querySelectorAll('.landing-btn');
   const labels=newLang==='ko'?['🏆 랭킹','❓ 도움말','📖 소개']:['🏆 Ranking','❓ Help','📖 About'];
   navBtns.forEach((b,i)=>{if(labels[i])b.textContent=labels[i]});
-  // 하단 링크 텍스트
   const landLinks=document.querySelectorAll('#landing-links a');
   if(landLinks[0])landLinks[0].textContent=t('ui.privacy');
   if(landLinks[1])landLinks[1].textContent=t('ui.terms');
 }
 
 function initLanding(){
-  // 초기 이미지: 모바일이면 main_mob, 아니면 언어별
-  document.getElementById('landing-bg').src=getLandingBg(LANG);
-  window.addEventListener('resize',()=>{
-    if(!document.getElementById('landing-screen').classList.contains('hidden')){
-      document.getElementById('landing-bg').src=getLandingBg(LANG);
-    }
-  });
+  // 우주 운석 애니메이션 시작
+  if(window.startLandingAnim)window.startLandingAnim();
   // 초기 언어 반영
   if(LANG==='en'){
     document.title=t('ui.title');
+    document.getElementById('landing-title').textContent='⚡ LIGHTNING RAISING';
     document.getElementById('landing-start').textContent='⚡ PLAY';
     document.getElementById('landing-lang').textContent='🌐 한국어';
     const navBtns=document.querySelectorAll('.landing-btn');
@@ -1028,6 +1018,7 @@ function initLanding(){
     if(landLinks[1])landLinks[1].textContent=t('ui.terms');
   }
   document.getElementById('landing-start').addEventListener('click',()=>{
+    if(window.stopLandingAnim)window.stopLandingAnim();
     document.getElementById('landing-screen').classList.add('hidden');
     startGame();
   });
