@@ -628,6 +628,7 @@ function gameOver(){
   savedMsg.style.display='none';
 
   document.getElementById('game-over').classList.add('show');
+  localStorage.removeItem('lightningGame2');
   setTimeout(()=>nickInput.focus(),400);
 }
 
@@ -779,6 +780,7 @@ function handleClick(px,py){
 //  세이브/로드
 // ================================================================
 function saveGame(){
+  if(G.hp<=0)return; // 게임오버 상태에서는 저장하지 않음
   try{
     const save={energy:G.energy,totalEnergy:G.totalEnergy,kills:G.kills,totalKills:G.totalKills,
       hp:G.hp,maxHp:G.maxHp,hpRegen:G.hpRegen,damage:G.damage,autoRate:G.autoRate,
@@ -793,7 +795,10 @@ function loadGame(){
   try{
     const d=localStorage.getItem('lightningGame2');
     if(d){
-      const s=JSON.parse(d);Object.assign(G,s);
+      const s=JSON.parse(d);
+      // 죽은 세이브 데이터는 무시하고 삭제
+      if(s.hp!==undefined&&s.hp<=0){localStorage.removeItem('lightningGame2');return;}
+      Object.assign(G,s);
       G.waveState='ready';G.waveTimer=0;G.enemies=[];G.enemiesSpawned=0;G.enemiesKilled=0;G.enemiesToSpawn=0;
       // 구세이브 마이그레이션 (unlockedUpgrades 없는 경우)
       if(!G.unlockedUpgrades){
@@ -1003,6 +1008,11 @@ function toggleLandingLang(){
 }
 
 function initLanding(){
+  // 페이지 로드 즉시 죽은 세이브 데이터 정리 (기존 버그 브라우저 대응)
+  try{
+    const d=localStorage.getItem('lightningGame2');
+    if(d){const s=JSON.parse(d);if(!s.hp||s.hp<=0)localStorage.removeItem('lightningGame2');}
+  }catch(e){localStorage.removeItem('lightningGame2');}
   // 우주 운석 애니메이션 시작
   if(window.startLandingAnim)window.startLandingAnim();
   // 초기 언어 반영

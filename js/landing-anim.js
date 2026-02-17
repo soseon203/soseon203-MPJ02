@@ -1,5 +1,5 @@
 // ================================================================
-//  Landing Animation — 우주 운석 충돌 & 파편 애니메이션
+//  Landing Animation — 우주 운석 충돌 & 번개 & 파편 애니메이션
 // ================================================================
 (function(){
   const cvs=document.getElementById('landing-canvas');
@@ -10,6 +10,7 @@
   const meteors=[];
   const debris=[];
   const flashes=[];
+  const bolts=[];
   const STAR_COUNT=120;
   const METEOR_COUNT=6;
 
@@ -31,9 +32,6 @@
   // ── 운석 생성 ──
   function makeMeteor(){
     const size=Math.random()*28+16;
-    const angle=Math.random()*Math.PI*2;
-    const speed=Math.random()*0.3+0.15;
-    // 화면 가장자리에서 중앙 방향으로
     const edge=Math.random()*4|0;
     let x,y;
     if(edge===0){x=Math.random()*W;y=-size;}
@@ -44,6 +42,7 @@
     const ty=H*0.3+Math.random()*H*0.4;
     const dx=tx-x,dy=ty-y;
     const dist=Math.sqrt(dx*dx+dy*dy);
+    const speed=Math.random()*0.3+0.15;
     const vx=(dx/dist)*speed;
     const vy=(dy/dist)*speed;
     const vertices=[];
@@ -79,7 +78,45 @@
 
   // ── 충돌 플래시 ──
   function spawnFlash(x,y){
-    flashes.push({x,y,r:5,maxR:60+Math.random()*40,age:0,life:30});
+    flashes.push({x,y,r:5,maxR:80+Math.random()*50,age:0,life:35});
+  }
+
+  // ── 번개 생성 ──
+  function spawnBolt(x1,y1,x2,y2){
+    const segments=[];
+    const steps=8+Math.floor(Math.random()*6);
+    let px=x1,py=y1;
+    for(let i=1;i<=steps;i++){
+      const t=i/steps;
+      let nx=x1+(x2-x1)*t;
+      let ny=y1+(y2-y1)*t;
+      if(i<steps){
+        const spread=30+Math.random()*20;
+        nx+=(Math.random()-0.5)*spread;
+        ny+=(Math.random()-0.5)*spread;
+      }
+      segments.push({x1:px,y1:py,x2:nx,y2:ny});
+      // 분기 번개 (30% 확률)
+      if(i>1&&i<steps&&Math.random()<0.3){
+        const bLen=20+Math.random()*30;
+        const bAngle=Math.atan2(ny-py,nx-px)+(Math.random()-0.5)*1.2;
+        segments.push({x1:nx,y1:ny,
+          x2:nx+Math.cos(bAngle)*bLen,
+          y2:ny+Math.sin(bAngle)*bLen,branch:true});
+      }
+      px=nx;py=ny;
+    }
+    bolts.push({segments,age:0,life:18+Math.random()*10,
+      color:`hsl(${200+Math.random()*40},100%,${75+Math.random()*20}%)`});
+  }
+
+  // ── 충돌 시 방사형 번개 ──
+  function spawnRadialBolts(cx,cy,count){
+    for(let i=0;i<count;i++){
+      const angle=Math.random()*Math.PI*2;
+      const len=60+Math.random()*80;
+      spawnBolt(cx,cy,cx+Math.cos(angle)*len,cy+Math.sin(angle)*len);
+    }
   }
 
   // ── 충돌 감지 ──
@@ -91,12 +128,15 @@
         const dist=Math.sqrt(dx*dx+dy*dy);
         const minDist=(a.size+b.size)*0.6;
         if(dist<minDist){
-          // 충돌 지점
           const cx=(a.x+b.x)/2,cy=(a.y+b.y)/2;
+          // 번개 이펙트: 두 운석 사이 + 방사형
+          spawnBolt(a.x,a.y,b.x,b.y);
+          spawnBolt(b.x,b.y,a.x,a.y);
+          spawnRadialBolts(cx,cy,4);
+          // 파편 & 플래시
           spawnDebris(cx,cy,a.bright,12);
           spawnDebris(cx,cy,b.bright,12);
           spawnFlash(cx,cy);
-          // 둘 다 새 운석으로 교체
           meteors[i]=makeMeteor();
           meteors[j]=makeMeteor();
         }
@@ -121,7 +161,6 @@
     ctx.save();
     ctx.translate(m.x,m.y);
     ctx.rotate(m.rot);
-    // 본체
     ctx.beginPath();
     m.vertices.forEach((v,i)=>{
       const px=Math.cos(v.a)*v.r,py=Math.sin(v.a)*v.r;
@@ -171,7 +210,6 @@
     ctx.closePath();
     ctx.fillStyle=d.color;
     ctx.fill();
-    // 파편 꼬리
     ctx.beginPath();
     ctx.moveTo(0,0);
     ctx.lineTo(-d.vx*4,-d.vy*4);
@@ -186,15 +224,42 @@
   function drawFlash(f){
     const t=f.age/f.life;
     const r=f.maxR*t;
-    const alpha=(1-t)*0.7;
+    const alpha=(1-t)*0.8;
     const g=ctx.createRadialGradient(f.x,f.y,0,f.x,f.y,r);
-    g.addColorStop(0,`rgba(255,240,200,${alpha})`);
-    g.addColorStop(0.3,`rgba(255,180,80,${alpha*0.5})`);
+    g.addColorStop(0,`rgba(200,230,255,${alpha})`);
+    g.addColorStop(0.2,`rgba(100,180,255,${alpha*0.6})`);
+    g.addColorStop(0.5,`rgba(150,100,255,${alpha*0.3})`);
     g.addColorStop(1,'transparent');
     ctx.beginPath();
     ctx.arc(f.x,f.y,r,0,Math.PI*2);
     ctx.fillStyle=g;
     ctx.fill();
+  }
+
+  // ── 그리기: 번개 ──
+  function drawBolt(b){
+    const alpha=1-b.age/b.life;
+    b.segments.forEach(s=>{
+      ctx.save();
+      ctx.globalAlpha=alpha;
+      // 글로우 레이어
+      ctx.beginPath();
+      ctx.moveTo(s.x1,s.y1);ctx.lineTo(s.x2,s.y2);
+      ctx.strokeStyle=b.color;
+      ctx.lineWidth=s.branch?2:4;
+      ctx.shadowColor=b.color;
+      ctx.shadowBlur=s.branch?8:20;
+      ctx.stroke();
+      // 밝은 코어
+      ctx.beginPath();
+      ctx.moveTo(s.x1,s.y1);ctx.lineTo(s.x2,s.y2);
+      ctx.strokeStyle='rgba(255,255,255,'+alpha*0.9+')';
+      ctx.lineWidth=s.branch?0.5:1.5;
+      ctx.shadowBlur=0;
+      ctx.stroke();
+      ctx.globalAlpha=1;
+      ctx.restore();
+    });
   }
 
   // ── 성운 배경 ──
@@ -214,7 +279,6 @@
   // ── 메인 루프 ──
   function frame(){
     ctx.clearRect(0,0,W,H);
-    // 배경
     ctx.fillStyle='#05051a';
     ctx.fillRect(0,0,W,H);
     drawNebula();
@@ -224,15 +288,21 @@
     meteors.forEach(m=>{
       m.x+=m.vx;m.y+=m.vy;
       m.rot+=m.rotV;m.age++;
-      // 화면 밖으로 나가면 재생성
       if(m.age>m.life||m.x<-100||m.x>W+100||m.y<-100||m.y>H+100){
         Object.assign(m,makeMeteor());
       }
       drawMeteor(m);
     });
 
-    // 충돌 검사
     checkCollisions();
+
+    // 번개 업데이트 & 그리기
+    for(let i=bolts.length-1;i>=0;i--){
+      const b=bolts[i];
+      b.age++;
+      if(b.age>=b.life){bolts.splice(i,1);continue;}
+      drawBolt(b);
+    }
 
     // 파편 업데이트 & 그리기
     for(let i=debris.length-1;i>=0;i--){
