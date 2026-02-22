@@ -42,7 +42,7 @@
     const ty=H*0.3+Math.random()*H*0.4;
     const dx=tx-x,dy=ty-y;
     const dist=Math.sqrt(dx*dx+dy*dy);
-    const speed=Math.random()*0.3+0.15;
+    const speed=Math.random()*0.4+0.25;
     const vx=(dx/dist)*speed;
     const vy=(dy/dist)*speed;
     const vertices=[];
@@ -53,7 +53,7 @@
       vertices.push({a,r});
     }
     return{x,y,vx,vy,size,rot:Math.random()*Math.PI*2,rotV:(Math.random()-0.5)*0.01,
-      vertices,life:600+Math.random()*400,age:0,
+      vertices,life:350+Math.random()*300,age:0,
       color:`hsl(${20+Math.random()*30},${40+Math.random()*20}%,${35+Math.random()*20}%)`,
       bright:`hsl(${15+Math.random()*25},${60+Math.random()*20}%,${55+Math.random()*15}%)`};
   }
@@ -288,7 +288,18 @@
     meteors.forEach(m=>{
       m.x+=m.vx;m.y+=m.vy;
       m.rot+=m.rotV;m.age++;
-      if(m.age>m.life||m.x<-100||m.x>W+100||m.y<-100||m.y>H+100){
+      const inView=m.x>-50&&m.x<W+50&&m.y>-50&&m.y<H+50;
+      if(m.age>m.life){
+        if(inView){
+          // 수명 다한 운석: 번개 낙뢰로 파괴
+          const strikeY=Math.max(0,m.y-200-Math.random()*150);
+          spawnBolt(m.x+(Math.random()-0.5)*30,strikeY,m.x,m.y);
+          spawnBolt(m.x+(Math.random()-0.5)*20,strikeY-40,m.x,m.y);
+          spawnDebris(m.x,m.y,m.bright,10);
+          spawnFlash(m.x,m.y);
+        }
+        Object.assign(m,makeMeteor());
+      }else if(!inView&&m.age>100){
         Object.assign(m,makeMeteor());
       }
       drawMeteor(m);
