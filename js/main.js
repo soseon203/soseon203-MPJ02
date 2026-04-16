@@ -17,7 +17,7 @@ function gameLoop(ts){
 }
 
 function update(dt){
-  if(G.hp<=0||G.skillSelecting||G.upgradeSelecting||G.paused)return;
+  if(G.hp<=0||G.skillSelecting||G.upgradeSelecting||G.levelUpSelecting||G.paused)return;
 
   // rage: 광전사 스택 감소
   if(G.rageTimer>0){G.rageTimer-=dt;if(G.rageTimer<=0){G.rageStacks=0;G.rageTimer=0}}
@@ -640,7 +640,7 @@ function togglePause(){
 
 function resetGame(){
   // 모든 팝업 강제 닫기
-  ['pause-popup','game-over','skill-popup','upgrade-popup','evolution-popup','ranking-popup'].forEach(id=>{
+  ['pause-popup','game-over','skill-popup','upgrade-popup','evolution-popup','ranking-popup','levelup-popup'].forEach(id=>{
     const el=document.getElementById(id);
     if(el)el.classList.remove('show');
   });
@@ -648,6 +648,7 @@ function resetGame(){
   G.paused=false;
   G.skillSelecting=false;
   G.upgradeSelecting=false;
+  G.levelUpSelecting=false;
   // 게임 상태 초기화
   G.energy=0;G.totalEnergy=0;G.kills=0;G.totalKills=0;
   G.hp=100;G.maxHp=100;G.hpRegen=0;
@@ -662,6 +663,8 @@ function resetGame(){
   G.rageStacks=0;G.rageTimer=0;G.comboCount=0;G.comboTimer=0;
   G.upgradeShieldActive=false;G.upgradeShieldTimer=0;G.empTimer=0;
   G.rebirthUsed=false;
+  // R1: XP/레벨 초기화
+  G.xp=0;G.level=1;G.skillPoints=0;G.totalLevels=0;G.levelUpQueue=0;
   zapBolts=[];fxEffects=[];G.bossProjectiles=[];G.orbitals=[];
   // 화면 흔들림 제거
   const gameArea=document.getElementById('game-area');
@@ -682,7 +685,7 @@ window.forceReset=function(){
 // ================================================================
 function handleClick(px,py){
   sfx.init();sfx.resume();
-  if(G.hp<=0||G.skillSelecting||G.upgradeSelecting)return;
+  if(G.hp<=0||G.skillSelecting||G.upgradeSelecting||G.levelUpSelecting)return;
 
   const now=Date.now();
   const baseCd=hasSkill('quickcharge')?90:150;
@@ -786,7 +789,8 @@ function saveGame(){
       hp:G.hp,maxHp:G.maxHp,hpRegen:G.hpRegen,damage:G.damage,autoRate:G.autoRate,
       chainCount:G.chainCount,wave:G.wave,evolutionStage:G.evolutionStage,
       upgrades:G.upgrades,unlockedUpgrades:G.unlockedUpgrades,
-      specialSkills:G.specialSkills,rebirthUsed:G.rebirthUsed};
+      specialSkills:G.specialSkills,rebirthUsed:G.rebirthUsed,
+      xp:G.xp,level:G.level,skillPoints:G.skillPoints,totalLevels:G.totalLevels};
     localStorage.setItem('lightningGame2',JSON.stringify(save));
   }catch(e){}
 }

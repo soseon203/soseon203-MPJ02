@@ -410,6 +410,16 @@ function updateUI(){
   document.getElementById('hp-bar').style.background=hpPct>50?'linear-gradient(90deg,#44ff44,#88ff44)':hpPct>25?'linear-gradient(90deg,#ffaa00,#ff6600)':'linear-gradient(90deg,#ff4444,#ff0000)';
   document.getElementById('hp-text').textContent=Math.ceil(G.hp)+' / '+G.maxHp;
 
+  // R1: XP 바 갱신
+  const xpNeed=xpNeeded();
+  const xpPct=Math.min(100,(G.xp/xpNeed)*100);
+  const xpBar=document.getElementById('xp-bar');
+  if(xpBar){
+    xpBar.style.width=xpPct+'%';
+    document.getElementById('level-text').textContent='Lv.'+G.level+(G.skillPoints>0?' (+'+G.skillPoints+'SP)':'');
+    document.getElementById('xp-progress').textContent=G.xp+' / '+xpNeed;
+  }
+
   const evo=EVOLUTIONS[G.evolutionStage];
   document.getElementById('evolution-badge').textContent=`Lv.${G.evolutionStage+1} ${t('evo.'+G.evolutionStage)}`;
   document.getElementById('evolution-badge').style.color=evo.color;
@@ -430,18 +440,88 @@ function updateUI(){
 }
 
 function buyUpgrade(type){
-  sfx.init();sfx.resume();
-  if(!G.upgrades[type])return;
-  const cost=getCost(type);
-  if(G.energy<cost)return;
-  G.energy-=cost;
-  G.upgrades[type].level++;
-  if(type==='hp') G.hp=Math.min(G.hp+20,100+upLv('hp')*20);
-  recalcStats();
+  // R1: 에너지 구매 비활성화 — 업그레이드는 레벨업 시 선택으로만 획득
+  // (R4에서 에너지/구매 시스템 완전 제거 예정)
+  return;
+}
+
+// ================================================================
+//  R1: 레벨업 선택 팝업 (VS 스타일)
+// ================================================================
+function showLevelUpSelection(){
+  if(G.levelUpQueue<=0) return;
+  // 언락된 업글 중 무작위 3개 뽑기
+  const unlocked=G.unlockedUpgrades.filter(id=>G.upgrades[id]);
+  if(unlocked.length===0) return;
+  const picks=[];
+  const pool=[...unlocked];
+  while(picks.length<Math.min(3,pool.length)){
+    const idx=Math.floor(Math.random()*pool.length);
+    picks.push(pool.splice(idx,1)[0]);
+  }
+
+  G.levelUpSelecting=true;
+  const container=document.getElementById('levelup-choices');
+  if(!container) return;
+  container.innerHTML='';
+  container.classList.add('no-interact');
+  document.getElementById('levelup-title').textContent='⚡ 레벨 '+G.level+' 달성!';
+  document.getElementById('levelup-subtitle').textContent=
+    (G.levelUpQueue>1?'('+G.levelUpQueue+' 회 남음) ':'')+'업그레이드 1개를 강화하세요';
+  picks.forEach(id=>{
+    const upg=UPGRADE_POOL.find(u=>u.id===id);
+    if(!upg) return;
+    const lv=upLv(id);
+    const card=document.createElement('div');
+    card.className='levelup-choice';
+    card.dataset.id=id;
+    card.innerHTML=`
+      <div class="levelup-choice-icon">${upg.icon}</div>
+      <div class="levelup-choice-info">
+        <div class="levelup-choice-name">${t('up.'+id)} <span class="levelup-choice-lv">Lv.${lv} → ${lv+1}</span></div>
+        <div class="levelup-choice-desc">${t('up.'+id+'_d')}</div>
+      </div>`;
+    card.addEventListener('click',()=>selectLevelUp(id,card));
+    container.appendChild(card);
+  });
+  const popup=document.getElementById('levelup-popup');
+  popup.classList.remove('closing');
+  document.getElementById('levelup-content').classList.add('entering');
+  popup.classList.add('show');
+  setTimeout(()=>container.classList.remove('no-interact'),400);
+}
+
+function selectLevelUp(id,card){
+  const container=document.getElementById('levelup-choices');
+  if(container.classList.contains('no-interact'))return;
+  container.classList.add('no-interact');
+  document.querySelectorAll('.levelup-choice').forEach(c=>{
+    c.classList.add(c===card?'selected':'not-selected');
+  });
   sfx.upgrade();
-  const btn=document.querySelector(`[data-upgrade="${type}"]`);
-  if(btn){btn.classList.remove('just-bought');void btn.offsetWidth;btn.classList.add('just-bought')}
-  updateUI();saveGame();
+  // 선택 적용 & 팝업 닫기
+  setTimeout(()=>{
+    const popup=document.getElementById('levelup-popup');
+    popup.classList.add('closing');
+    setTimeout(()=>{
+      popup.classList.remove('show','closing');
+      document.getElementById('levelup-content').classList.remove('entering');
+      // 업그레이드 레벨 적용
+      G.upgrades[id].level++;
+      if(id==='hp') G.hp=Math.min(G.hp+20,100+upLv('hp')*20);
+      recalcStats();
+      G.skillPoints=Math.max(0,G.skillPoints-1);
+      G.levelUpQueue=Math.max(0,G.levelUpQueue-1);
+      G.levelUpSelecting=false;
+      screenFlash('evo');
+      updateUI();
+      saveGame();
+      // 큐에 남은 레벨업이 있으면 다음 팝업 바로 표시
+      if(G.levelUpQueue>0){
+        setTimeout(()=>showLevelUpSelection(),250);
+      }
+    },350);
+  },280);
 }
 
 // ================================================================

@@ -17,6 +17,9 @@ const G={
   unlockedUpgrades:['damage','auto'],
   upgrades:{damage:{level:0},auto:{level:0}},
   upgradeSelecting:false,
+  // R1: XP/레벨업 시스템 (로그라이크 스킬트리 기반)
+  xp:0, level:1, skillPoints:0, totalLevels:0,
+  levelUpQueue:0, levelUpSelecting:false,
   // 신규 업그레이드 전용 상태
   rageStacks:0, rageTimer:0,
   comboCount:0, comboTimer:0,
@@ -24,6 +27,37 @@ const G={
   empTimer:0,
   rebirthUsed:false
 };
+
+// ================================================================
+//  R1: XP / 레벨업 공식
+// ================================================================
+// 레벨 n → n+1 에 필요한 XP
+function xpForLevel(n){ return Math.floor(8 + n*4 + n*n*0.35); }
+// 현재 레벨의 경험치 요구량
+function xpNeeded(){ return xpForLevel(G.level); }
+// 적 처치 시 획득 XP (보상액 기반, 최소 1)
+function xpFromEnemy(enemy){
+  const base=Math.max(1, Math.ceil((enemy.reward||1)/8));
+  if(enemy.isBoss) return base*8;
+  if(enemy.isElite) return base*2;
+  return base;
+}
+// XP 획득 + 레벨업 체크
+function gainXP(amount){
+  if(amount<=0) return;
+  G.xp += amount;
+  while(G.xp >= xpNeeded()){
+    G.xp -= xpNeeded();
+    G.level++;
+    G.totalLevels++;
+    G.skillPoints++;
+    G.levelUpQueue++;
+  }
+  // 레벨업 큐가 있고, 현재 아무 팝업도 안 열려있으면 선택 팝업 트리거
+  if(G.levelUpQueue>0 && !G.skillSelecting && !G.upgradeSelecting && !G.levelUpSelecting && !G.paused && G.hp>0){
+    if(typeof showLevelUpSelection==='function') showLevelUpSelection();
+  }
+}
 
 // ================================================================
 //  랭킹 시스템 (Firebase Firestore + localStorage 캐시)
@@ -648,6 +682,8 @@ function killEnemy(enemy){
   }
   G.energy+=reward;
   G.totalEnergy+=reward;
+  // R1: XP 획득 & 레벨업 체크
+  gainXP(xpFromEnemy(enemy));
   // rage: 광전사 스택
   if(upLv('rage')>0){
     const maxStacks=upLv('rage')*3;
