@@ -11,7 +11,7 @@
   <meta property="og:type" content="website">
   <meta name="description" content="번개를 진화시키며 끝없는 웨이브에 도전하는 HTML5 캐주얼 게임">
   <link rel="icon" type="image/png" href="img/favicon.png">
-  <link rel="stylesheet" href="css/style.css?v=20">
+  <link rel="stylesheet" href="css/style.css?v=21">
 </head>
 
 <body>
@@ -26,6 +26,7 @@
         <button class="landing-btn" onclick="location.href='help.html'">❓ 도움말</button>
         <button class="landing-btn" onclick="location.href='about.html'">📖 소개</button>
       </div>
+      <button class="landing-btn landing-meta-btn" onclick="showMetaPopup()">🌟 영구 성장</button>
       <div id="landing-bottom">
         <button id="landing-lang" onclick="toggleLandingLang()">🌐 English</button>
         <div id="landing-links">
@@ -46,6 +47,8 @@
             class="top-btn-label">랭킹</span></button>
         <button class="top-btn" id="sound-btn" title="사운드"><span class="top-btn-icon">🔊</span><span
             class="top-btn-label">사운드</span></button>
+        <button class="top-btn" id="tree-btn" title="스킬 트리"><span class="top-btn-icon">🌳</span><span
+            class="top-btn-label">트리</span></button>
         <button class="top-btn" id="pause-btn" title="일시정지"><span class="top-btn-icon">⏸</span><span
             class="top-btn-label">일시정지</span></button>
       </div>
@@ -167,6 +170,41 @@
       <div id="levelup-choices"></div>
     </div>
   </div>
+  <div id="tree-popup">
+    <div id="tree-content">
+      <div id="tree-header">
+        <h2 id="tree-title">⚡ 스킬 트리</h2>
+        <div id="tree-sp-display">SP: <span id="tree-sp">0</span></div>
+        <button id="tree-close" title="닫기">✕</button>
+      </div>
+      <div id="tree-columns">
+        <div class="tree-col" data-tree="atk">
+          <div class="tree-col-title">🗡️ 공격</div>
+          <div class="tree-col-body" id="tree-col-atk"></div>
+        </div>
+        <div class="tree-col" data-tree="def">
+          <div class="tree-col-title">🛡️ 방어</div>
+          <div class="tree-col-body" id="tree-col-def"></div>
+        </div>
+        <div class="tree-col" data-tree="util">
+          <div class="tree-col-title">🌀 유틸</div>
+          <div class="tree-col-body" id="tree-col-util"></div>
+        </div>
+      </div>
+      <div id="tree-tooltip"></div>
+    </div>
+  </div>
+  <div id="meta-popup">
+    <div id="meta-content">
+      <div id="meta-header">
+        <h2>🌟 영구 성장</h2>
+        <div id="meta-rp-display">RP: <span id="meta-rp">0</span></div>
+        <button id="meta-close" title="닫기">✕</button>
+      </div>
+      <p id="meta-subtitle">로그라이크 포인트로 시작 보너스를 해금하세요</p>
+      <div id="meta-grid"></div>
+    </div>
+  </div>
   <div id="ranking-popup">
     <div id="ranking-content">
       <h2>🏆 RANKING</h2>
@@ -202,15 +240,16 @@
 
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
-  <script src="js/firebase-config.js?v=20"></script>
-  <script src="js/locales.js?v=20"></script>
-  <script src="js/sound.js?v=20"></script>
-  <script src="js/config.js?v=20"></script>
-  <script src="js/game.js?v=20"></script>
-  <script src="js/render.js?v=20"></script>
-  <script src="js/ui.js?v=20"></script>
-  <script src="js/landing-anim.js?v=20"></script>
-  <script src="js/main.js?v=20"></script>
+  <script src="js/firebase-config.js?v=21"></script>
+  <script src="js/locales.js?v=21"></script>
+  <script src="js/sound.js?v=21"></script>
+  <script src="js/config.js?v=21"></script>
+  <script src="js/game.js?v=21"></script>
+  <script src="js/tree.js?v=21"></script>
+  <script src="js/render.js?v=21"></script>
+  <script src="js/ui.js?v=21"></script>
+  <script src="js/landing-anim.js?v=21"></script>
+  <script src="js/main.js?v=21"></script>
 </body>
 
 </html>

@@ -446,82 +446,135 @@ function buyUpgrade(type){
 }
 
 // ================================================================
-//  R1: 레벨업 선택 팝업 (VS 스타일)
+//  R4: 레벨업 → 트리 팝업 자동 오픈 (하이브리드 — 선택 or 닫기)
 // ================================================================
-function showLevelUpSelection(){
-  if(G.levelUpQueue<=0) return;
-  // 언락된 업글 중 무작위 3개 뽑기
-  const unlocked=G.unlockedUpgrades.filter(id=>G.upgrades[id]);
-  if(unlocked.length===0) return;
-  const picks=[];
-  const pool=[...unlocked];
-  while(picks.length<Math.min(3,pool.length)){
-    const idx=Math.floor(Math.random()*pool.length);
-    picks.push(pool.splice(idx,1)[0]);
+function openTreeOnLevelUp(){
+  if(G.levelUpQueue>0){
+    G.levelUpQueue=0; // 트리를 열면 큐는 소진 (포인트는 누적되어 있음)
   }
-
-  G.levelUpSelecting=true;
-  const container=document.getElementById('levelup-choices');
-  if(!container) return;
-  container.innerHTML='';
-  container.classList.add('no-interact');
-  document.getElementById('levelup-title').textContent='⚡ 레벨 '+G.level+' 달성!';
-  document.getElementById('levelup-subtitle').textContent=
-    (G.levelUpQueue>1?'('+G.levelUpQueue+' 회 남음) ':'')+'업그레이드 1개를 강화하세요';
-  picks.forEach(id=>{
-    const upg=UPGRADE_POOL.find(u=>u.id===id);
-    if(!upg) return;
-    const lv=upLv(id);
-    const card=document.createElement('div');
-    card.className='levelup-choice';
-    card.dataset.id=id;
-    card.innerHTML=`
-      <div class="levelup-choice-icon">${upg.icon}</div>
-      <div class="levelup-choice-info">
-        <div class="levelup-choice-name">${t('up.'+id)} <span class="levelup-choice-lv">Lv.${lv} → ${lv+1}</span></div>
-        <div class="levelup-choice-desc">${t('up.'+id+'_d')}</div>
-      </div>`;
-    card.addEventListener('click',()=>selectLevelUp(id,card));
-    container.appendChild(card);
-  });
-  const popup=document.getElementById('levelup-popup');
-  popup.classList.remove('closing');
-  document.getElementById('levelup-content').classList.add('entering');
-  popup.classList.add('show');
-  setTimeout(()=>container.classList.remove('no-interact'),400);
+  openTreePopup(true); // levelUp 모드: 안내 메시지 바꿈
 }
 
-function selectLevelUp(id,card){
-  const container=document.getElementById('levelup-choices');
-  if(container.classList.contains('no-interact'))return;
-  container.classList.add('no-interact');
-  document.querySelectorAll('.levelup-choice').forEach(c=>{
-    c.classList.add(c===card?'selected':'not-selected');
+// ================================================================
+//  R3/R4: 스킬 트리 팝업 렌더링
+// ================================================================
+function openTreePopup(isLevelUp){
+  const popup=document.getElementById('tree-popup');
+  if(!popup) return;
+  G.treeOpen=true;
+  if(typeof G.paused!=='undefined') G.paused=true; // 트리 열면 게임 일시정지
+  document.getElementById('tree-title').textContent=isLevelUp?('⚡ 레벨 업! — 포인트를 투자하세요'):('🌳 스킬 트리');
+  renderTree();
+  popup.classList.add('show');
+}
+function closeTreePopup(){
+  const popup=document.getElementById('tree-popup');
+  if(!popup) return;
+  popup.classList.remove('show');
+  G.treeOpen=false;
+  G.paused=false;
+  saveGame();
+  updateUI();
+}
+function renderTree(){
+  document.getElementById('tree-sp').textContent=G.skillPoints;
+  ['atk','def','util'].forEach(treeId=>{
+    const container=document.getElementById('tree-col-'+treeId);
+    if(!container) return;
+    container.innerHTML='';
+    const nodes=nodesByTree(treeId);
+    // tier별 그룹핑
+    const byTier={};
+    nodes.forEach(n=>{ (byTier[n.tier]=byTier[n.tier]||[]).push(n); });
+    Object.keys(byTier).sort((a,b)=>+a-+b).forEach(tier=>{
+      const tierBlock=document.createElement('div');
+      tierBlock.className='tree-tier';
+      const label=document.createElement('div');
+      label.className='tree-tier-label';
+      label.textContent=(+tier===7)?'◆ KEYSTONE':'TIER '+tier;
+      tierBlock.appendChild(label);
+      byTier[tier].sort((a,b)=>a.row-b.row).forEach(node=>{
+        const el=buildTreeNodeEl(node);
+        tierBlock.appendChild(el);
+      });
+      container.appendChild(tierBlock);
+    });
   });
-  sfx.upgrade();
-  // 선택 적용 & 팝업 닫기
-  setTimeout(()=>{
-    const popup=document.getElementById('levelup-popup');
-    popup.classList.add('closing');
-    setTimeout(()=>{
-      popup.classList.remove('show','closing');
-      document.getElementById('levelup-content').classList.remove('entering');
-      // 업그레이드 레벨 적용
-      G.upgrades[id].level++;
-      if(id==='hp') G.hp=Math.min(G.hp+20,100+upLv('hp')*20);
+}
+function buildTreeNodeEl(node){
+  const rank=getNodeRank(node);
+  const unlocked=isNodeUnlocked(node);
+  const maxed=rank>=node.maxRank;
+  const ksBlocked=node.type==='keystone'&&isKeystoneBlocked(node);
+  const canInvest=canInvestNode(node);
+
+  const el=document.createElement('div');
+  el.className='tree-node';
+  if(node.type==='keystone') el.classList.add('keystone');
+  if(rank>0) el.classList.add('invested');
+  if(maxed) el.classList.add('maxed');
+  else if(canInvest) el.classList.add('available');
+  else if(!unlocked||ksBlocked) el.classList.add('locked');
+
+  const icon=getNodeIcon(node);
+  const name=getNodeName(node);
+  const desc=getNodeDesc(node);
+  el.innerHTML=`
+    <div class="tree-node-icon">${icon}</div>
+    <div class="tree-node-info">
+      <div class="tree-node-name">${name}</div>
+      <div class="tree-node-desc">${desc}</div>
+    </div>
+    <div class="tree-node-rank">${rank}/${node.maxRank}</div>
+  `;
+  el.addEventListener('click',()=>{
+    if(investNode(node)){
+      sfx.upgrade();
       recalcStats();
-      G.skillPoints=Math.max(0,G.skillPoints-1);
-      G.levelUpQueue=Math.max(0,G.levelUpQueue-1);
-      G.levelUpSelecting=false;
-      screenFlash('evo');
-      updateUI();
+      renderTree();
       saveGame();
-      // 큐에 남은 레벨업이 있으면 다음 팝업 바로 표시
-      if(G.levelUpQueue>0){
-        setTimeout(()=>showLevelUpSelection(),250);
-      }
-    },350);
-  },280);
+    }
+  });
+  return el;
+}
+
+// ================================================================
+//  R5: 메타 팝업 (영구 성장)
+// ================================================================
+function showMetaPopup(){
+  const popup=document.getElementById('meta-popup');
+  if(!popup) return;
+  renderMeta();
+  popup.classList.add('show');
+}
+function hideMetaPopup(){
+  document.getElementById('meta-popup').classList.remove('show');
+}
+function renderMeta(){
+  document.getElementById('meta-rp').textContent=G.rp||0;
+  const grid=document.getElementById('meta-grid');
+  grid.innerHTML='';
+  META_UPGRADES.forEach(mu=>{
+    const r=metaRank(mu.id);
+    const maxed=r>=mu.maxRank;
+    const cost=metaCost(mu);
+    const canBuy=!maxed&&G.rp>=cost;
+    const item=document.createElement('div');
+    item.className='meta-item';
+    if(maxed) item.classList.add('maxed');
+    else if(!canBuy) item.classList.add('locked');
+    item.innerHTML=`
+      <div class="meta-item-name">${mu.icon} ${mu.name}</div>
+      <div class="meta-item-desc">${mu.desc}</div>
+      <div class="meta-item-footer">
+        <span class="meta-item-rank">${r}/${mu.maxRank}</span>
+        <span class="meta-item-cost">${maxed?'MAX':('💠 '+cost)}</span>
+      </div>`;
+    item.addEventListener('click',()=>{
+      if(buyMetaUpgrade(mu.id)){ sfx.upgrade(); renderMeta(); }
+    });
+    grid.appendChild(item);
+  });
 }
 
 // ================================================================

@@ -557,10 +557,10 @@ function waveClear(){
   checkEvolution();
   saveGame();
   // 업그레이드 선택 팝업 (웨이브 증가 후)
-  if(shouldSelect){
-    const available=UPGRADE_POOL.filter(u=>!G.unlockedUpgrades.includes(u.id)&&u.unlockWave<=G.wave);
-    if(available.length>0) setTimeout(()=>showUpgradeSelection(),800);
-  }
+  // R4: 기존 웨이브 업글 팝업 비활성화 (트리가 관리)
+  // if(shouldSelect){ ... showUpgradeSelection() ... }
+  // R6: 업적 인-런 체크
+  if(typeof checkAchievements==='function') checkAchievements();
 }
 
 function gameOver(){
@@ -578,6 +578,22 @@ function gameOver(){
   }
   sfx.gameOver();
   screenFlash('big');
+
+  // R5: 런 종료 — RP 계산 & 업적 체크 (런 최종 결과 기준)
+  checkAchievements();
+  const runRp=computeRunRP();
+  if(runRp>0){ G.rp+=runRp; saveMeta(); }
+  // 게임오버 화면에 RP 표시
+  const go=document.getElementById('go-stats-grid');
+  if(go && runRp>0 && !document.getElementById('go-rp-item')){
+    const rpItem=document.createElement('div');
+    rpItem.id='go-rp-item';
+    rpItem.className='go-stat';
+    rpItem.innerHTML='<div class="go-stat-label">🌟 RP</div><div class="go-stat-value" style="color:#ff99ff">+'+runRp+'</div>';
+    go.appendChild(rpItem);
+  }else if(document.getElementById('go-rp-item')&&runRp>0){
+    document.querySelector('#go-rp-item .go-stat-value').textContent='+'+runRp;
+  }
 
   const evo=EVOLUTIONS[G.evolutionStage];
   // 호칭
@@ -665,6 +681,15 @@ function resetGame(){
   G.rebirthUsed=false;
   // R1: XP/레벨 초기화
   G.xp=0;G.level=1;G.skillPoints=0;G.totalLevels=0;G.levelUpQueue=0;
+  // R4: 키스톤 초기화 (런 한정)
+  G.keystones={};G.treeOpen=false;
+  // R5: 메타 시작 보너스 적용 (RP/메타업글은 영구 유지)
+  const mHp=getMetaEffect('maxHp');
+  const mSp=getMetaEffect('sp');
+  const mDmg=getMetaEffect('damage');
+  if(mHp>0){ G.maxHp+=mHp; G.hp=G.maxHp; }
+  if(mSp>0) G.skillPoints+=mSp;
+  if(mDmg>0) G.damage+=mDmg;
   zapBolts=[];fxEffects=[];G.bossProjectiles=[];G.orbitals=[];
   // 화면 흔들림 제거
   const gameArea=document.getElementById('game-area');
@@ -790,7 +815,8 @@ function saveGame(){
       chainCount:G.chainCount,wave:G.wave,evolutionStage:G.evolutionStage,
       upgrades:G.upgrades,unlockedUpgrades:G.unlockedUpgrades,
       specialSkills:G.specialSkills,rebirthUsed:G.rebirthUsed,
-      xp:G.xp,level:G.level,skillPoints:G.skillPoints,totalLevels:G.totalLevels};
+      xp:G.xp,level:G.level,skillPoints:G.skillPoints,totalLevels:G.totalLevels,
+      keystones:G.keystones||{}};
     localStorage.setItem('lightningGame2',JSON.stringify(save));
   }catch(e){}
 }
@@ -919,6 +945,17 @@ function initEvents(){
   document.getElementById('ranking-close').addEventListener('click',()=>hideRankingPopup());
 
   document.getElementById('pause-btn').addEventListener('click',()=>togglePause());
+  // R3: 스킬 트리 버튼 / 메타 팝업 / 닫기
+  const treeBtn=document.getElementById('tree-btn');
+  if(treeBtn) treeBtn.addEventListener('click',()=>{ if(G.treeOpen) closeTreePopup(); else openTreePopup(false); });
+  const treeClose=document.getElementById('tree-close');
+  if(treeClose) treeClose.addEventListener('click',()=>closeTreePopup());
+  const metaClose=document.getElementById('meta-close');
+  if(metaClose) metaClose.addEventListener('click',()=>hideMetaPopup());
+  document.addEventListener('keydown',e=>{
+    if(e.key==='Escape'){ if(G.treeOpen) closeTreePopup(); else hideMetaPopup(); }
+    if(e.key==='t'||e.key==='T'){ if(!G.treeOpen&&G.hp>0&&!G.skillSelecting&&!G.upgradeSelecting) openTreePopup(false); }
+  });
 
   document.getElementById('pause-resume').addEventListener('click',()=>togglePause());
   document.getElementById('pause-reset').addEventListener('click',()=>{
@@ -1017,6 +1054,16 @@ function initLanding(){
     const d=localStorage.getItem('lightningGame2');
     if(d){const s=JSON.parse(d);if(!s.hp||s.hp<=0)localStorage.removeItem('lightningGame2');}
   }catch(e){localStorage.removeItem('lightningGame2');}
+  // R5: 메타 프로그레션 로드 (랜딩에서 영구 성장 버튼 사용 가능)
+  if(typeof loadMeta==='function') loadMeta();
+  // R6: 스킬트리 도입으로 구버전 세이브 무효화 (업글 풀 변경되어 충돌 가능)
+  try{
+    const d=localStorage.getItem('lightningGame2');
+    if(d){
+      const s=JSON.parse(d);
+      if(!s.xp&&!s.level){ localStorage.removeItem('lightningGame2'); }
+    }
+  }catch(e){}
   // 우주 운석 애니메이션 시작
   if(window.startLandingAnim)window.startLandingAnim();
   // 초기 언어 반영
@@ -1048,6 +1095,12 @@ function startGame(){
   const footer=document.getElementById('game-footer');
   if(footer)footer.classList.add('hidden');
   loadGame();
+  if(typeof loadMeta==='function') loadMeta();
+  // R5: 메타 시작 보너스 적용 (새 런 시작 시)
+  const mSp=(typeof getMetaEffect==='function'?getMetaEffect('sp'):0);
+  const mDmg=(typeof getMetaEffect==='function'?getMetaEffect('damage'):0);
+  if(mSp>0&&G.level<=1) G.skillPoints=Math.max(G.skillPoints,mSp);
+  if(mDmg>0&&G.level<=1) G.damage=Math.max(G.damage,1+mDmg);
   recalcStats();
   applyI18nHTML();
   rebuildUpgradeGrid();

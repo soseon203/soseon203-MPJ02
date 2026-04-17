@@ -20,6 +20,9 @@ const G={
   // R1: XP/레벨업 시스템 (로그라이크 스킬트리 기반)
   xp:0, level:1, skillPoints:0, totalLevels:0,
   levelUpQueue:0, levelUpSelecting:false,
+  // R4: 키스톤 + R5: 메타 프로그레션
+  keystones:{}, treeOpen:false,
+  rp:0, metaUpgrades:{}, achievements:{},
   // 신규 업그레이드 전용 상태
   rageStacks:0, rageTimer:0,
   comboCount:0, comboTimer:0,
@@ -37,9 +40,15 @@ function xpForLevel(n){ return Math.floor(8 + n*4 + n*n*0.35); }
 function xpNeeded(){ return xpForLevel(G.level); }
 // 적 처치 시 획득 XP (보상액 기반, 최소 1)
 function xpFromEnemy(enemy){
-  const base=Math.max(1, Math.ceil((enemy.reward||1)/8));
-  if(enemy.isBoss) return base*8;
-  if(enemy.isElite) return base*2;
+  let base=Math.max(1, Math.ceil((enemy.reward||1)/8));
+  if(enemy.isBoss) base*=8;
+  else if(enemy.isElite) base*=2;
+  // R5: 메타 XP 배율
+  const xpMult=(typeof getMetaEffect==='function'?getMetaEffect('xpMult'):0);
+  if(xpMult>0) base=Math.ceil(base*(1+xpMult));
+  // R4: 키스톤 XP 효과
+  if(hasKeystone('ks_collector')) base=Math.ceil(base*3);
+  if(hasKeystone('ks_timelord')) base=Math.ceil(base*0.75);
   return base;
 }
 // XP 획득 + 레벨업 체크
@@ -54,9 +63,94 @@ function gainXP(amount){
     G.levelUpQueue++;
   }
   // 레벨업 큐가 있고, 현재 아무 팝업도 안 열려있으면 선택 팝업 트리거
-  if(G.levelUpQueue>0 && !G.skillSelecting && !G.upgradeSelecting && !G.levelUpSelecting && !G.paused && G.hp>0){
-    if(typeof showLevelUpSelection==='function') showLevelUpSelection();
+  if(G.levelUpQueue>0 && !G.skillSelecting && !G.upgradeSelecting && !G.levelUpSelecting && !G.treeOpen && !G.paused && G.hp>0){
+    // R4: 하이브리드 — 레벨업 시 트리 자동 오픈
+    if(typeof openTreeOnLevelUp==='function') openTreeOnLevelUp();
   }
+}
+
+// ================================================================
+//  R5: 메타 업그레이드 정의 (RP 해금)
+// ================================================================
+const META_UPGRADES=[
+  {id:'m_hp',    name:'시작 체력',    desc:'시작 시 최대 HP +15',       icon:'❤️', maxRank:5, costBase:3, costMult:1.8, effect:(r)=>({maxHp:r*15})},
+  {id:'m_sp',    name:'시작 스킬포인트', desc:'시작 시 스킬포인트 +1',  icon:'⭐', maxRank:5, costBase:8, costMult:2.2, effect:(r)=>({sp:r})},
+  {id:'m_xp',    name:'경험 증폭',    desc:'XP 획득 +8%',             icon:'📘', maxRank:5, costBase:5, costMult:2.0, effect:(r)=>({xpMult:r*0.08})},
+  {id:'m_dmg',   name:'시작 데미지',  desc:'시작 데미지 +1',           icon:'⚡', maxRank:5, costBase:4, costMult:1.9, effect:(r)=>({damage:r})},
+  {id:'m_eng',   name:'에너지 부스트', desc:'에너지 획득 +10%',        icon:'💰', maxRank:5, costBase:5, costMult:2.0, effect:(r)=>({energyMult:r*0.1})},
+  {id:'m_revive',name:'부활 부적',    desc:'런당 1회 HP 30%로 부활',  icon:'✨', maxRank:1, costBase:50, costMult:1, effect:(r)=>({revive:r>0})}
+];
+function metaCost(mu){ const r=(G.metaUpgrades&&G.metaUpgrades[mu.id])||0; return Math.ceil(mu.costBase*Math.pow(mu.costMult,r)); }
+function metaRank(id){ return (G.metaUpgrades&&G.metaUpgrades[id])||0; }
+function canBuyMeta(mu){ return G.rp>=metaCost(mu)&&metaRank(mu.id)<mu.maxRank; }
+function buyMetaUpgrade(id){
+  const mu=META_UPGRADES.find(m=>m.id===id);
+  if(!mu||!canBuyMeta(mu)) return false;
+  G.rp-=metaCost(mu);
+  if(!G.metaUpgrades) G.metaUpgrades={};
+  G.metaUpgrades[id]=(G.metaUpgrades[id]||0)+1;
+  saveMeta();
+  return true;
+}
+// 메타 효과 누적 계산
+function getMetaEffect(field){
+  let total=0;
+  META_UPGRADES.forEach(mu=>{
+    const r=metaRank(mu.id);
+    if(r>0){ const e=mu.effect(r); if(e[field]!==undefined) total+=e[field]; }
+  });
+  return total;
+}
+function getMetaFlag(field){
+  let v=false;
+  META_UPGRADES.forEach(mu=>{
+    const r=metaRank(mu.id);
+    if(r>0){ const e=mu.effect(r); if(e[field]!==undefined) v=e[field]||v; }
+  });
+  return v;
+}
+// 메타 저장/로드 (영구)
+function saveMeta(){
+  try{ localStorage.setItem('lightningMeta',JSON.stringify({rp:G.rp,metaUpgrades:G.metaUpgrades||{},achievements:G.achievements||{}})); }catch(e){}
+}
+function loadMeta(){
+  try{
+    const d=localStorage.getItem('lightningMeta');
+    if(d){
+      const s=JSON.parse(d);
+      G.rp=s.rp||0;
+      G.metaUpgrades=s.metaUpgrades||{};
+      G.achievements=s.achievements||{};
+    }
+  }catch(e){}
+}
+
+// ================================================================
+//  R6: 업적 (5개)
+// ================================================================
+const ACHIEVEMENTS=[
+  {id:'first_blood',  name:'첫 처치',        desc:'적 1체 처치',            rp:1,  check:()=>G.totalKills>=1},
+  {id:'wave10',       name:'10 웨이브',      desc:'웨이브 10 도달',         rp:3,  check:()=>G.wave>=10},
+  {id:'wave30',       name:'30 웨이브',      desc:'웨이브 30 도달',         rp:8,  check:()=>G.wave>=30},
+  {id:'wave50',       name:'50 웨이브',      desc:'웨이브 50 도달',         rp:15, check:()=>G.wave>=50},
+  {id:'level40',      name:'각성자',         desc:'레벨 40 달성',           rp:10, check:()=>G.level>=40}
+];
+function checkAchievements(){
+  let gained=0;
+  ACHIEVEMENTS.forEach(a=>{
+    if(!G.achievements) G.achievements={};
+    if(G.achievements[a.id]) return;
+    if(a.check()){ G.achievements[a.id]=true; gained+=a.rp; G.rp+=a.rp; }
+  });
+  if(gained>0){ saveMeta(); if(typeof showFloatText==='function'){ const el=document.getElementById('game-canvas'); if(el) showFloatText(el.width/(2*dpr),el.height/(2*dpr)-60,'+'+gained+' RP 🌟','chain'); } }
+  return gained;
+}
+// 런당 RP 계산
+function computeRunRP(){
+  let rp=Math.floor(G.wave/5);             // 웨이브 도달 (5당 1 RP)
+  rp+=Math.floor(G.totalKills/50);         // 처치 (50당 1 RP)
+  rp+=Math.floor(G.totalLevels/5);         // 레벨 (5당 1 RP)
+  return rp;
 }
 
 // ================================================================
@@ -212,6 +306,20 @@ function recalcStats(){
   G.chainCount=upLv('chain');
   G.maxHp=100+upLv('hp')*20+upLv('tough_skin')*15+upLv('hp_boost')*30+upLv('titan_guard')*50;
   G.hpRegen=upLv('hp')+upLv('regen')*0.5;
+  // R5: 메타 보너스 HP 추가 (런 시작 시 적용되지만, 업글 사서 maxHp 재계산 시 유지)
+  const metaHp=(typeof getMetaEffect==='function'?getMetaEffect('maxHp'):0);
+  if(metaHp>0) G.maxHp+=metaHp;
+  // R4: 키스톤 효과
+  if(G.keystones){
+    if(G.keystones['ks_berserker']){ G.damage=Math.ceil(G.damage*2); G.maxHp=Math.floor(G.maxHp*0.6); }
+    if(G.keystones['ks_click_master']){ G.damage=Math.ceil(G.damage*3); G.autoRate=0; }
+    if(G.keystones['ks_immortal']){ G.maxHp=Math.floor(G.maxHp*2.5); G.hpRegen*=2; G.damage=Math.ceil(G.damage*0.7); }
+    if(G.keystones['ks_glass_cannon']){ G.maxHp=1; G.damage*=5; }
+    if(G.keystones['ks_collector']){ G.maxHp=Math.floor(G.maxHp*0.7); }
+    if(G.keystones['ks_timelord']){ /* 이동속도/XP는 xpFromEnemy·spawnEnemy에서 처리 */ }
+  }
+  // HP가 max 초과되지 않도록
+  if(G.hp>G.maxHp) G.hp=G.maxHp;
 }
 function getUpgradeDesc(id){
   const lv=upLv(id);
@@ -428,7 +536,10 @@ function getWaveConfig(wave){
   }
   if(count>120)count=120;
 
-  return{count,hpMult:hpMult*extraHp,speedMult:speedMult*extraSpeed,reward,isBoss,waveType};
+  // R4: 키스톤 — 시간의 주인 (적 이동속도 -40%)
+  let speedMod=speedMult*extraSpeed;
+  if(hasKeystone('ks_timelord')) speedMod*=0.6;
+  return{count,hpMult:hpMult*extraHp,speedMult:speedMod,reward,isBoss,waveType};
 }
 
 function spawnEnemy(){
@@ -671,6 +782,10 @@ function killEnemy(enemy){
   if(hasSkill('lucky')&&Math.random()<0.25){ reward*=2; showFloatText(enemy.x,enemy.y-30,'LUCKY!','chain'); }
   // fortune: 업그레이드 행운 (5%/레벨 확률 2배)
   if(upLv('fortune')>0&&Math.random()<upLv('fortune')*0.05){ reward*=2; showFloatText(enemy.x,enemy.y-30,'FORTUNE!','chain'); }
+  // R4/R5: 키스톤·메타 에너지 배율
+  const mEng=(typeof getMetaEffect==='function'?getMetaEffect('energyMult'):0);
+  if(mEng>0) reward=Math.ceil(reward*(1+mEng));
+  if(hasKeystone('ks_collector')) reward=Math.ceil(reward*3);
   // combo: 연속 처치 보너스
   if(upLv('combo')>0){
     G.comboCount++;G.comboTimer=2;
