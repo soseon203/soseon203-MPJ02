@@ -26,26 +26,26 @@ const TREE_NODES = [
   {id:'precision',   tree:'atk', tier:3, row:1, maxRank:5, type:'notable', prereqs:['double_tap']},
   {id:'boss_hunter', tree:'atk', tier:3, row:2, maxRank:5, type:'notable', prereqs:['tough_skin']},
   {id:'bolt_size',   tree:'atk', tier:3, row:3, maxRank:5, type:'notable', prereqs:['quick']},
-  // Tier 4
-  {id:'weak_point',  tree:'atk', tier:4, row:0, maxRank:5, type:'notable', prereqs:['crit_dmg']},
+  // Tier 4 — cross-chain AND 시작: 티어4부터 다른 기둥 노드와의 결합 요구
+  {id:'weak_point',  tree:'atk', tier:4, row:0, maxRank:5, type:'notable', prereqs:['crit_dmg','precision']}, // 크리+정밀
   {id:'multi',       tree:'atk', tier:4, row:1, maxRank:3, type:'notable', prereqs:['precision']},
   {id:'iron_core',   tree:'atk', tier:4, row:2, maxRank:5, type:'notable', prereqs:['boss_hunter']},
-  {id:'barrier',     tree:'atk', tier:4, row:3, maxRank:5, type:'notable', prereqs:['bolt_size']},
-  // Tier 5
-  {id:'execute',     tree:'atk', tier:5, row:0, maxRank:5, type:'notable', prereqs:['weak_point']},
-  {id:'rage',        tree:'atk', tier:5, row:1, maxRank:5, type:'notable', prereqs:['multi']},
-  {id:'penetrate',   tree:'atk', tier:5, row:2, maxRank:5, type:'notable', prereqs:['iron_core']},
-  // Tier 6
-  {id:'final_strike',tree:'atk', tier:6, row:0, maxRank:5, type:'notable', prereqs:['execute']},
+  {id:'barrier',     tree:'atk', tier:4, row:3, maxRank:5, type:'notable', prereqs:['bolt_size','tough_skin']}, // 빠름+튼튼
+  // Tier 5 — cross-chain 심화
+  {id:'execute',     tree:'atk', tier:5, row:0, maxRank:5, type:'notable', prereqs:['weak_point','boss_hunter']}, // 크리+보스
+  {id:'rage',        tree:'atk', tier:5, row:1, maxRank:5, type:'notable', prereqs:['multi','crit_dmg']}, // 클릭+크리
+  {id:'penetrate',   tree:'atk', tier:5, row:2, maxRank:5, type:'notable', prereqs:['iron_core','barrier']}, // 탱커 양쪽
+  // Tier 6 — 아펙스: 두 데미지 기둥 모두 필요
+  {id:'final_strike',tree:'atk', tier:6, row:0, maxRank:5, type:'notable', prereqs:['execute','rage']},
   {id:'energy_shield',tree:'atk',tier:6, row:2, maxRank:5, type:'notable', prereqs:['penetrate'],
    nameOverride:'뇌전 방벽', nameOverrideEn:'Storm Bulwark',
    descOverride:'HP 80% 이상일 때 피해 -15%/랭크', descOverrideEn:'At 80%+ HP, damage taken -15%/rank',
    iconOverride:'🛡️'},
-  // Keystones
-  {id:'ks_berserker',   tree:'atk', tier:7, row:0, maxRank:1, type:'keystone', prereqs:['final_strike'],
+  // Keystones — 세 빌드 라인 융합 요구
+  {id:'ks_berserker',   tree:'atk', tier:7, row:0, maxRank:1, type:'keystone', prereqs:['final_strike','penetrate'],
    ksName:'광전사', ksNameEn:'Berserker', ksIcon:'🔥',
    ksDesc:'공격력 +100%, 최대 HP -40%', ksDescEn:'+100% damage, -40% Max HP', ksExclusive:'atk_ks'},
-  {id:'ks_click_master',tree:'atk', tier:7, row:1, maxRank:1, type:'keystone', prereqs:['rage'],
+  {id:'ks_click_master',tree:'atk', tier:7, row:1, maxRank:1, type:'keystone', prereqs:['rage','multi'],
    ksName:'뇌전의 화신', ksNameEn:'Thunder Avatar', ksIcon:'⚡',
    ksDesc:'클릭 데미지 +200%, 자동 공격 비활성화', ksDescEn:'+200% click damage, auto-attack disabled', ksExclusive:'atk_ks'},
 
@@ -64,26 +64,26 @@ const TREE_NODES = [
   {id:'splash_range', tree:'def', tier:2, row:2, maxRank:5, type:'notable', prereqs:['splash']},
   {id:'recover',      tree:'def', tier:2, row:3, maxRank:5, type:'notable', prereqs:['shield_wall']},
   // Tier 3
-  {id:'chain_crit',   tree:'def', tier:3, row:0, maxRank:5, type:'notable', prereqs:['chain_dmg']},
+  {id:'chain_crit',   tree:'def', tier:3, row:0, maxRank:5, type:'notable', prereqs:['chain_dmg','chain_range']}, // 체인 양쪽
   {id:'field_expand', tree:'def', tier:3, row:1, maxRank:5, type:'notable', prereqs:['chain_range']},
-  {id:'overload',     tree:'def', tier:3, row:2, maxRank:5, type:'notable', prereqs:['splash_range']},
+  {id:'overload',     tree:'def', tier:3, row:2, maxRank:5, type:'notable', prereqs:['chain_dmg','splash_range']}, // 체인+스플래시
   {id:'resilience',   tree:'def', tier:3, row:3, maxRank:5, type:'notable', prereqs:['recover']},
-  // Tier 4
-  {id:'surge',      tree:'def', tier:4, row:0, maxRank:5, type:'notable', prereqs:['chain_crit']},
-  {id:'plasma',     tree:'def', tier:4, row:1, maxRank:5, type:'notable', prereqs:['field_expand']},
-  {id:'thorns_up',  tree:'def', tier:4, row:2, maxRank:5, type:'notable', prereqs:['overload']},
+  // Tier 4 — cross-chain 심화
+  {id:'surge',      tree:'def', tier:4, row:0, maxRank:5, type:'notable', prereqs:['chain_crit','overload']}, // 체인크리+전체증폭
+  {id:'plasma',     tree:'def', tier:4, row:1, maxRank:5, type:'notable', prereqs:['field_expand','overload']}, // 범위+폭발
+  {id:'thorns_up',  tree:'def', tier:4, row:2, maxRank:5, type:'notable', prereqs:['overload','resilience']}, // 공격+방어 융합
   {id:'dodge_up',   tree:'def', tier:4, row:3, maxRank:5, type:'notable', prereqs:['resilience']},
-  // Tier 5
-  {id:'emp',        tree:'def', tier:5, row:0, maxRank:5, type:'notable', prereqs:['surge']},
-  {id:'lifeline',   tree:'def', tier:5, row:1, maxRank:5, type:'notable', prereqs:['plasma']},
-  {id:'auto_shield',tree:'def', tier:5, row:3, maxRank:5, type:'notable', prereqs:['dodge_up']},
-  // Tier 6
-  {id:'rebirth',    tree:'def', tier:6, row:3, maxRank:3, type:'notable', prereqs:['auto_shield']},
+  // Tier 5 — 폭풍 아펙스
+  {id:'emp',        tree:'def', tier:5, row:0, maxRank:5, type:'notable', prereqs:['surge','plasma']}, // EMP는 체인+폭발
+  {id:'lifeline',   tree:'def', tier:5, row:1, maxRank:5, type:'notable', prereqs:['plasma','thorns_up']}, // 폭발+반사
+  {id:'auto_shield',tree:'def', tier:5, row:3, maxRank:5, type:'notable', prereqs:['dodge_up','thorns_up']}, // 회피+반사
+  // Tier 6 — 양쪽 방어 라인 모두
+  {id:'rebirth',    tree:'def', tier:6, row:3, maxRank:3, type:'notable', prereqs:['auto_shield','lifeline']},
   // Keystones
-  {id:'ks_immortal',    tree:'def', tier:7, row:0, maxRank:1, type:'keystone', prereqs:['emp'],
+  {id:'ks_immortal',    tree:'def', tier:7, row:0, maxRank:1, type:'keystone', prereqs:['emp','rebirth'],
    ksName:'불멸의 코어', ksNameEn:'Immortal Core', ksIcon:'🛡️',
    ksDesc:'최대 HP +150%, 재생 2배, 주는 데미지 -30%', ksDescEn:'+150% Max HP, 2× regen, -30% damage dealt', ksExclusive:'def_ks'},
-  {id:'ks_glass_cannon',tree:'def', tier:7, row:3, maxRank:1, type:'keystone', prereqs:['rebirth'],
+  {id:'ks_glass_cannon',tree:'def', tier:7, row:3, maxRank:1, type:'keystone', prereqs:['rebirth','emp'],
    ksName:'유리 대포', ksNameEn:'Glass Cannon', ksIcon:'💎',
    ksDesc:'최대 HP 고정 1, 모든 데미지 ×5', ksDescEn:'Max HP fixed at 1, all damage ×5', ksExclusive:'def_ks'},
 
@@ -107,34 +107,34 @@ const TREE_NODES = [
   {id:'cooldown',    tree:'util', tier:2, row:3, maxRank:5, type:'notable', prereqs:['slow_aura']},
   // Tier 3
   {id:'auto_dmg',    tree:'util', tier:3, row:0, maxRank:5, type:'notable', prereqs:['auto_acc']},
-  {id:'vampiric',    tree:'util', tier:3, row:1, maxRank:5, type:'notable', prereqs:['hp_boost']},
-  {id:'fortune',     tree:'util', tier:3, row:2, maxRank:5, type:'notable', prereqs:['energy_flat'],
+  {id:'vampiric',    tree:'util', tier:3, row:1, maxRank:5, type:'notable', prereqs:['hp_boost','regen']}, // HP 체계 양쪽
+  {id:'fortune',     tree:'util', tier:3, row:2, maxRank:5, type:'notable', prereqs:['energy_flat','harvest'], // XP 체계 양쪽
    nameOverride:'행운의 번개', nameOverrideEn:'Lucky Bolt',
    descOverride:'적 처치 시 +5%/랭크 확률 XP 2배', descOverrideEn:'+5%/rank chance to double XP on kill', iconOverride:'🍀'},
   {id:'wave_heal',   tree:'util', tier:3, row:3, maxRank:5, type:'notable', prereqs:['cooldown']},
-  // Tier 4
-  {id:'rapid_fire',  tree:'util', tier:4, row:0, maxRank:5, type:'notable', prereqs:['auto_dmg']},
-  {id:'absorption',  tree:'util', tier:4, row:1, maxRank:5, type:'notable', prereqs:['vampiric']},
-  {id:'elite_hunter',tree:'util', tier:4, row:2, maxRank:5, type:'notable', prereqs:['fortune'],
+  // Tier 4 — 라인 교차
+  {id:'rapid_fire',  tree:'util', tier:4, row:0, maxRank:5, type:'notable', prereqs:['auto_dmg','auto_acc']}, // 자동 양쪽
+  {id:'absorption',  tree:'util', tier:4, row:1, maxRank:5, type:'notable', prereqs:['vampiric','hp_boost']}, // HP 심화
+  {id:'elite_hunter',tree:'util', tier:4, row:2, maxRank:5, type:'notable', prereqs:['fortune','energy_flat'], // XP 심화
    nameOverride:'정예 처단', nameOverrideEn:'Elite Slayer',
    descOverride:'엘리트 처치 시 XP +50%/랭크', descOverrideEn:'+50%/rank XP from elites', iconOverride:'🎖️'},
-  // Tier 5
-  {id:'titan_guard', tree:'util', tier:5, row:1, maxRank:5, type:'notable', prereqs:['absorption']},
-  {id:'bonus_wave',  tree:'util', tier:5, row:2, maxRank:5, type:'notable', prereqs:['elite_hunter'],
+  // Tier 5 — 자동+HP 융합 / XP+쿨다운 융합
+  {id:'titan_guard', tree:'util', tier:5, row:1, maxRank:5, type:'notable', prereqs:['absorption','vampiric']},
+  {id:'bonus_wave',  tree:'util', tier:5, row:2, maxRank:5, type:'notable', prereqs:['elite_hunter','wave_heal'], // 보스처단 + 쿨회복
    nameOverride:'보스 처단', nameOverrideEn:'Boss Slayer',
    descOverride:'보스 처치 시 XP +80%/랭크', descOverrideEn:'+80%/rank XP from bosses', iconOverride:'💀'},
   // Tier 6
-  {id:'energy_storm',tree:'util', tier:6, row:0, maxRank:5, type:'notable', prereqs:['rapid_fire'],
+  {id:'energy_storm',tree:'util', tier:6, row:0, maxRank:5, type:'notable', prereqs:['rapid_fire','titan_guard'], // 자동+탱커 융합
    nameOverride:'뇌전 폭발', nameOverrideEn:'Thunder Burst',
    descOverride:'처치 시 +15%/랭크 확률 주변 번쩍', descOverrideEn:'+15%/rank chance to flash nearby on kill', iconOverride:'🌩️'},
-  {id:'combo',       tree:'util', tier:6, row:2, maxRank:5, type:'notable', prereqs:['bonus_wave'],
+  {id:'combo',       tree:'util', tier:6, row:2, maxRank:5, type:'notable', prereqs:['bonus_wave','elite_hunter'],
    nameOverride:'연쇄 각성', nameOverrideEn:'Chain Awakening',
    descOverride:'콤보당 XP 보너스 +3/랭크', descOverrideEn:'+3/rank XP per combo stack', iconOverride:'🔢'},
-  // Keystones
-  {id:'ks_timelord', tree:'util', tier:7, row:0, maxRank:1, type:'keystone', prereqs:['energy_storm'],
+  // Keystones — 양쪽 라인 모두
+  {id:'ks_timelord', tree:'util', tier:7, row:0, maxRank:1, type:'keystone', prereqs:['energy_storm','combo'],
    ksName:'시간의 주인', ksNameEn:'Timelord', ksIcon:'⏳',
    ksDesc:'적 이동속도 -40%, XP 획득 -25%', ksDescEn:'Enemies -40% speed, XP gain -25%', ksExclusive:'util_ks'},
-  {id:'ks_collector',tree:'util', tier:7, row:2, maxRank:1, type:'keystone', prereqs:['combo'],
+  {id:'ks_collector',tree:'util', tier:7, row:2, maxRank:1, type:'keystone', prereqs:['combo','energy_storm'],
    ksName:'수집가', ksNameEn:'Collector', ksIcon:'💰',
    ksDesc:'XP 획득 +200%, 최대 HP -30%', ksDescEn:'+200% XP gain, -30% Max HP', ksExclusive:'util_ks'}
 ];
@@ -173,13 +173,22 @@ function isNodeUnlocked(node){
   if(!node) return false;
   if(!isTierGateOpen(node.tree, node.tier)) return false;
   if(node.prereqs&&node.prereqs.length>0){
-    const ok=node.prereqs.some(pid=>{
+    // AND: 나열된 모든 prereq가 1랭크 이상이어야 해금
+    const ok=node.prereqs.every(pid=>{
       const p=getTreeNode(pid);
       return p && getNodeRank(p)>0;
     });
     if(!ok) return false;
   }
   return true;
+}
+// prereq 중 아직 충족되지 않은 것만 반환 (툴팁용)
+function getMissingPrereqs(node){
+  if(!node||!node.prereqs) return [];
+  return node.prereqs.filter(pid=>{
+    const p=getTreeNode(pid);
+    return !(p&&getNodeRank(p)>0);
+  });
 }
 
 function isKeystoneBlocked(node){
