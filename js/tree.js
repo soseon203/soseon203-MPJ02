@@ -149,19 +149,20 @@ function getNodeRank(node){
   return G.upgrades&&G.upgrades[node.id]?G.upgrades[node.id].level:0;
 }
 
-// 특정 트리의 주어진 티어 "이하"(<)에 투자된 포인트 총합
+// 특정 트리의 "tier 미만"에서 랭크≥1인 서로 다른 노드 개수
+//  — 한 노드에 랭크 몰아찍는 편법 방지, WoW/PoE 스타일 트리 다이빙 강제
 function getTreeInvestedBelow(treeId, tier){
-  let sum=0;
+  let count=0;
   TREE_NODES.forEach(n=>{
-    if(n.tree===treeId && n.tier<tier) sum+=getNodeRank(n);
+    if(n.tree===treeId && n.tier<tier && getNodeRank(n)>0) count++;
   });
-  return sum;
+  return count;
 }
-// 티어 T 진입에 필요한 누적 포인트
+// 티어 T 진입에 필요한 "서로 다른 노드 수"
 function tierGateRequired(tier){
   if(tier<=1) return 0;
-  if(tier===7) return 14;
-  return (tier-1)*2;
+  if(tier===7) return 12;          // 키스톤: 12개 노드 해금 필요
+  return (tier-1)*2;                // T2=2, T3=4, T4=6, T5=8, T6=10
 }
 
 function isTierGateOpen(treeId, tier){
