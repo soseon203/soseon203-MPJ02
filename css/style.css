@@ -185,10 +185,14 @@ body{font-family:'Noto Sans KR','Malgun Gothic',sans-serif;background:#05051a;co
 .tree-col-body::-webkit-scrollbar-thumb{background:rgba(255,255,255,.2);border-radius:3px}
 /* SVG 연결선 오버레이 — 두꺼운 선, 명확한 상태 */
 .tree-svg{position:absolute;top:0;left:0;width:100%;pointer-events:none;z-index:0;overflow:visible}
-.tree-svg line,.tree-svg path{stroke-width:3;stroke-linecap:round;stroke-linejoin:round;fill:none}
-.tree-svg .tree-line-locked{stroke:rgba(255,255,255,.12)}
-.tree-svg .tree-line-available{stroke:rgba(255,238,0,.55);stroke-width:3}
-.tree-svg .tree-line-active{stroke:#ffdd44;stroke-width:4;filter:drop-shadow(0 0 6px rgba(255,238,0,.7))}
+.tree-svg line,.tree-svg path{stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;fill:none}
+.tree-svg .tree-line-locked{stroke:rgba(255,255,255,.08)}
+.tree-svg .tree-line-available{stroke:rgba(255,238,0,.45);stroke-width:2.5}
+.tree-svg .tree-line-active{stroke:#ffdd44;stroke-width:3.5;filter:drop-shadow(0 0 5px rgba(255,238,0,.6))}
+/* path(ㄱ자)는 line보다 더 얇게 — cross-chain이 눈에 덜 띄게 */
+.tree-svg path.tree-line-locked{stroke:rgba(255,255,255,.05);stroke-width:2}
+.tree-svg path.tree-line-available{stroke:rgba(255,238,0,.3);stroke-width:2}
+.tree-svg path.tree-line-active{stroke:#ffdd44;stroke-width:3;opacity:.85}
 /* 티어 블록 — T7(키스톤)이 위, T1(시작)이 아래 (WoW/PoE 스타일) */
 .tree-tier{margin-bottom:8px;padding-bottom:8px;position:relative;z-index:1;border-bottom:1px dashed rgba(255,255,255,.08)}
 .tree-tier.gate-locked .tree-tier-grid{opacity:.35;filter:grayscale(.3)}

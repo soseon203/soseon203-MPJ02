@@ -432,7 +432,7 @@ I18N.ko['up.chain']='체인 라이트닝';  I18N.ko['up.chain_d']='추가 적 1�
 I18N.ko['up.range']='전자기장';       I18N.ko['up.range_d']='공격 범위 +5';
 I18N.ko['up.quick']='신속 충전';      I18N.ko['up.quick_d']='클릭 쿨다운 -8ms';
 I18N.ko['up.regen']='재생력 강화';    I18N.ko['up.regen_d']='초당 HP 재생 +0.5';
-I18N.ko['up.precision']='정밀 사격';  I18N.ko['up.precision_d']='클릭 크리 확률 +{cur}% → +{next}%';
+I18N.ko['up.precision']='정밀 사격';  I18N.ko['up.precision_d']='클릭 시 크리 확률 +4%';
 I18N.ko['up.shield_wall']='보호벽';   I18N.ko['up.shield_wall_d']='받는 피해 -8%';
 I18N.ko['up.boss_hunter']='보스 사냥꾼';I18N.ko['up.boss_hunter_d']='보스 데미지 +15%';
 I18N.ko['up.bolt_size']='번개 확대';  I18N.ko['up.bolt_size_d']='클릭 적중 범위 +10';
@@ -498,7 +498,7 @@ I18N.en['up.chain']='Chain Lightning';   I18N.en['up.chain_d']='Chain hit 1 extr
 I18N.en['up.range']='EM Field';          I18N.en['up.range_d']='Attack range +5';
 I18N.en['up.quick']='Quick Charge';      I18N.en['up.quick_d']='Click cooldown -8ms';
 I18N.en['up.regen']='Regeneration';      I18N.en['up.regen_d']='HP regen +0.5/s';
-I18N.en['up.precision']='Precision';     I18N.en['up.precision_d']='Click crit chance +{cur}% → +{next}%';
+I18N.en['up.precision']='Precision';     I18N.en['up.precision_d']='+4% crit chance on click';
 I18N.en['up.shield_wall']='Shield Wall'; I18N.en['up.shield_wall_d']='Damage taken -8%';
 I18N.en['up.boss_hunter']='Boss Hunter'; I18N.en['up.boss_hunter_d']='Boss damage +15%';
 I18N.en['up.bolt_size']='Bolt Expand';   I18N.en['up.bolt_size_d']='Click hit range +10';
