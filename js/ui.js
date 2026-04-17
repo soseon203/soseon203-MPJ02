@@ -614,7 +614,7 @@ function renderTree(){
   });
 }
 
-// SVG 연결선 그리기
+// SVG 연결선 그리기 — Manhattan 라우팅 (직각 ㄱ자)
 function drawTreeConnections(){
   ['atk','def','util'].forEach(treeId=>{
     const container=document.getElementById('tree-col-'+treeId);
@@ -633,24 +633,39 @@ function drawTreeConnections(){
       if(!childEl) return;
       const cr=childEl.getBoundingClientRect();
       const cx=cr.left-cRect.left+cr.width/2;
-      const cy=cr.top-cRect.top+container.scrollTop+cr.height/2;
+      const ctop=cr.top-cRect.top+container.scrollTop;    // 자식 상단
+      const cy=ctop+cr.height/2;
       node.prereqs.forEach(pid=>{
         const pEl=container.querySelector('[data-node-id="'+pid+'"]');
         if(!pEl) return;
         const pr=pEl.getBoundingClientRect();
         const px=pr.left-cRect.left+pr.width/2;
-        const py=pr.top-cRect.top+container.scrollTop+pr.height/2;
-        const line=document.createElementNS('http://www.w3.org/2000/svg','line');
-        line.setAttribute('x1',px);line.setAttribute('y1',py);
-        line.setAttribute('x2',cx);line.setAttribute('y2',cy);
+        const ptop=pr.top-cRect.top+container.scrollTop;  // 부모 상단
+        const py=ptop+pr.height/2;
         const parent=getTreeNode(pid);
         const parentInvested=getNodeRank(parent)>0;
         const childInvested=getNodeRank(node)>0;
         let cls='tree-line-locked';
         if(childInvested) cls='tree-line-active';
         else if(parentInvested) cls='tree-line-available';
-        line.setAttribute('class',cls);
-        svg.appendChild(line);
+        // 같은 col이면 직선, 다른 col이면 ㄱ자 경로
+        if(Math.abs(px-cx)<2){
+          // 수직 직선
+          const ln=document.createElementNS('http://www.w3.org/2000/svg','line');
+          ln.setAttribute('x1',px);ln.setAttribute('y1',py);
+          ln.setAttribute('x2',cx);ln.setAttribute('y2',cy);
+          ln.setAttribute('class',cls);
+          svg.appendChild(ln);
+        }else{
+          // ㄱ자: 자식 중심에서 위로 나와 중간 Y에서 가로, 부모 중심으로 수직 연결
+          const midY=(ptop+cr.bottom-cRect.top+container.scrollTop)/2;
+          const path=document.createElementNS('http://www.w3.org/2000/svg','path');
+          const d=`M ${cx} ${cy} L ${cx} ${midY} L ${px} ${midY} L ${px} ${py}`;
+          path.setAttribute('d',d);
+          path.setAttribute('class',cls);
+          path.setAttribute('fill','none');
+          svg.appendChild(path);
+        }
       });
     });
   });

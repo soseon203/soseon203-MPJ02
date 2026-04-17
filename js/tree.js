@@ -143,8 +143,8 @@ const TREE_NODES = [
   {id:'combo',       tree:'util', tier:6, row:2, maxRank:5, type:'notable', prereqs:['bonus_wave','elite_hunter'],
    nameOverride:'연쇄 각성', nameOverrideEn:'Chain Awakening',
    descOverride:'콤보당 XP 보너스 +3/랭크', descOverrideEn:'+3/rank XP per combo stack', iconOverride:'🔢'},
-  // 🆕 B: 자석 (magnet_pull) — 유틸 시그니처 (적 끌어당김)
-  {id:'magnet_pull', tree:'util', tier:3, row:3, maxRank:5, type:'notable', prereqs:['slow_aura'],
+  // 🆕 B: 자석 (magnet_pull) — 유틸 시그니처, T4로 이동 (T3 5칸 conflict 해소)
+  {id:'magnet_pull', tree:'util', tier:4, row:3, maxRank:5, type:'notable', prereqs:['wave_heal'],
    nameOverride:'자기장 견인', nameOverrideEn:'Magnet Pull',
    descOverride:'적을 코어로 천천히 끌어당김 (끌림 +8%/랭크)', descOverrideEn:'Slowly pulls enemies toward core (+8%/rank)',
    iconOverride:'🧲'},
