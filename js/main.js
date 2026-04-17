@@ -931,12 +931,16 @@ function initEvents(){
     document.getElementById('sound-btn').classList.toggle('muted',!on);
   });
 
-  document.getElementById('evo-ok').addEventListener('click',()=>{
-    document.getElementById('evolution-popup').classList.remove('show');saveGame();
-  });
-  document.getElementById('evolution-popup').addEventListener('click',()=>{
-    document.getElementById('evolution-popup').classList.remove('show');saveGame();
-  });
+  // 진화 토스트: 클릭 시 즉시 닫기 (자동 사라짐 타이머가 있어도 수동 dismiss 가능)
+  const evoPopup=document.getElementById('evolution-popup');
+  if(evoPopup){
+    evoPopup.addEventListener('click',()=>{
+      evoPopup.classList.add('closing');
+      if(G._evoToastTimer) clearTimeout(G._evoToastTimer);
+      setTimeout(()=>evoPopup.classList.remove('show','closing'),300);
+      saveGame();
+    });
+  }
 
   document.getElementById('go-retry').addEventListener('click',()=>resetGame());
 

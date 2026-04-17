@@ -865,5 +865,18 @@ function showEvolution(evo){
   document.getElementById('evo-name').style.color=evo.color;
   document.getElementById('evo-name').style.textShadow=`0 0 30px ${evo.color}`;
   document.getElementById('evo-desc').textContent=tf('pop.evo_desc',{count:EVOLUTIONS[G.evolutionStage].threshold});
-  document.getElementById('evolution-popup').classList.add('show');
+  const popup=document.getElementById('evolution-popup');
+  // 여러 번 빠르게 진화 시 이전 타이머/class 정리
+  popup.classList.remove('closing');
+  popup.classList.remove('show');
+  void popup.offsetWidth;
+  popup.classList.add('show');
+  if(G._evoToastTimer) clearTimeout(G._evoToastTimer);
+  G._evoToastTimer=setTimeout(()=>{
+    popup.classList.add('closing');
+    setTimeout(()=>{
+      popup.classList.remove('show','closing');
+      if(typeof saveGame==='function') saveGame();
+    },500);
+  },3200);
 }
