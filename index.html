@@ -11,7 +11,7 @@
   <meta property="og:type" content="website">
   <meta name="description" content="번개를 진화시키며 끝없는 웨이브에 도전하는 HTML5 캐주얼 게임">
   <link rel="icon" type="image/png" href="img/favicon.png">
-  <link rel="stylesheet" href="css/style.css?v=34">
+  <link rel="stylesheet" href="css/style.css?v=35">
 </head>
 
 <body>
@@ -231,12 +231,12 @@
       <div id="tree-tooltip"></div>
     </div>
   </div>
-  <div id="meta-popup">
+  <div id="meta-popup" onclick="if(event.target.id==='meta-popup')hideMetaPopup()">
     <div id="meta-content">
       <div id="meta-header">
         <h2>🌟 영구 성장</h2>
         <div id="meta-rp-display">RP: <span id="meta-rp">0</span></div>
-        <button id="meta-close" title="닫기">✕</button>
+        <button id="meta-close" title="닫기" onclick="hideMetaPopup()">✕</button>
       </div>
       <p id="meta-subtitle">로그라이크 포인트로 시작 보너스를 해금하세요</p>
       <div id="meta-grid"></div>
@@ -277,16 +277,16 @@
 
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
-  <script src="js/firebase-config.js?v=34"></script>
-  <script src="js/locales.js?v=34"></script>
-  <script src="js/sound.js?v=34"></script>
-  <script src="js/config.js?v=34"></script>
-  <script src="js/game.js?v=34"></script>
-  <script src="js/tree.js?v=34"></script>
-  <script src="js/render.js?v=34"></script>
-  <script src="js/ui.js?v=34"></script>
-  <script src="js/landing-anim.js?v=34"></script>
-  <script src="js/main.js?v=34"></script>
+  <script src="js/firebase-config.js?v=35"></script>
+  <script src="js/locales.js?v=35"></script>
+  <script src="js/sound.js?v=35"></script>
+  <script src="js/config.js?v=35"></script>
+  <script src="js/game.js?v=35"></script>
+  <script src="js/tree.js?v=35"></script>
+  <script src="js/render.js?v=35"></script>
+  <script src="js/ui.js?v=35"></script>
+  <script src="js/landing-anim.js?v=35"></script>
+  <script src="js/main.js?v=35"></script>
 </body>
 
 </html>

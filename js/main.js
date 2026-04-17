@@ -1078,17 +1078,29 @@ function toggleLandingLang(){
   const newLang=LANG==='ko'?'en':'ko';
   setLang(newLang);
   document.title=t('ui.title');
-  document.getElementById('landing-title').textContent=newLang==='ko'?'⚡ 라이트닝 키우기':'⚡ LIGHTNING RAISING';
+  // 아이콘 브랜드(⚡)는 별도 요소이므로 타이틀 텍스트에 포함하지 않음
+  document.getElementById('landing-title').textContent=newLang==='ko'?'라이트닝 키우기':'LIGHTNING RAISING';
+  const tagEl=document.getElementById('landing-tagline');
+  if(tagEl) tagEl.textContent=newLang==='ko'?'번개를 진화시키며 끝없는 웨이브에 도전':'Raise your lightning, conquer endless waves';
   const startBtn=document.getElementById('landing-start');
   startBtn.textContent=newLang==='ko'?'⚡ 게임 시작':'⚡ PLAY';
+  // 원형 언어 아이콘 — 텍스트 오버플로우 방지, tooltip으로 안내
   const langBtn=document.getElementById('landing-lang');
-  langBtn.textContent=newLang==='ko'?'🌐 English':'🌐 한국어';
-  const navBtns=document.querySelectorAll('.landing-btn');
+  if(langBtn){ langBtn.textContent='🌐'; langBtn.title=newLang==='ko'?'Language: English':'언어: 한국어'; }
+  // 메타 카드 텍스트 (RP 배지는 별도 업데이트)
+  const metaTitle=document.querySelector('#landing-meta-card .meta-card-title');
+  const metaSub=document.querySelector('#landing-meta-card .meta-card-sub');
+  if(metaTitle) metaTitle.textContent=newLang==='ko'?'영구 성장':'Meta Growth';
+  if(metaSub) metaSub.textContent=newLang==='ko'?'RP로 시작 보너스 해금':'Spend RP on starting bonuses';
+  // 마지막 런 라벨
+  const lrLabel=document.querySelector('#landing-lastrun .lastrun-label');
+  if(lrLabel) lrLabel.textContent=newLang==='ko'?'마지막 기록':'Last run';
+  const navBtns=document.querySelectorAll('#landing-nav .landing-btn');
   const labels=newLang==='ko'?['🏆 랭킹','❓ 도움말','📖 소개']:['🏆 Ranking','❓ Help','📖 About'];
   navBtns.forEach((b,i)=>{if(labels[i])b.textContent=labels[i]});
-  const landLinks=document.querySelectorAll('#landing-links a');
-  if(landLinks[0])landLinks[0].textContent=t('ui.privacy');
-  if(landLinks[1])landLinks[1].textContent=t('ui.terms');
+  const footLinks=document.querySelectorAll('#landing-footer a');
+  if(footLinks[0])footLinks[0].textContent=t('ui.privacy');
+  if(footLinks[1])footLinks[1].textContent=t('ui.terms');
 }
 
 // 랜딩 RP 표시 갱신 (영구 성장 카드)
@@ -1132,17 +1144,24 @@ function initLanding(){
   showLandingLastRun();
   // 우주 운석 애니메이션 시작
   if(window.startLandingAnim)window.startLandingAnim();
-  // 초기 언어 반영
+  // 초기 언어 반영 (아이콘은 별도 브랜드, 언어 버튼은 원형 아이콘만)
   if(LANG==='en'){
     document.title=t('ui.title');
-    document.getElementById('landing-title').textContent='⚡ LIGHTNING RAISING';
+    document.getElementById('landing-title').textContent='LIGHTNING RAISING';
+    const tagEl=document.getElementById('landing-tagline');
+    if(tagEl) tagEl.textContent='Raise your lightning, conquer endless waves';
     document.getElementById('landing-start').textContent='⚡ PLAY';
-    document.getElementById('landing-lang').textContent='🌐 한국어';
-    const navBtns=document.querySelectorAll('.landing-btn');
+    const langBtn=document.getElementById('landing-lang');
+    if(langBtn){ langBtn.textContent='🌐'; langBtn.title='Language: 한국어'; }
+    const metaTitle=document.querySelector('#landing-meta-card .meta-card-title');
+    const metaSub=document.querySelector('#landing-meta-card .meta-card-sub');
+    if(metaTitle) metaTitle.textContent='Meta Growth';
+    if(metaSub) metaSub.textContent='Spend RP on starting bonuses';
+    const navBtns=document.querySelectorAll('#landing-nav .landing-btn');
     ['🏆 Ranking','❓ Help','📖 About'].forEach((l,i)=>{if(navBtns[i])navBtns[i].textContent=l});
-    const landLinks=document.querySelectorAll('#landing-links a');
-    if(landLinks[0])landLinks[0].textContent=t('ui.privacy');
-    if(landLinks[1])landLinks[1].textContent=t('ui.terms');
+    const footLinks=document.querySelectorAll('#landing-footer a');
+    if(footLinks[0])footLinks[0].textContent=t('ui.privacy');
+    if(footLinks[1])footLinks[1].textContent=t('ui.terms');
   }
   document.getElementById('landing-start').addEventListener('click',()=>{
     if(window.stopLandingAnim)window.stopLandingAnim();
