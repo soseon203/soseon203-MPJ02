@@ -11,28 +11,48 @@
   <meta property="og:type" content="website">
   <meta name="description" content="번개를 진화시키며 끝없는 웨이브에 도전하는 HTML5 캐주얼 게임">
   <link rel="icon" type="image/png" href="img/favicon.png">
-  <link rel="stylesheet" href="css/style.css?v=31">
+  <link rel="stylesheet" href="css/style.css?v=34">
 </head>
 
 <body>
   <div id="landing-screen">
     <canvas id="landing-canvas"></canvas>
     <div id="landing-overlay"></div>
+    <!-- 우상단: 언어 + RP 통계 -->
+    <div id="landing-topbar">
+      <button id="landing-lang" onclick="toggleLandingLang()" title="Language">🌐</button>
+    </div>
     <div id="landing-content">
-      <h1 id="landing-title">⚡ 라이트닝 키우기</h1>
+      <div id="landing-hero">
+        <div id="landing-brand">⚡</div>
+        <h1 id="landing-title">라이트닝 키우기</h1>
+        <div id="landing-tagline">번개를 진화시키며 끝없는 웨이브에 도전</div>
+      </div>
       <button id="landing-start">⚡ 게임 시작</button>
+      <!-- 메타 성장 카드 (RP 표시 포함) -->
+      <button id="landing-meta-card" onclick="showMetaPopup()">
+        <span class="meta-card-ico">🌟</span>
+        <span class="meta-card-body">
+          <span class="meta-card-title">영구 성장</span>
+          <span class="meta-card-sub">RP로 시작 보너스 해금</span>
+        </span>
+        <span class="meta-card-rp" id="landing-rp-display">RP 0</span>
+      </button>
+      <!-- 마지막 런 요약 -->
+      <div id="landing-lastrun" class="hidden">
+        <span class="lastrun-label">마지막 기록</span>
+        <span class="lastrun-stats" id="landing-lastrun-stats"></span>
+      </div>
+      <!-- 3버튼 네비 -->
       <div id="landing-nav">
         <button class="landing-btn" onclick="showRankingPopup()">🏆 랭킹</button>
         <button class="landing-btn" onclick="location.href='help.html'">❓ 도움말</button>
         <button class="landing-btn" onclick="location.href='about.html'">📖 소개</button>
       </div>
-      <button class="landing-btn landing-meta-btn" onclick="showMetaPopup()">🌟 영구 성장</button>
-      <div id="landing-bottom">
-        <button id="landing-lang" onclick="toggleLandingLang()">🌐 English</button>
-        <div id="landing-links">
-          <a href="privacy.html">개인정보처리방침</a>
-          <a href="terms.html">이용약관</a>
-        </div>
+      <div id="landing-footer">
+        <a href="privacy.html">개인정보처리방침</a>
+        <span class="footer-sep">·</span>
+        <a href="terms.html">이용약관</a>
       </div>
     </div>
   </div>
@@ -196,15 +216,15 @@
       </div>
       <div id="tree-columns">
         <div class="tree-col" data-tree="atk">
-          <div class="tree-col-title">🗡️ 공격</div>
+          <div class="tree-col-title">🗡️ 낙뢰 <span class="tree-col-sub">단일 극딜</span></div>
           <div class="tree-col-body" id="tree-col-atk"></div>
         </div>
         <div class="tree-col" data-tree="def">
-          <div class="tree-col-title">🛡️ 방어</div>
+          <div class="tree-col-title">🌩️ 폭풍 <span class="tree-col-sub">광역·체인</span></div>
           <div class="tree-col-body" id="tree-col-def"></div>
         </div>
         <div class="tree-col" data-tree="util">
-          <div class="tree-col-title">🌀 유틸</div>
+          <div class="tree-col-title">🔋 전격 <span class="tree-col-sub">자동·지속</span></div>
           <div class="tree-col-body" id="tree-col-util"></div>
         </div>
       </div>
@@ -257,16 +277,16 @@
 
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
-  <script src="js/firebase-config.js?v=31"></script>
-  <script src="js/locales.js?v=31"></script>
-  <script src="js/sound.js?v=31"></script>
-  <script src="js/config.js?v=31"></script>
-  <script src="js/game.js?v=31"></script>
-  <script src="js/tree.js?v=31"></script>
-  <script src="js/render.js?v=31"></script>
-  <script src="js/ui.js?v=31"></script>
-  <script src="js/landing-anim.js?v=31"></script>
-  <script src="js/main.js?v=31"></script>
+  <script src="js/firebase-config.js?v=34"></script>
+  <script src="js/locales.js?v=34"></script>
+  <script src="js/sound.js?v=34"></script>
+  <script src="js/config.js?v=34"></script>
+  <script src="js/game.js?v=34"></script>
+  <script src="js/tree.js?v=34"></script>
+  <script src="js/render.js?v=34"></script>
+  <script src="js/ui.js?v=34"></script>
+  <script src="js/landing-anim.js?v=34"></script>
+  <script src="js/main.js?v=34"></script>
 </body>
 
 </html>

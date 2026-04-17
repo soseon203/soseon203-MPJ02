@@ -587,6 +587,10 @@ function gameOver(){
   checkAchievements();
   const runRp=computeRunRP();
   if(runRp>0){ G.rp+=runRp; saveMeta(); }
+  // 마지막 런 스냅샷 (랜딩 화면 표시용)
+  try{
+    localStorage.setItem('lightningLastRun',JSON.stringify({wave:G.wave,level:G.level,kills:G.totalKills,rp:runRp}));
+  }catch(e){}
   // 게임오버 화면에 RP 표시
   const go=document.getElementById('go-stats-grid');
   if(go && runRp>0 && !document.getElementById('go-rp-item')){
@@ -1087,6 +1091,26 @@ function toggleLandingLang(){
   if(landLinks[1])landLinks[1].textContent=t('ui.terms');
 }
 
+// 랜딩 RP 표시 갱신 (영구 성장 카드)
+function updateLandingRpDisplay(){
+  const el=document.getElementById('landing-rp-display');
+  if(el) el.textContent='RP '+formatNum(G.rp||0);
+}
+// 랜딩 마지막 런 기록 표시 (localStorage lightningLastRun)
+function showLandingLastRun(){
+  const el=document.getElementById('landing-lastrun');
+  const statsEl=document.getElementById('landing-lastrun-stats');
+  if(!el||!statsEl) return;
+  try{
+    const d=localStorage.getItem('lightningLastRun');
+    if(d){
+      const s=JSON.parse(d);
+      statsEl.textContent=`웨이브 ${s.wave} · Lv ${s.level} · +${s.rp} RP`;
+      el.classList.remove('hidden');
+    }
+  }catch(e){}
+}
+
 function initLanding(){
   // 페이지 로드 즉시 죽은 세이브 데이터 정리 (기존 버그 브라우저 대응)
   try{
@@ -1103,6 +1127,9 @@ function initLanding(){
       if(!s.xp&&!s.level){ localStorage.removeItem('lightningGame2'); }
     }
   }catch(e){}
+  // U-Landing: RP 배지 & 마지막 런 표시
+  updateLandingRpDisplay();
+  showLandingLastRun();
   // 우주 운석 애니메이션 시작
   if(window.startLandingAnim)window.startLandingAnim();
   // 초기 언어 반영

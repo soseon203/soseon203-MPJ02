@@ -5,22 +5,49 @@ body{font-family:'Noto Sans KR','Malgun Gothic',sans-serif;background:#05051a;co
 #landing-screen.hidden{display:none}
 #landing-canvas{position:absolute;top:0;left:0;width:100%;height:100%}
 #landing-overlay{position:absolute;top:0;left:0;width:100%;height:100%;background:linear-gradient(0deg,rgba(5,5,26,.7) 0%,rgba(5,5,26,.15) 35%,transparent 55%,rgba(5,5,26,.3) 100%)}
-#landing-content{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:16px;width:90%;max-width:360px;padding-bottom:20px}
-#landing-title{font-size:2.8em;font-weight:900;letter-spacing:6px;text-align:center;white-space:nowrap;color:transparent;background:linear-gradient(135deg,#00d4ff 0%,#b44aff 40%,#ff6ec7 100%);-webkit-background-clip:text;background-clip:text;text-shadow:none;filter:drop-shadow(0 0 25px rgba(0,212,255,.6)) drop-shadow(0 0 50px rgba(180,74,255,.4));margin-bottom:12px;line-height:1.2;animation:titleGlow 3s ease-in-out infinite}
-@keyframes titleGlow{0%,100%{filter:drop-shadow(0 0 25px rgba(0,212,255,.6)) drop-shadow(0 0 50px rgba(180,74,255,.4))}50%{filter:drop-shadow(0 0 40px rgba(0,212,255,.9)) drop-shadow(0 0 80px rgba(180,74,255,.7))}}
-#landing-start{background:linear-gradient(135deg,#00d4ff,#b44aff);border:none;color:#fff;padding:12px 48px;border-radius:24px;font-size:.95em;font-weight:700;cursor:pointer;letter-spacing:2px;box-shadow:0 0 25px rgba(0,212,255,.4),0 4px 12px rgba(0,0,0,.5);transition:all .3s;animation:startPulse 2s ease-in-out infinite}
-#landing-start:hover{transform:translateY(-2px) scale(1.03);box-shadow:0 0 40px rgba(0,212,255,.6),0 6px 20px rgba(0,0,0,.5)}
+/* 우상단 툴바 (언어 아이콘) */
+#landing-topbar{position:absolute;top:12px;right:12px;z-index:2;display:flex;gap:8px}
+#landing-topbar #landing-lang{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.2);color:#fff;width:38px;height:38px;border-radius:50%;font-size:1em;cursor:pointer;transition:all .2s;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;padding:0}
+#landing-topbar #landing-lang:hover{background:rgba(255,255,255,.18);border-color:rgba(0,212,255,.5);transform:scale(1.08)}
+
+#landing-content{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:11px;width:90%;max-width:360px;padding:24px}
+#landing-hero{text-align:center;display:flex;flex-direction:column;align-items:center;gap:2px;margin-bottom:4px}
+#landing-brand{font-size:3em;filter:drop-shadow(0 0 18px rgba(255,238,0,.6)) drop-shadow(0 0 36px rgba(255,200,0,.3));animation:brandFloat 3s ease-in-out infinite;line-height:1}
+@keyframes brandFloat{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-6px) scale(1.04)}}
+#landing-title{font-size:2em;font-weight:900;letter-spacing:4px;text-align:center;white-space:nowrap;color:transparent;background:linear-gradient(135deg,#00d4ff 0%,#b44aff 40%,#ff6ec7 100%);-webkit-background-clip:text;background-clip:text;filter:drop-shadow(0 0 20px rgba(0,212,255,.55)) drop-shadow(0 0 40px rgba(180,74,255,.3));margin:4px 0 0;line-height:1.15;animation:titleGlow 3s ease-in-out infinite}
+@keyframes titleGlow{0%,100%{filter:drop-shadow(0 0 20px rgba(0,212,255,.55)) drop-shadow(0 0 40px rgba(180,74,255,.3))}50%{filter:drop-shadow(0 0 32px rgba(0,212,255,.85)) drop-shadow(0 0 60px rgba(180,74,255,.6))}}
+#landing-tagline{font-size:.7em;color:rgba(255,255,255,.5);letter-spacing:1.5px;margin-top:2px}
+
+#landing-start{background:linear-gradient(135deg,#00d4ff,#b44aff);border:none;color:#fff;padding:15px 56px;border-radius:30px;font-size:1.05em;font-weight:900;cursor:pointer;letter-spacing:3px;box-shadow:0 0 28px rgba(0,212,255,.48),0 6px 16px rgba(0,0,0,.55);transition:all .25s;animation:startPulse 2s ease-in-out infinite;width:100%;max-width:280px;margin-top:4px}
+#landing-start:hover{transform:translateY(-2px) scale(1.03);box-shadow:0 0 42px rgba(0,212,255,.7),0 8px 22px rgba(0,0,0,.6)}
 #landing-start:active{transform:translateY(1px) scale(.98)}
-@keyframes startPulse{0%,100%{box-shadow:0 0 25px rgba(0,212,255,.4),0 4px 12px rgba(0,0,0,.5)}50%{box-shadow:0 0 40px rgba(180,74,255,.5),0 4px 12px rgba(0,0,0,.5)}}
-#landing-nav{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;width:100%}
-.landing-btn{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.25);color:#fff;padding:10px 8px;border-radius:20px;font-size:.85em;font-weight:600;cursor:pointer;transition:all .2s;white-space:nowrap;text-align:center;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
-.landing-btn:hover{background:rgba(255,255,255,.18);border-color:rgba(0,212,255,.5);transform:translateY(-1px)}
-#landing-bottom{display:flex;flex-direction:column;align-items:center;gap:10px;margin-top:8px}
-#landing-lang{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.25);color:#fff;padding:10px 24px;border-radius:20px;font-size:.85em;font-weight:600;cursor:pointer;transition:all .2s;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
-#landing-lang:hover{background:rgba(255,255,255,.18);border-color:rgba(0,212,255,.5);transform:translateY(-1px)}
-#landing-links{display:flex;gap:14px;font-size:.65em}
-#landing-links a{color:rgba(255,255,255,.4);text-decoration:none;transition:color .2s}
-#landing-links a:hover{color:rgba(255,255,255,.7)}
+@keyframes startPulse{0%,100%{box-shadow:0 0 25px rgba(0,212,255,.4),0 4px 12px rgba(0,0,0,.5)}50%{box-shadow:0 0 40px rgba(180,74,255,.55),0 4px 12px rgba(0,0,0,.5)}}
+
+/* 영구 성장 카드 — RP 배지 포함 */
+#landing-meta-card{display:flex;align-items:center;gap:10px;width:100%;max-width:320px;background:linear-gradient(135deg,rgba(255,100,255,.15),rgba(120,60,200,.2));border:1px solid rgba(255,100,255,.45);color:#fff;padding:10px 14px;border-radius:16px;cursor:pointer;transition:all .2s;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);text-align:left;font-family:inherit}
+#landing-meta-card:hover{background:linear-gradient(135deg,rgba(255,100,255,.25),rgba(140,70,220,.3));border-color:rgba(255,150,255,.7);transform:translateY(-1px);box-shadow:0 4px 16px rgba(255,100,255,.25)}
+#landing-meta-card:active{transform:translateY(1px)}
+.meta-card-ico{font-size:1.6em;filter:drop-shadow(0 0 8px rgba(255,200,100,.7))}
+.meta-card-body{flex:1;display:flex;flex-direction:column;gap:1px;min-width:0}
+.meta-card-title{font-size:.88em;font-weight:700;color:#ff99ff}
+.meta-card-sub{font-size:.66em;color:rgba(255,255,255,.6)}
+.meta-card-rp{font-size:.78em;font-weight:700;color:#ffee00;background:rgba(255,238,0,.1);padding:4px 10px;border-radius:10px;border:1px solid rgba(255,238,0,.35);white-space:nowrap}
+
+/* 마지막 런 기록 카드 */
+#landing-lastrun{display:flex;align-items:center;gap:8px;padding:6px 14px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;font-size:.7em;max-width:320px;width:100%;justify-content:center}
+#landing-lastrun.hidden{display:none}
+.lastrun-label{color:rgba(255,255,255,.45);font-size:.92em}
+.lastrun-stats{color:rgba(255,255,255,.88);font-weight:600}
+
+/* 3버튼 네비 */
+#landing-nav{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;width:100%;max-width:320px}
+.landing-btn{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.18);color:rgba(255,255,255,.85);padding:9px 8px;border-radius:14px;font-size:.78em;font-weight:600;cursor:pointer;transition:all .18s;white-space:nowrap;text-align:center;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.landing-btn:hover{background:rgba(255,255,255,.14);border-color:rgba(0,212,255,.45);transform:translateY(-1px);color:#fff}
+
+#landing-footer{display:flex;gap:10px;font-size:.6em;margin-top:6px;color:rgba(255,255,255,.3)}
+#landing-footer a{color:rgba(255,255,255,.4);text-decoration:none;transition:color .2s}
+#landing-footer a:hover{color:rgba(255,255,255,.7)}
+.footer-sep{color:rgba(255,255,255,.15)}
 #game-container{position:relative;height:100vh;width:100vw;overflow:hidden;display:none}
 #game-container.active{display:block}
 #game-container.shake{animation:shake .12s ease-out}
@@ -142,10 +169,11 @@ body{font-family:'Noto Sans KR','Malgun Gothic',sans-serif;background:#05051a;co
 .tree-col[data-tree="atk"]{border-color:rgba(255,102,68,.25)}
 .tree-col[data-tree="def"]{border-color:rgba(68,187,255,.25)}
 .tree-col[data-tree="util"]{border-color:rgba(255,204,0,.25)}
-.tree-col-title{font-size:.82em;font-weight:700;text-align:center;padding:4px;margin-bottom:6px;border-bottom:1px solid rgba(255,255,255,.1)}
-.tree-col[data-tree="atk"] .tree-col-title{color:#ff8866}
+.tree-col-title{font-size:.85em;font-weight:700;text-align:center;padding:4px;margin-bottom:6px;border-bottom:1px solid rgba(255,255,255,.1);display:flex;align-items:baseline;justify-content:center;gap:6px}
+.tree-col-sub{font-size:.7em;font-weight:500;color:rgba(255,255,255,.4);letter-spacing:0}
+.tree-col[data-tree="atk"] .tree-col-title{color:#ffcc44}
 .tree-col[data-tree="def"] .tree-col-title{color:#66bbff}
-.tree-col[data-tree="util"] .tree-col-title{color:#ffdd44}
+.tree-col[data-tree="util"] .tree-col-title{color:#aaff66}
 .tree-col-body{flex:1;overflow-y:auto;padding:4px;position:relative}
 .tree-col-body::-webkit-scrollbar{width:6px}
 .tree-col-body::-webkit-scrollbar-thumb{background:rgba(255,255,255,.2);border-radius:3px}
@@ -163,9 +191,7 @@ body{font-family:'Noto Sans KR','Malgun Gothic',sans-serif;background:#05051a;co
 .tree-gate-info{font-size:.95em;color:#ff6644;font-weight:700}
 .tree-gate-info.ok{color:#00ffaa}
 /* 기본 5열 그리드, 유틸 트리는 4열로 압축 */
-.tree-tier-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;min-height:46px;justify-items:center;align-items:center}
-.tree-col[data-tree="util"] .tree-tier-grid{grid-template-columns:repeat(4,1fr)}
-.tree-col[data-tree="def"] .tree-tier-grid{grid-template-columns:repeat(4,1fr)}
+.tree-tier-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;min-height:46px;justify-items:center;align-items:center}
 /* 노드 (아이콘 원형) — WoW 테크트리 스타일 */
 .tree-node{display:flex;align-items:center;justify-content:center;width:54px;height:54px;background:linear-gradient(145deg,rgba(40,40,60,.6),rgba(10,10,25,.8));border:2px solid rgba(255,255,255,.12);border-radius:50%;cursor:pointer;transition:all .18s;position:relative;box-shadow:inset 0 2px 4px rgba(255,255,255,.05)}
 .tree-node:hover{transform:scale(1.1);z-index:3}
@@ -200,7 +226,7 @@ body{font-family:'Noto Sans KR','Malgun Gothic',sans-serif;background:#05051a;co
 #tree-tooltip .tt-warn{margin-top:6px;color:#ff88cc;font-size:.85em;font-style:italic}
 
 /* ─── R5: 메타 팝업 (영구 성장) ─── */
-#meta-popup{position:fixed;top:0;left:0;width:100%;height:100%;z-index:99;display:none;align-items:center;justify-content:center;background:rgba(10,5,30,.94)}
+#meta-popup{position:fixed;top:0;left:0;width:100%;height:100%;z-index:250;display:none;align-items:center;justify-content:center;background:rgba(5,3,20,.985);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
 #meta-popup.show{display:flex;animation:fadeIn .3s}
 #meta-content{background:rgba(0,0,15,.9);border:1px solid rgba(255,100,255,.3);border-radius:14px;padding:18px;max-width:520px;width:92%;max-height:85vh;overflow-y:auto}
 #meta-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid rgba(255,100,255,.2)}
