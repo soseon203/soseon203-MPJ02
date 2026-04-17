@@ -606,24 +606,27 @@ function gameOver(){
   document.getElementById('go-evo-stage').textContent=`Lv.${G.evolutionStage+1}`;
   document.getElementById('go-dmg').textContent=G.damage;
   document.getElementById('go-auto').textContent=G.autoRate.toFixed(1);
-  // 업그레이드 상세
+  // 업그레이드 상세 (빈 섹션은 숨김)
   const upgEl=document.getElementById('go-upgrade-detail');
+  const upgSec=document.getElementById('go-upgrades-section');
   upgEl.innerHTML='';
+  let upgCount=0;
   G.unlockedUpgrades.forEach(id=>{
     const lv=upLv(id);
     if(lv===0)return;
     const data=getUpgradeData(id);
     if(!data)return;
+    upgCount++;
     const d=document.createElement('div');d.className='go-upg-item';
     d.innerHTML=`<span class="go-upg-name">${data.icon} ${t('up.'+id)}</span><span class="go-upg-lv">Lv.${lv}</span>`;
     upgEl.appendChild(d);
   });
-  // 획득 스킬
+  if(upgSec) upgSec.style.display=upgCount>0?'':'none';
+  // 획득 스킬 (빈 섹션은 숨김)
   const skillEl=document.getElementById('go-skill-list');
+  const skillSec=document.getElementById('go-skills-section');
   skillEl.innerHTML='';
-  if(G.specialSkills.length===0){
-    skillEl.innerHTML='<span style="font-size:.7em;color:rgba(255,255,255,.3)">'+t('ui.none')+'</span>';
-  }else{
+  if(G.specialSkills.length>0){
     G.specialSkills.forEach(id=>{
       const sk=SKILL_POOL.find(s=>s.id===id);
       if(!sk)return;
@@ -633,6 +636,7 @@ function gameOver(){
       skillEl.appendChild(tag);
     });
   }
+  if(skillSec) skillSec.style.display=G.specialSkills.length>0?'':'none';
 
   // 닉네임 입력 초기화
   const nickInput=document.getElementById('go-nickname');
@@ -644,6 +648,7 @@ function gameOver(){
   savedMsg.style.display='none';
 
   document.getElementById('game-over').classList.add('show');
+  document.body.classList.add('state-gameover');
   localStorage.removeItem('lightningGame2');
   setTimeout(()=>nickInput.focus(),400);
 }
@@ -660,6 +665,7 @@ function resetGame(){
     const el=document.getElementById(id);
     if(el)el.classList.remove('show');
   });
+  document.body.classList.remove('state-gameover');
   // 모든 블로킹 상태 해제
   G.paused=false;
   G.skillSelecting=false;
@@ -967,7 +973,22 @@ function initEvents(){
   const metaClose=document.getElementById('meta-close');
   if(metaClose) metaClose.addEventListener('click',()=>hideMetaPopup());
   document.addEventListener('keydown',e=>{
-    if(e.key==='Escape'){ if(G.treeOpen) closeTreePopup(); else hideMetaPopup(); }
+    // 입력 필드 타이핑 중에는 단축키 무시
+    const tag=(e.target&&e.target.tagName||'').toLowerCase();
+    if(tag==='input'||tag==='textarea') return;
+    if(e.key==='Escape'){
+      const mm=document.getElementById('more-menu');
+      if(mm&&!mm.classList.contains('hidden')){ mm.classList.add('hidden'); return; }
+      if(G.treeOpen){ closeTreePopup(); return; }
+      const metaShow=document.getElementById('meta-popup')?.classList?.contains('show');
+      if(metaShow){ hideMetaPopup(); return; }
+      const rankShow=document.getElementById('ranking-popup')?.classList?.contains('show');
+      if(rankShow){ hideRankingPopup(); return; }
+      // 게임오버 상태에서 Esc → 다시 시작
+      if(document.body.classList.contains('state-gameover')){ resetGame(); return; }
+      // 기본: 일시정지 토글 (웨이브 진행 중에만)
+      if(G.hp>0&&!G.skillSelecting&&!G.upgradeSelecting) togglePause();
+    }
     if(e.key==='t'||e.key==='T'){ if(!G.treeOpen&&G.hp>0&&!G.skillSelecting&&!G.upgradeSelecting) openTreePopup(false); }
   });
 

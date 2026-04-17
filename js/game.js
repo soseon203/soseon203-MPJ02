@@ -517,20 +517,21 @@ function getWaveType(wave){
 function getWaveConfig(wave){
   const waveType=G.currentWaveType||getWaveType(wave);
   const isBoss=waveType==='boss';
-  const hpMult=1+wave*0.7;
-  const speedMult=1+wave*0.035;
+  // 튜토리얼 웨이브(1~2) 완화: HP/스피드/카운트 모두 부드럽게 시작
+  const hpMult=1+Math.max(0,wave-1)*0.55+(wave>=1?0.1:0);
+  const speedMult=1+Math.max(0,wave-1)*0.03;
   const reward=Math.floor(4+wave*2);
   let count,extraHp=1,extraSpeed=1;
 
   switch(waveType){
     case'swarm':
-      count=Math.floor(22+wave*6); extraHp=0.5; break;
+      count=Math.floor(18+wave*5); extraHp=0.5; break;
     case'elite':
-      count=Math.floor(8+wave*1.8); extraHp=2.2; break;
+      count=Math.floor(8+wave*1.8); extraHp=2.0; break;
     case'rush':
-      count=Math.floor(14+wave*4); extraSpeed=1.7; extraHp=0.65; break;
+      count=Math.floor(12+wave*3.5); extraSpeed=1.6; extraHp=0.65; break;
     case'fortress':
-      count=Math.floor(10+wave*2.2); extraHp=2.8; extraSpeed=0.7; break;
+      count=Math.floor(10+wave*2.2); extraHp=2.5; extraSpeed=0.7; break;
     case'mixed':
       count=Math.floor(14+wave*4); break;
     case'chaos':
@@ -538,9 +539,10 @@ function getWaveConfig(wave){
     case'nightmare':
       count=Math.floor(18+wave*4); extraHp=2.0; extraSpeed=1.4; break;
     case'boss':
-      count=Math.floor(25+wave*5); break;
+      count=Math.floor(20+wave*4); break;
     default:
-      count=Math.floor(12+wave*5); break;
+      // 웨이브 1: 8마리, 2: 12, 3: 16, 10: 40 — 초반 완만, 후반 유지
+      count=Math.floor(6+wave*4); break;
   }
   if(count>120)count=120;
 
