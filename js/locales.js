@@ -612,24 +612,27 @@ function applyI18nHTML(){
   document.title=t('ui.title');
   document.documentElement.lang=LANG;
   const s=id=>document.getElementById(id);
-  // game title + lang button
-  s('game-title').textContent='\u26A1 '+t('ui.title');
-  s('lang-label').textContent=LANG==='ko'?'EN':'KO';
-  // top buttons
-  s('sound-btn').querySelector('.top-btn-label').textContent=t('ui.sound');
-  s('sound-btn').title=t('ui.sound');
-  s('pause-btn').querySelector('.top-btn-label').textContent=t('ui.pause');
-  s('pause-btn').title=t('ui.pause');
-  if(s('ranking-btn')){
-    s('ranking-btn').querySelector('.top-btn-label').textContent=t('ui.ranking');
-    s('ranking-btn').title=t('ui.ranking');
-  }
-  // stats row — use data-i18n keys
+  const setText=(el,txt)=>{ if(el) el.textContent=txt; };
+  const setTitle=(el,txt)=>{ if(el) el.title=txt; };
+  // U1 redesign: game-title removed; lang-label lives in #more-menu
+  setText(s('game-title'),'\u26A1 '+t('ui.title'));
+  setText(s('lang-label'),LANG==='ko'?'EN':'KO');
+  // top buttons (U1에서 텍스트 라벨 제거 — title만 업데이트)
+  setTitle(s('sound-btn'),t('ui.sound'));
+  setTitle(s('pause-btn'),t('ui.pause'));
+  setTitle(s('ranking-btn'),t('ui.ranking'));
+  setTitle(s('tree-btn'),t('ui.tree')||'스킬 트리');
+  // 레거시 top-btn-label 잔여물이 있으면 업데이트 (안전)
+  const _ql=(el,sel)=>el&&el.querySelector&&el.querySelector(sel);
+  setText(_ql(s('sound-btn'),'.top-btn-label'),t('ui.sound'));
+  setText(_ql(s('pause-btn'),'.top-btn-label'),t('ui.pause'));
+  setText(_ql(s('ranking-btn'),'.top-btn-label'),t('ui.ranking'));
+  // stats row — 새 HUD에서는 .hud-stat[title]로 툴팁, 옛 .stat-label 있으면 유지
   const statLabels=document.querySelectorAll('.stat-label');
   if(statLabels[0])statLabels[0].textContent=t('ui.damage');
   if(statLabels[1])statLabels[1].textContent=t('ui.auto_per_sec');
   if(statLabels[2])statLabels[2].textContent=t('ui.kills');
-  s('energy-unit').textContent=t('ui.energy');
+  setText(s('energy-unit'),t('ui.energy'));
   // game over labels (순서 고정)
   const goLabels=document.querySelectorAll('.go-stat-label');
   const goKeys=['go.wave','go.kills','go.energy','go.evo','go.damage','go.auto'];

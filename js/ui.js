@@ -540,7 +540,7 @@ function openTreePopup(isLevelUp){
   if(!popup) return;
   G.treeOpen=true;
   if(typeof G.paused!=='undefined') G.paused=true; // 트리 열면 게임 일시정지
-  document.getElementById('tree-title').textContent=isLevelUp?('⚡ 레벨 업! — 포인트를 투자하세요'):('🌳 스킬 트리');
+  document.getElementById('tree-title').textContent=isLevelUp?('⚡ 레벨 업! — 포인트를 투자하세요'):('🧬 스킬 트리');
   renderTree();
   popup.classList.add('show');
 }
