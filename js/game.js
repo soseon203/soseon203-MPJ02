@@ -463,7 +463,7 @@ function getUpgradeDesc(id){
     wave_heal:{cur:lv*10,next:(lv+1)*10},
     energy_flat:{cur:lv*2,next:(lv+1)*2},
     auto_acc:{cur:lv,next:lv+1},
-    precision:{cur:(lv*0.15).toFixed(2),next:((lv+1)*0.15).toFixed(2)},
+    precision:{cur:lv*4,next:(lv+1)*4},
     shield_wall:{cur:lv*8,next:(lv+1)*8},
     boss_hunter:{cur:lv*15,next:(lv+1)*15},
     bolt_size:{cur:lv*10,next:(lv+1)*10},
@@ -1068,11 +1068,13 @@ function strikeEnemy(enemy,isDirect){
   // rage: 광전사 버프
   if(G.rageStacks>0&&upLv('rage')>0) dmg=Math.ceil(dmg*(1+G.rageStacks*upLv('rage')*0.1));
   // critical (스킬 + 업그레이드)
+  // precision: 클릭 전용 크리 확률 (기존 crit_dmg 중복 문제 해소)
   let isCrit=false;
   let critChance=upLv('crit')*0.03;
+  if(isDirect&&upLv('precision')>0) critChance+=upLv('precision')*0.04;
   if(hasSkill('critical')) critChance+=0.15;
   if(critChance>0&&Math.random()<critChance){
-    const critMult=3+upLv('crit')*0.25+upLv('crit_dmg')*0.25+upLv('precision')*0.15;
+    const critMult=3+upLv('crit')*0.15+upLv('crit_dmg')*0.25;
     dmg=Math.ceil(dmg*critMult);isCrit=true;
   }
   // lifeline: 크리티컬 적중 시 HP 회복
