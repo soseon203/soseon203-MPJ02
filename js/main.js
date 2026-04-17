@@ -559,6 +559,10 @@ function waveClear(){
   // 업그레이드 선택 팝업 (웨이브 증가 후)
   // R4: 기존 웨이브 업글 팝업 비활성화 (트리가 관리)
   // if(shouldSelect){ ... showUpgradeSelection() ... }
+  // 유틸 victory 노드: 웨이브 클리어 시 XP 보너스
+  if(upLv('victory')>0&&typeof gainXP==='function'){
+    gainXP(upLv('victory')*15);
+  }
   // R6: 업적 인-런 체크
   if(typeof checkAchievements==='function') checkAchievements();
 }

@@ -568,7 +568,8 @@ function renderTree(){
     const nodes=nodesByTree(treeId);
     const byTier={};
     nodes.forEach(n=>{ (byTier[n.tier]=byTier[n.tier]||[]).push(n); });
-    Object.keys(byTier).sort((a,b)=>+a-+b).forEach(tier=>{
+    // 테크트리 스타일: T7(키스톤)이 위, T1(시작)이 아래 — 내림차순 렌더링
+    Object.keys(byTier).sort((a,b)=>+b-+a).forEach(tier=>{
       const tierBlock=document.createElement('div');
       tierBlock.className='tree-tier';
       const gateOpen=isTierGateOpen(treeId,+tier);

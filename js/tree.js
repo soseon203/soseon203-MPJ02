@@ -16,7 +16,7 @@ const TREE_NODES = [
   {id:'auto_acc',  tree:'atk', tier:1, row:3, maxRank:10, type:'basic',    prereqs:[]},
   // Tier 2
   {id:'chain',       tree:'atk', tier:2, row:0, maxRank:5,  type:'notable', prereqs:['damage']},
-  {id:'precision',   tree:'atk', tier:2, row:1, maxRank:5,  type:'notable', prereqs:['damage','click_amp']},
+  {id:'precision',   tree:'atk', tier:2, row:1, maxRank:5,  type:'notable', prereqs:['click_amp']},
   {id:'boss_hunter', tree:'atk', tier:2, row:2, maxRank:5,  type:'notable', prereqs:['damage']},
   // Tier 3
   {id:'crit',        tree:'atk', tier:3, row:0, maxRank:5,  type:'notable', prereqs:['precision']},
@@ -27,8 +27,8 @@ const TREE_NODES = [
   // Tier 4
   {id:'crit_dmg',     tree:'atk', tier:4, row:0, maxRank:5, type:'notable', prereqs:['crit']},
   {id:'chain_dmg',    tree:'atk', tier:4, row:1, maxRank:5, type:'notable', prereqs:['chain']},
-  {id:'auto_dmg',     tree:'atk', tier:4, row:2, maxRank:5, type:'notable', prereqs:['auto','auto_acc']},
-  {id:'chain_crit',   tree:'atk', tier:4, row:3, maxRank:5, type:'notable', prereqs:['chain','crit']},
+  {id:'auto_dmg',     tree:'atk', tier:4, row:2, maxRank:5, type:'notable', prereqs:['auto_acc']},
+  {id:'chain_crit',   tree:'atk', tier:4, row:3, maxRank:5, type:'notable', prereqs:['chain_dmg']},
   {id:'splash_range', tree:'atk', tier:4, row:4, maxRank:5, type:'notable', prereqs:['splash']},
   // Tier 5
   {id:'multi',   tree:'atk', tier:5, row:0, maxRank:3, type:'notable', prereqs:['double_tap']},
@@ -61,7 +61,7 @@ const TREE_NODES = [
   // Tier 3
   {id:'barrier',    tree:'def', tier:3, row:0, maxRank:5, type:'notable', prereqs:['shield_wall']},
   {id:'resilience', tree:'def', tier:3, row:1, maxRank:5, type:'notable', prereqs:['recover']},
-  {id:'iron_core',  tree:'def', tier:3, row:2, maxRank:5, type:'notable', prereqs:['tough_skin','shield_wall']},
+  {id:'iron_core',  tree:'def', tier:3, row:2, maxRank:5, type:'notable', prereqs:['shield_wall']},
   // Tier 4
   {id:'vampiric',      tree:'def', tier:4, row:0, maxRank:5, type:'notable', prereqs:['regen']},
   {id:'dodge_up',      tree:'def', tier:4, row:1, maxRank:5, type:'notable', prereqs:['resilience']},
@@ -82,27 +82,34 @@ const TREE_NODES = [
    ksName:'유리 대포', ksIcon:'💎', ksDesc:'최대 HP 고정 1, 모든 데미지 ×5', ksExclusive:'def_ks'},
 
   // ═══════════════════════════════════════════════════
-  //  유틸 트리 (UTIL) — 8 nodes + 2 keystones
-  //  (순수 에너지 노드 7개 제거: harvest/energy_flat/fortune/
-  //   bonus_wave/victory/combo/elite_hunter — 스킬트리 전환으로 무의미)
+  //  유틸 트리 (UTIL) — 16 nodes + 2 keystones
+  //  (에너지 기반 노드를 XP 배율로 재활용 — game.js xpFromEnemy 참조)
+  //  3개 카테고리: [범위·탄] [쿨다운·속도] [XP 경제]
   // ═══════════════════════════════════════════════════
-  // Tier 1 (시작)
-  {id:'range',     tree:'util', tier:1, row:0, maxRank:5, type:'basic',   prereqs:[]},
-  {id:'quick',     tree:'util', tier:1, row:1, maxRank:5, type:'basic',   prereqs:[]},
+  // Tier 1 (4개 스타터)
+  {id:'range',       tree:'util', tier:1, row:0, maxRank:10, type:'basic', prereqs:[]},
+  {id:'quick',       tree:'util', tier:1, row:1, maxRank:10, type:'basic', prereqs:[]},
+  {id:'harvest',     tree:'util', tier:1, row:3, maxRank:10, type:'basic', prereqs:[]},
+  {id:'energy_flat', tree:'util', tier:1, row:4, maxRank:10, type:'basic', prereqs:[]},
   // Tier 2
-  {id:'bolt_size', tree:'util', tier:2, row:0, maxRank:5, type:'notable', prereqs:['range']},
-  {id:'slow_aura', tree:'util', tier:2, row:1, maxRank:5, type:'notable', prereqs:['range']},
+  {id:'bolt_size',    tree:'util', tier:2, row:0, maxRank:5, type:'notable', prereqs:['range']},
+  {id:'cooldown',     tree:'util', tier:2, row:1, maxRank:5, type:'notable', prereqs:['quick']},
+  {id:'elite_hunter', tree:'util', tier:2, row:3, maxRank:5, type:'notable', prereqs:['harvest']},
   // Tier 3
-  {id:'cooldown',  tree:'util', tier:3, row:0, maxRank:5, type:'notable', prereqs:['quick']},
+  {id:'slow_aura', tree:'util', tier:3, row:0, maxRank:5, type:'notable', prereqs:['range']},
+  {id:'victory',   tree:'util', tier:3, row:3, maxRank:5, type:'notable', prereqs:['harvest']},
+  {id:'fortune',   tree:'util', tier:3, row:4, maxRank:5, type:'notable', prereqs:['elite_hunter']},
   // Tier 4
   {id:'chain_range',  tree:'util', tier:4, row:0, maxRank:5, type:'notable', prereqs:['range']},
   {id:'field_expand', tree:'util', tier:4, row:1, maxRank:5, type:'notable', prereqs:['bolt_size']},
+  {id:'bonus_wave',   tree:'util', tier:4, row:3, maxRank:5, type:'notable', prereqs:['victory']},
   // Tier 5
-  {id:'energy_storm', tree:'util', tier:5, row:0, maxRank:5, type:'notable', prereqs:['field_expand']},
+  {id:'energy_storm', tree:'util', tier:5, row:1, maxRank:5, type:'notable', prereqs:['field_expand']},
+  {id:'combo',        tree:'util', tier:5, row:4, maxRank:5, type:'notable', prereqs:['fortune']},
   // Keystones
-  {id:'ks_collector', tree:'util', tier:7, row:0, maxRank:1, type:'keystone', prereqs:['energy_storm'],
+  {id:'ks_collector', tree:'util', tier:7, row:2, maxRank:1, type:'keystone', prereqs:['combo'],
    ksName:'수집가', ksIcon:'💰', ksDesc:'XP 획득 +200%, 최대 HP -30%', ksExclusive:'util_ks'},
-  {id:'ks_timelord',  tree:'util', tier:7, row:1, maxRank:1, type:'keystone', prereqs:['slow_aura'],
+  {id:'ks_timelord',  tree:'util', tier:7, row:0, maxRank:1, type:'keystone', prereqs:['slow_aura'],
    ksName:'시간의 주인', ksIcon:'⏳', ksDesc:'적 이동속도 -40%, XP 획득 -25%', ksExclusive:'util_ks'}
 ];
 

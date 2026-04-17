@@ -43,6 +43,14 @@ function xpFromEnemy(enemy){
   let base=Math.max(1, Math.ceil((enemy.reward||1)/8));
   if(enemy.isBoss) base*=8;
   else if(enemy.isElite) base*=2;
+  // 유틸 트리 XP 노드 (energy_flat=XP 증폭, harvest=XP 수확, elite_hunter=엘리트 XP, bonus_wave=보스 XP, fortune=럭키)
+  if(upLv('energy_flat')>0) base+=upLv('energy_flat')*2;
+  if(upLv('harvest')>0) base=Math.ceil(base*(1+upLv('harvest')*0.1));
+  if(upLv('elite_hunter')>0&&enemy.isElite) base=Math.ceil(base*(1+upLv('elite_hunter')*0.5));
+  if(upLv('bonus_wave')>0&&enemy.isBoss) base=Math.ceil(base*(1+upLv('bonus_wave')*0.8));
+  if(upLv('fortune')>0&&Math.random()<upLv('fortune')*0.05){ base*=2; }
+  // combo: 콤보 카운트에 비례한 XP 보너스
+  if(upLv('combo')>0&&G.comboCount>1) base+=Math.floor(G.comboCount*upLv('combo')*0.5);
   // R5: 메타 XP 배율
   const xpMult=(typeof getMetaEffect==='function'?getMetaEffect('xpMult'):0);
   if(xpMult>0) base=Math.ceil(base*(1+xpMult));

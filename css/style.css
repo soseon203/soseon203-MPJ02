@@ -155,9 +155,11 @@ body{font-family:'Noto Sans KR','Malgun Gothic',sans-serif;background:#05051a;co
 .tree-svg line.tree-line-locked{stroke:rgba(255,255,255,.08)}
 .tree-svg line.tree-line-available{stroke:rgba(255,238,0,.35);stroke-dasharray:4,3}
 .tree-svg line.tree-line-active{stroke:rgba(0,255,170,.65);filter:drop-shadow(0 0 3px rgba(0,255,170,.4))}
-/* 티어 블록 */
+/* 티어 블록 — T7(키스톤)이 위, T1(시작)이 아래 (WoW/PoE 스타일) */
 .tree-tier{margin-bottom:14px;position:relative;z-index:1}
 .tree-tier.gate-locked .tree-tier-grid{opacity:.45}
+/* 첫 자식(= 맨 위 = 키스톤 티어)만 위 마진, 마지막 자식 마진 제거 */
+.tree-tier:last-child{margin-bottom:6px}
 .tree-tier-label{display:flex;justify-content:space-between;align-items:center;font-size:.65em;color:rgba(255,255,255,.4);letter-spacing:1px;margin-bottom:6px;padding:0 2px}
 .tree-gate-info{font-size:.92em;color:#ff6644;font-weight:700}
 .tree-gate-info.ok{color:#00ffaa}
