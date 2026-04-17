@@ -85,7 +85,7 @@ function updateComboDisplay(){
   const el=document.getElementById('active-combo');
   if(!el) return;
   if(G.comboCount&&G.comboCount>=3){
-    el.textContent='🔥 '+G.comboCount+' COMBO';
+    el.textContent='🔥 '+G.comboCount+' '+t('ui.combo');
     el.classList.remove('hidden');
   }else{
     el.classList.add('hidden');
@@ -98,7 +98,7 @@ function showLevelUpBanner(level){
   if(!area) return;
   const el=document.createElement('div');
   el.className='level-up-banner';
-  el.innerHTML=`<div class="lub-main">LEVEL UP!</div><div class="lub-sub">Lv.${level}</div>`;
+  el.innerHTML=`<div class="lub-main">${t('ui.level_up')}</div><div class="lub-sub">Lv.${level}</div>`;
   area.appendChild(el);
   setTimeout(()=>el.remove(),1600);
 }
@@ -492,7 +492,7 @@ function updateUI(){
   const xpBar=document.getElementById('xp-bar');
   if(xpBar){
     xpBar.style.width=xpPct+'%';
-    document.getElementById('level-text').textContent='Lv.'+G.level+(G.skillPoints>0?' (+'+G.skillPoints+'SP)':'');
+    document.getElementById('level-text').textContent='Lv.'+G.level+(G.skillPoints>0?' (+'+G.skillPoints+' SP)':'');
     document.getElementById('xp-progress').textContent=G.xp+' / '+xpNeed;
   }
 
@@ -540,7 +540,15 @@ function openTreePopup(isLevelUp){
   if(!popup) return;
   G.treeOpen=true;
   if(typeof G.paused!=='undefined') G.paused=true; // 트리 열면 게임 일시정지
-  document.getElementById('tree-title').textContent=isLevelUp?('⚡ 레벨 업! — 포인트를 투자하세요'):('🧬 스킬 트리');
+  document.getElementById('tree-title').textContent=isLevelUp?('⚡ '+t('ui.tree_lvup')):('🧬 '+t('ui.tree'));
+  // 컬럼 헤더/서브타이틀 재생성
+  const colTitles=document.querySelectorAll('.tree-col-title');
+  const colMap=[['atk','🗡️','ui.col_atk','ui.col_atk_sub'],['def','🌩️','ui.col_def','ui.col_def_sub'],['util','🔋','ui.col_util','ui.col_util_sub']];
+  colTitles.forEach(el=>{
+    const tree=el.parentElement.dataset.tree;
+    const m=colMap.find(x=>x[0]===tree);
+    if(m) el.innerHTML=`${m[1]} ${t(m[2])} <span class="tree-col-sub">${t(m[3])}</span>`;
+  });
   renderTree();
   popup.classList.add('show');
 }
@@ -579,7 +587,7 @@ function renderTree(){
       label.className='tree-tier-label';
       const req=tierGateRequired(+tier);
       const inv=getTreeInvestedBelow(treeId,+tier);
-      const labelText=(+tier===7)?'◆ KEYSTONE':'TIER '+tier;
+      const labelText=(+tier===7)?('◆ '+t('ui.tier_keystone').toUpperCase()):((t('ui.tier')+' '+tier).toUpperCase());
       if(req>0){
         label.innerHTML=`<span>${labelText}</span><span class="tree-gate-info ${gateOpen?'ok':''}">${gateOpen?'✓':'🔒'} ${Math.min(inv,req)}/${req}</span>`;
       }else{
@@ -697,19 +705,18 @@ function showTreeTooltip(node,anchor){
 
   let html='';
   html+=`<div class="tt-header"><span class="tt-ico">${icon}</span><span class="tt-name">${name}</span></div>`;
-  const tierLabel=(node.tier===7)?'◆ 키스톤':`Tier ${node.tier}`;
-  html+=`<div class="tt-meta">${tierLabel} · 랭크 <b>${rank}/${node.maxRank}</b></div>`;
+  const tierLabel=(node.tier===7)?('◆ '+t('ui.tier_keystone')):(t('ui.tier')+' '+node.tier);
+  html+=`<div class="tt-meta">${tierLabel} · ${t('ui.rank')} <b>${rank}/${node.maxRank}</b></div>`;
   html+=`<div class="tt-desc">${getNodeDesc(node)}</div>`;
 
-  // 현재 → 다음 랭크 변화
   if(node.type!=='keystone'){
     if(maxed){
-      html+=`<div class="tt-progress tt-max">✦ 최대 랭크</div>`;
+      html+=`<div class="tt-progress tt-max">✦ ${t('ui.max_rank')}</div>`;
     }else if(G.skillPoints>0 && canInvestNode(node)){
       const progDesc=getUpgradeDesc(node.id);
       if(progDesc){
         html+=`<div class="tt-progress">
-          <div class="tt-arrow-label">⚡ SP 투자 시</div>
+          <div class="tt-arrow-label">⚡ ${t('ui.sp_invest')}</div>
           <div class="tt-change">${progDesc}</div>
         </div>`;
       }
@@ -717,28 +724,27 @@ function showTreeTooltip(node,anchor){
       const req=tierGateRequired(node.tier);
       const inv=getTreeInvestedBelow(node.tree,node.tier);
       if(inv<req){
-        html+=`<div class="tt-locked">🔒 티어 ${node.tier} 해금: ${inv}/${req} 포인트 필요</div>`;
+        html+=`<div class="tt-locked">🔒 ${tf('ui.locked_tier',{tier:node.tier,inv,req})}</div>`;
       }else if(node.prereqs&&node.prereqs.length>0){
-        const names=node.prereqs.map(pid=>{const p=getTreeNode(pid);return p?getNodeName(p):pid;}).join(' 또는 ');
-        html+=`<div class="tt-locked">🔒 선행 노드 1랭크 필요: ${names}</div>`;
+        const names=node.prereqs.map(pid=>{const p=getTreeNode(pid);return p?getNodeName(p):pid;}).join(' / ');
+        html+=`<div class="tt-locked">🔒 ${tf('ui.locked_prereq',{name:names})}</div>`;
       }
     }else if(G.skillPoints<=0){
-      html+=`<div class="tt-locked">⚠️ 스킬 포인트 부족</div>`;
+      html+=`<div class="tt-locked">⚠️ ${t('ui.no_sp')}</div>`;
     }
   }else{
-    // 키스톤
     if(rank>0){
-      html+=`<div class="tt-progress tt-max">✦ 활성됨</div>`;
+      html+=`<div class="tt-progress tt-max">✦ ${t('ui.ks_active')}</div>`;
     }else if(ksBlocked){
-      html+=`<div class="tt-locked">🔒 다른 ${node.ksExclusive} 키스톤 선택됨</div>`;
+      html+=`<div class="tt-locked">🔒 ${t('ui.ks_blocked')}</div>`;
     }else if(!unlocked){
       const req=tierGateRequired(7);
       const inv=getTreeInvestedBelow(node.tree,7);
       if(inv<req){
-        html+=`<div class="tt-locked">🔒 ${inv}/${req} 포인트 필요</div>`;
+        html+=`<div class="tt-locked">🔒 ${inv}/${req}</div>`;
       }
     }
-    html+=`<div class="tt-warn">⚠ 배타적: 같은 트리의 다른 키스톤 잠금</div>`;
+    html+=`<div class="tt-warn">⚠ ${t('ui.ks_warn')}</div>`;
   }
 
   tip.innerHTML=html;
@@ -767,6 +773,11 @@ function hideTreeTooltip(){
 function showMetaPopup(){
   const popup=document.getElementById('meta-popup');
   if(!popup) return;
+  // 팝업 헤더 i18n
+  const h2=popup.querySelector('h2');
+  if(h2) h2.textContent='🌟 '+t('ui.meta_growth');
+  const sub=document.getElementById('meta-subtitle');
+  if(sub) sub.textContent=t('ui.meta_prompt');
   renderMeta();
   popup.classList.add('show');
 }
@@ -787,8 +798,8 @@ function renderMeta(){
     if(maxed) item.classList.add('maxed');
     else if(!canBuy) item.classList.add('locked');
     item.innerHTML=`
-      <div class="meta-item-name">${mu.icon} ${mu.name}</div>
-      <div class="meta-item-desc">${mu.desc}</div>
+      <div class="meta-item-name">${mu.icon} ${metaName(mu)}</div>
+      <div class="meta-item-desc">${metaDesc(mu)}</div>
       <div class="meta-item-footer">
         <span class="meta-item-rank">${r}/${mu.maxRank}</span>
         <span class="meta-item-cost">${maxed?'MAX':('💠 '+cost)}</span>

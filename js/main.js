@@ -553,7 +553,7 @@ function waveClear(){
   G.wave++;
   G.bossProjectiles=[];
   sfx.waveClear();
-  showWavePopup('WAVE CLEAR!');
+  showWavePopup(t('msg.wave_clear').toUpperCase());
   checkEvolution();
   saveGame();
   // 업그레이드 선택 팝업 (웨이브 증가 후)
@@ -573,7 +573,7 @@ function gameOver(){
     G.rebirthUsed=true;
     G.hp=Math.ceil(G.maxHp*upLv('rebirth')*0.2);
     const bw=gameCanvas.width/dpr,bh=gameCanvas.height/dpr;
-    showFloatText(bw/2,bh/2-30,'REBIRTH!','chain');
+    showFloatText(bw/2,bh/2-30,t('msg.rebirth').toUpperCase(),'chain');
     addShockwave(bw/2,bh/2,'#ffdd00',200);
     addShockwave(bw/2,bh/2,'#ff8800',140);
     screenFlash('big');
@@ -1090,11 +1090,10 @@ function toggleLandingLang(){
   // 메타 카드 텍스트 (RP 배지는 별도 업데이트)
   const metaTitle=document.querySelector('#landing-meta-card .meta-card-title');
   const metaSub=document.querySelector('#landing-meta-card .meta-card-sub');
-  if(metaTitle) metaTitle.textContent=newLang==='ko'?'영구 성장':'Meta Growth';
-  if(metaSub) metaSub.textContent=newLang==='ko'?'RP로 시작 보너스 해금':'Spend RP on starting bonuses';
-  // 마지막 런 라벨
-  const lrLabel=document.querySelector('#landing-lastrun .lastrun-label');
-  if(lrLabel) lrLabel.textContent=newLang==='ko'?'마지막 기록':'Last run';
+  if(metaTitle) metaTitle.textContent=t('ui.meta_growth');
+  if(metaSub) metaSub.textContent=t('ui.meta_sub');
+  // 마지막 런 라벨 + 통계 문자열 재생성
+  if(typeof showLandingLastRun==='function') showLandingLastRun();
   const navBtns=document.querySelectorAll('#landing-nav .landing-btn');
   const labels=newLang==='ko'?['🏆 랭킹','❓ 도움말','📖 소개']:['🏆 Ranking','❓ Help','📖 About'];
   navBtns.forEach((b,i)=>{if(labels[i])b.textContent=labels[i]});
@@ -1112,12 +1111,14 @@ function updateLandingRpDisplay(){
 function showLandingLastRun(){
   const el=document.getElementById('landing-lastrun');
   const statsEl=document.getElementById('landing-lastrun-stats');
+  const labelEl=document.querySelector('#landing-lastrun .lastrun-label');
   if(!el||!statsEl) return;
+  if(labelEl) labelEl.textContent=t('ui.last_run');
   try{
     const d=localStorage.getItem('lightningLastRun');
     if(d){
       const s=JSON.parse(d);
-      statsEl.textContent=`웨이브 ${s.wave} · Lv ${s.level} · +${s.rp} RP`;
+      statsEl.textContent=`${t('ui.wave')} ${s.wave} · Lv ${s.level} · +${s.rp} RP`;
       el.classList.remove('hidden');
     }
   }catch(e){}

@@ -38,12 +38,16 @@ const TREE_NODES = [
   // Tier 6
   {id:'final_strike',tree:'atk', tier:6, row:0, maxRank:5, type:'notable', prereqs:['execute']},
   {id:'energy_shield',tree:'atk',tier:6, row:2, maxRank:5, type:'notable', prereqs:['penetrate'],
-   nameOverride:'뇌전 방벽', descOverride:'HP 80% 이상일 때 피해 -15%/랭크', iconOverride:'🛡️'},
+   nameOverride:'뇌전 방벽', nameOverrideEn:'Storm Bulwark',
+   descOverride:'HP 80% 이상일 때 피해 -15%/랭크', descOverrideEn:'At 80%+ HP, damage taken -15%/rank',
+   iconOverride:'🛡️'},
   // Keystones
   {id:'ks_berserker',   tree:'atk', tier:7, row:0, maxRank:1, type:'keystone', prereqs:['final_strike'],
-   ksName:'광전사', ksIcon:'🔥', ksDesc:'공격력 +100%, 최대 HP -40%', ksExclusive:'atk_ks'},
+   ksName:'광전사', ksNameEn:'Berserker', ksIcon:'🔥',
+   ksDesc:'공격력 +100%, 최대 HP -40%', ksDescEn:'+100% damage, -40% Max HP', ksExclusive:'atk_ks'},
   {id:'ks_click_master',tree:'atk', tier:7, row:1, maxRank:1, type:'keystone', prereqs:['rage'],
-   ksName:'뇌전의 화신', ksIcon:'⚡', ksDesc:'클릭 데미지 +200%, 자동 공격 비활성화', ksExclusive:'atk_ks'},
+   ksName:'뇌전의 화신', ksNameEn:'Thunder Avatar', ksIcon:'⚡',
+   ksDesc:'클릭 데미지 +200%, 자동 공격 비활성화', ksDescEn:'+200% click damage, auto-attack disabled', ksExclusive:'atk_ks'},
 
   // ═══════════════════════════════════════════════════
   //  🌩️ 폭풍 (def) — 22 nodes (20 + 2 keystones)
@@ -77,9 +81,11 @@ const TREE_NODES = [
   {id:'rebirth',    tree:'def', tier:6, row:3, maxRank:3, type:'notable', prereqs:['auto_shield']},
   // Keystones
   {id:'ks_immortal',    tree:'def', tier:7, row:0, maxRank:1, type:'keystone', prereqs:['emp'],
-   ksName:'불멸의 코어', ksIcon:'🛡️', ksDesc:'최대 HP +150%, 재생 2배, 주는 데미지 -30%', ksExclusive:'def_ks'},
+   ksName:'불멸의 코어', ksNameEn:'Immortal Core', ksIcon:'🛡️',
+   ksDesc:'최대 HP +150%, 재생 2배, 주는 데미지 -30%', ksDescEn:'+150% Max HP, 2× regen, -30% damage dealt', ksExclusive:'def_ks'},
   {id:'ks_glass_cannon',tree:'def', tier:7, row:3, maxRank:1, type:'keystone', prereqs:['rebirth'],
-   ksName:'유리 대포', ksIcon:'💎', ksDesc:'최대 HP 고정 1, 모든 데미지 ×5', ksExclusive:'def_ks'},
+   ksName:'유리 대포', ksNameEn:'Glass Cannon', ksIcon:'💎',
+   ksDesc:'최대 HP 고정 1, 모든 데미지 ×5', ksDescEn:'Max HP fixed at 1, all damage ×5', ksExclusive:'def_ks'},
 
   // ═══════════════════════════════════════════════════
   //  🔋 전격 (util) — 21 nodes (19 + 2 keystones)
@@ -89,39 +95,48 @@ const TREE_NODES = [
   {id:'auto',        tree:'util', tier:1, row:0, maxRank:10, type:'basic', prereqs:[]},
   {id:'regen',       tree:'util', tier:1, row:1, maxRank:10, type:'basic', prereqs:[]},
   {id:'harvest',     tree:'util', tier:1, row:2, maxRank:10, type:'basic', prereqs:[],
-   nameOverride:'경험 흡수', descOverride:'적 처치 시 XP +10%/랭크', iconOverride:'📘'},
+   nameOverride:'경험 흡수', nameOverrideEn:'XP Siphon',
+   descOverride:'적 처치 시 XP +10%/랭크', descOverrideEn:'+10% XP per kill per rank', iconOverride:'📘'},
   {id:'slow_aura',   tree:'util', tier:1, row:3, maxRank:10, type:'basic', prereqs:[]},
   // Tier 2
   {id:'auto_acc',    tree:'util', tier:2, row:0, maxRank:10,type:'basic', prereqs:['auto']},
   {id:'hp_boost',    tree:'util', tier:2, row:1, maxRank:5, type:'notable', prereqs:['regen']},
   {id:'energy_flat', tree:'util', tier:2, row:2, maxRank:10,type:'basic', prereqs:['harvest'],
-   nameOverride:'뇌전 각인', descOverride:'적 처치 시 XP +2/랭크', iconOverride:'✨'},
+   nameOverride:'뇌전 각인', nameOverrideEn:'Thunder Mark',
+   descOverride:'적 처치 시 XP +2/랭크', descOverrideEn:'+2 XP per kill per rank', iconOverride:'✨'},
   {id:'cooldown',    tree:'util', tier:2, row:3, maxRank:5, type:'notable', prereqs:['slow_aura']},
   // Tier 3
   {id:'auto_dmg',    tree:'util', tier:3, row:0, maxRank:5, type:'notable', prereqs:['auto_acc']},
   {id:'vampiric',    tree:'util', tier:3, row:1, maxRank:5, type:'notable', prereqs:['hp_boost']},
   {id:'fortune',     tree:'util', tier:3, row:2, maxRank:5, type:'notable', prereqs:['energy_flat'],
-   nameOverride:'행운의 번개', descOverride:'적 처치 시 +5%/랭크 확률 XP 2배', iconOverride:'🍀'},
+   nameOverride:'행운의 번개', nameOverrideEn:'Lucky Bolt',
+   descOverride:'적 처치 시 +5%/랭크 확률 XP 2배', descOverrideEn:'+5%/rank chance to double XP on kill', iconOverride:'🍀'},
   {id:'wave_heal',   tree:'util', tier:3, row:3, maxRank:5, type:'notable', prereqs:['cooldown']},
   // Tier 4
   {id:'rapid_fire',  tree:'util', tier:4, row:0, maxRank:5, type:'notable', prereqs:['auto_dmg']},
   {id:'absorption',  tree:'util', tier:4, row:1, maxRank:5, type:'notable', prereqs:['vampiric']},
   {id:'elite_hunter',tree:'util', tier:4, row:2, maxRank:5, type:'notable', prereqs:['fortune'],
-   nameOverride:'정예 처단', descOverride:'엘리트 처치 시 XP +50%/랭크', iconOverride:'🎖️'},
+   nameOverride:'정예 처단', nameOverrideEn:'Elite Slayer',
+   descOverride:'엘리트 처치 시 XP +50%/랭크', descOverrideEn:'+50%/rank XP from elites', iconOverride:'🎖️'},
   // Tier 5
   {id:'titan_guard', tree:'util', tier:5, row:1, maxRank:5, type:'notable', prereqs:['absorption']},
   {id:'bonus_wave',  tree:'util', tier:5, row:2, maxRank:5, type:'notable', prereqs:['elite_hunter'],
-   nameOverride:'보스 처단', descOverride:'보스 처치 시 XP +80%/랭크', iconOverride:'💀'},
+   nameOverride:'보스 처단', nameOverrideEn:'Boss Slayer',
+   descOverride:'보스 처치 시 XP +80%/랭크', descOverrideEn:'+80%/rank XP from bosses', iconOverride:'💀'},
   // Tier 6
   {id:'energy_storm',tree:'util', tier:6, row:0, maxRank:5, type:'notable', prereqs:['rapid_fire'],
-   nameOverride:'뇌전 폭발', descOverride:'처치 시 +15%/랭크 확률 주변 번쩍', iconOverride:'🌩️'},
+   nameOverride:'뇌전 폭발', nameOverrideEn:'Thunder Burst',
+   descOverride:'처치 시 +15%/랭크 확률 주변 번쩍', descOverrideEn:'+15%/rank chance to flash nearby on kill', iconOverride:'🌩️'},
   {id:'combo',       tree:'util', tier:6, row:2, maxRank:5, type:'notable', prereqs:['bonus_wave'],
-   nameOverride:'연쇄 각성', descOverride:'콤보당 XP 보너스 +3/랭크', iconOverride:'🔢'},
+   nameOverride:'연쇄 각성', nameOverrideEn:'Chain Awakening',
+   descOverride:'콤보당 XP 보너스 +3/랭크', descOverrideEn:'+3/rank XP per combo stack', iconOverride:'🔢'},
   // Keystones
   {id:'ks_timelord', tree:'util', tier:7, row:0, maxRank:1, type:'keystone', prereqs:['energy_storm'],
-   ksName:'시간의 주인', ksIcon:'⏳', ksDesc:'적 이동속도 -40%, XP 획득 -25%', ksExclusive:'util_ks'},
+   ksName:'시간의 주인', ksNameEn:'Timelord', ksIcon:'⏳',
+   ksDesc:'적 이동속도 -40%, XP 획득 -25%', ksDescEn:'Enemies -40% speed, XP gain -25%', ksExclusive:'util_ks'},
   {id:'ks_collector',tree:'util', tier:7, row:2, maxRank:1, type:'keystone', prereqs:['combo'],
-   ksName:'수집가', ksIcon:'💰', ksDesc:'XP 획득 +200%, 최대 HP -30%', ksExclusive:'util_ks'}
+   ksName:'수집가', ksNameEn:'Collector', ksIcon:'💰',
+   ksDesc:'XP 획득 +200%, 최대 HP -30%', ksDescEn:'+200% XP gain, -30% Max HP', ksExclusive:'util_ks'}
 ];
 
 // 노드 조회 헬퍼
@@ -201,14 +216,22 @@ function nodesByTree(treeId){
   return TREE_NODES.filter(n=>n.tree===treeId);
 }
 
-// 노드 이름/설명/아이콘 (override → keystone 필드 → locale 순)
+// 노드 이름/설명/아이콘 (override → keystone 필드 → locale 순, EN 지원)
 function getNodeName(node){
+  if(LANG==='en'){
+    if(node.nameOverrideEn) return node.nameOverrideEn;
+    if(node.type==='keystone'&&node.ksNameEn) return node.ksNameEn;
+  }
   if(node.nameOverride) return node.nameOverride;
   if(node.type==='keystone') return node.ksName||node.id;
   const u=UPGRADE_POOL.find(u=>u.id===node.id);
   return u?t('up.'+node.id):node.id;
 }
 function getNodeDesc(node){
+  if(LANG==='en'){
+    if(node.descOverrideEn) return node.descOverrideEn;
+    if(node.type==='keystone'&&node.ksDescEn) return node.ksDescEn;
+  }
   if(node.descOverride) return node.descOverride;
   if(node.type==='keystone') return node.ksDesc||'';
   return t('up.'+node.id+'_d');

@@ -89,13 +89,15 @@ function gainXP(amount){
 //  R5: 메타 업그레이드 정의 (RP 해금)
 // ================================================================
 const META_UPGRADES=[
-  {id:'m_hp',    name:'시작 체력',    desc:'시작 시 최대 HP +15',       icon:'❤️', maxRank:5, costBase:3, costMult:1.8, effect:(r)=>({maxHp:r*15})},
-  {id:'m_sp',    name:'시작 스킬포인트', desc:'시작 시 스킬포인트 +1',  icon:'⭐', maxRank:5, costBase:8, costMult:2.2, effect:(r)=>({sp:r})},
-  {id:'m_xp',    name:'경험 증폭',    desc:'XP 획득 +8%',             icon:'📘', maxRank:5, costBase:5, costMult:2.0, effect:(r)=>({xpMult:r*0.08})},
-  {id:'m_dmg',   name:'시작 데미지',  desc:'시작 데미지 +1',           icon:'⚡', maxRank:5, costBase:4, costMult:1.9, effect:(r)=>({damage:r})},
-  {id:'m_eng',   name:'에너지 부스트', desc:'에너지 획득 +10%',        icon:'💰', maxRank:5, costBase:5, costMult:2.0, effect:(r)=>({energyMult:r*0.1})},
-  {id:'m_revive',name:'부활 부적',    desc:'런당 1회 HP 30%로 부활',  icon:'✨', maxRank:1, costBase:50, costMult:1, effect:(r)=>({revive:r>0})}
+  {id:'m_hp',    name:'시작 체력',    nameEn:'Starter HP',    desc:'시작 시 최대 HP +15',  descEn:'Start with +15 Max HP',       icon:'❤️', maxRank:5, costBase:3, costMult:1.8, effect:(r)=>({maxHp:r*15})},
+  {id:'m_sp',    name:'시작 스킬포인트', nameEn:'Starter SP',   desc:'시작 시 스킬포인트 +1', descEn:'Start with +1 Skill Point',  icon:'⭐', maxRank:5, costBase:8, costMult:2.2, effect:(r)=>({sp:r})},
+  {id:'m_xp',    name:'경험 증폭',    nameEn:'XP Amplify',    desc:'XP 획득 +8%',          descEn:'+8% XP gain',                   icon:'📘', maxRank:5, costBase:5, costMult:2.0, effect:(r)=>({xpMult:r*0.08})},
+  {id:'m_dmg',   name:'시작 데미지',  nameEn:'Starter Damage',desc:'시작 데미지 +1',       descEn:'Start with +1 Damage',          icon:'⚡', maxRank:5, costBase:4, costMult:1.9, effect:(r)=>({damage:r})},
+  {id:'m_eng',   name:'에너지 부스트', nameEn:'Energy Boost',  desc:'에너지 획득 +10%',     descEn:'+10% Energy gain',              icon:'💰', maxRank:5, costBase:5, costMult:2.0, effect:(r)=>({energyMult:r*0.1})},
+  {id:'m_revive',name:'부활 부적',    nameEn:'Revival Charm', desc:'런당 1회 HP 30%로 부활', descEn:'Once per run, revive at 30% HP',icon:'✨', maxRank:1, costBase:50, costMult:1, effect:(r)=>({revive:r>0})}
 ];
+function metaName(mu){ return LANG==='en'&&mu.nameEn?mu.nameEn:mu.name; }
+function metaDesc(mu){ return LANG==='en'&&mu.descEn?mu.descEn:mu.desc; }
 function metaCost(mu){ const r=(G.metaUpgrades&&G.metaUpgrades[mu.id])||0; return Math.ceil(mu.costBase*Math.pow(mu.costMult,r)); }
 function metaRank(id){ return (G.metaUpgrades&&G.metaUpgrades[id])||0; }
 function canBuyMeta(mu){ return G.rp>=metaCost(mu)&&metaRank(mu.id)<mu.maxRank; }
@@ -145,11 +147,11 @@ function loadMeta(){
 //  R6: 업적 (5개)
 // ================================================================
 const ACHIEVEMENTS=[
-  {id:'first_blood',  name:'첫 처치',        desc:'적 1체 처치',            rp:1,  check:()=>G.totalKills>=1},
-  {id:'wave10',       name:'10 웨이브',      desc:'웨이브 10 도달',         rp:3,  check:()=>G.wave>=10},
-  {id:'wave30',       name:'30 웨이브',      desc:'웨이브 30 도달',         rp:8,  check:()=>G.wave>=30},
-  {id:'wave50',       name:'50 웨이브',      desc:'웨이브 50 도달',         rp:15, check:()=>G.wave>=50},
-  {id:'level40',      name:'각성자',         desc:'레벨 40 달성',           rp:10, check:()=>G.level>=40}
+  {id:'first_blood',  name:'첫 처치',  nameEn:'First Blood',   desc:'적 1체 처치',     descEn:'Kill 1 enemy',      rp:1,  check:()=>G.totalKills>=1},
+  {id:'wave10',       name:'10 웨이브',nameEn:'Wave 10',       desc:'웨이브 10 도달',  descEn:'Reach wave 10',     rp:3,  check:()=>G.wave>=10},
+  {id:'wave30',       name:'30 웨이브',nameEn:'Wave 30',       desc:'웨이브 30 도달',  descEn:'Reach wave 30',     rp:8,  check:()=>G.wave>=30},
+  {id:'wave50',       name:'50 웨이브',nameEn:'Wave 50',       desc:'웨이브 50 도달',  descEn:'Reach wave 50',     rp:15, check:()=>G.wave>=50},
+  {id:'level40',      name:'각성자',   nameEn:'Awakened',      desc:'레벨 40 달성',    descEn:'Reach level 40',    rp:10, check:()=>G.level>=40}
 ];
 function checkAchievements(){
   let gained=0;
