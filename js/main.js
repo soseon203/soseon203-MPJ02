@@ -393,6 +393,10 @@ function update(dt){
     G.enemies.forEach(me=>{
       if(me.markTimer>0) me.markTimer-=dt;
     });
+    // B-리팩토링 신규 메커니즘 (유틸/폭풍 빌드 기믹)
+    if(typeof applyMagnetPull==='function') applyMagnetPull(G.enemies, cx, cy, dt);
+    if(typeof applyStormEye==='function') applyStormEye(G.enemies, cx, cy, dt);
+    if(typeof applyBlackhole==='function') applyBlackhole(G.enemies, cx, cy, dt);
 
     // 보스 압박 - 가까워지면 지진파 (투사체 대신)
     G.enemies.forEach(e=>{
@@ -728,9 +732,23 @@ function handleClick(px,py){
 
   const now=Date.now();
   const baseCd=hasSkill('quickcharge')?90:150;
-  const cd=Math.max(50,baseCd-upLv('quick')*8);
+  let cd=Math.max(50,baseCd-upLv('quick')*8);
+  // ⏳ 시간의 주인 쿨다운 -40%
+  if(typeof getClickCdMult==='function') cd=Math.max(40, cd*getClickCdMult());
   if(now-G.lastClickTime<cd)return;
   G.lastClickTime=now;
+
+  // ⚡ 뇌신의 화신 (Thunder Avatar): 클릭당 HP -3 (자기 소모)
+  if(hasKeystone('ks_click_master')){
+    G.hp=Math.max(0, G.hp-3);
+    if(G.hp<=0){ gameOver(); return; }
+  }
+  // 🩸 피의 의지 (bloodlust): 업글 보유 시 클릭당 5% HP 소모, 스택 +1 (다음 클릭 부스트)
+  if(upLv('bloodlust')>0 && G.hp>G.maxHp*0.15){
+    const cost=Math.ceil(G.maxHp*0.05);
+    G.hp=Math.max(1, G.hp-cost);
+    if(typeof addBloodlustStack==='function') addBloodlustStack();
+  }
 
   // 근접 타게팅: 커서 원 범위 내 가장 가까운 적 자동 선택
   const rangeBonus=upLv('range')*5+upLv('bolt_size')*10+upLv('field_expand')*8;

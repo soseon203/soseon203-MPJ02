@@ -41,13 +41,18 @@ const TREE_NODES = [
    nameOverride:'뇌전 방벽', nameOverrideEn:'Storm Bulwark',
    descOverride:'HP 80% 이상일 때 피해 -15%/랭크', descOverrideEn:'At 80%+ HP, damage taken -15%/rank',
    iconOverride:'🛡️'},
-  // Keystones — 세 빌드 라인 융합 요구
+  // 🆕 B: 피의 의지 (bloodlust) — T3 level
+  {id:'bloodlust',   tree:'atk', tier:3, row:4, maxRank:5, type:'notable', prereqs:['crit_dmg'],
+   nameOverride:'피의 의지', nameOverrideEn:'Bloodlust',
+   descOverride:'클릭 시 HP 5% 소모, 다음 클릭 데미지 +50% (스택 3)', descOverrideEn:'Clicks cost 5% HP, next click +50% dmg (3 stacks)',
+   iconOverride:'🩸'},
+  // Keystones — 세 빌드 라인 융합 요구 (B-리팩토링: 트레이드오프 심화)
   {id:'ks_berserker',   tree:'atk', tier:7, row:0, maxRank:1, type:'keystone', prereqs:['final_strike','penetrate'],
    ksName:'광전사', ksNameEn:'Berserker', ksIcon:'🔥',
-   ksDesc:'공격력 +100%, 최대 HP -40%', ksDescEn:'+100% damage, -40% Max HP', ksExclusive:'atk_ks'},
+   ksDesc:'공격력 ×2, HP -40%, 잃은 HP%만큼 데미지 추가', ksDescEn:'×2 damage, -40% HP, lost HP% adds more damage', ksExclusive:'atk_ks'},
   {id:'ks_click_master',tree:'atk', tier:7, row:1, maxRank:1, type:'keystone', prereqs:['rage','multi'],
    ksName:'뇌전의 화신', ksNameEn:'Thunder Avatar', ksIcon:'⚡',
-   ksDesc:'클릭 데미지 +200%, 자동 공격 비활성화', ksDescEn:'+200% click damage, auto-attack disabled', ksExclusive:'atk_ks'},
+   ksDesc:'클릭 데미지 ×5, 자동 공격 비활성, 클릭당 HP -3', ksDescEn:'×5 click damage, auto disabled, -3 HP per click', ksExclusive:'atk_ks'},
 
   // ═══════════════════════════════════════════════════
   //  🌩️ 폭풍 (def) — 22 nodes (20 + 2 keystones)
@@ -79,10 +84,18 @@ const TREE_NODES = [
   {id:'auto_shield',tree:'def', tier:5, row:3, maxRank:5, type:'notable', prereqs:['dodge_up','thorns_up']}, // 회피+반사
   // Tier 6 — 양쪽 방어 라인 모두
   {id:'rebirth',    tree:'def', tier:6, row:3, maxRank:3, type:'notable', prereqs:['auto_shield','lifeline']},
-  // Keystones
+  // 🆕 B: 폭풍의 눈 (storm_eye) — 자동화 빌드 시그니처
+  {id:'storm_eye',  tree:'def', tier:6, row:1, maxRank:5, type:'notable', prereqs:['plasma','emp'],
+   nameOverride:'폭풍의 눈', nameOverrideEn:'Eye of the Storm',
+   descOverride:'코어 주변 지속 데미지 존 (반경 +20/랭크, DPS +3/랭크)', descOverrideEn:'Damage zone around core (radius +20/rank, dps +3/rank)',
+   iconOverride:'🌀'},
+  // Keystones — 극적 트레이드오프
   {id:'ks_immortal',    tree:'def', tier:7, row:0, maxRank:1, type:'keystone', prereqs:['emp','rebirth'],
    ksName:'불멸의 코어', ksNameEn:'Immortal Core', ksIcon:'🛡️',
-   ksDesc:'최대 HP +150%, 재생 2배, 주는 데미지 -30%', ksDescEn:'+150% Max HP, 2× regen, -30% damage dealt', ksExclusive:'def_ks'},
+   ksDesc:'HP ×2.5, 재생 ×3, 주는 데미지 -50%', ksDescEn:'×2.5 HP, ×3 regen, -50% damage dealt', ksExclusive:'def_ks'},
+  {id:'ks_storm_lord',  tree:'def', tier:7, row:2, maxRank:1, type:'keystone', prereqs:['storm_eye','rebirth'],
+   ksName:'폭풍 군주', ksNameEn:'Storm Lord', ksIcon:'🌪️',
+   ksDesc:'자동 공격 범위 +100%, 체인 5체 추가, 데미지 -70%', ksDescEn:'Auto range +100%, +5 chain, -70% damage', ksExclusive:'def_ks'},
   {id:'ks_glass_cannon',tree:'def', tier:7, row:3, maxRank:1, type:'keystone', prereqs:['rebirth','emp'],
    ksName:'유리 대포', ksNameEn:'Glass Cannon', ksIcon:'💎',
    ksDesc:'최대 HP 고정 1, 모든 데미지 ×5', ksDescEn:'Max HP fixed at 1, all damage ×5', ksExclusive:'def_ks'},
@@ -130,13 +143,21 @@ const TREE_NODES = [
   {id:'combo',       tree:'util', tier:6, row:2, maxRank:5, type:'notable', prereqs:['bonus_wave','elite_hunter'],
    nameOverride:'연쇄 각성', nameOverrideEn:'Chain Awakening',
    descOverride:'콤보당 XP 보너스 +3/랭크', descOverrideEn:'+3/rank XP per combo stack', iconOverride:'🔢'},
-  // Keystones — 양쪽 라인 모두
+  // 🆕 B: 자석 (magnet_pull) — 유틸 시그니처 (적 끌어당김)
+  {id:'magnet_pull', tree:'util', tier:3, row:3, maxRank:5, type:'notable', prereqs:['slow_aura'],
+   nameOverride:'자기장 견인', nameOverrideEn:'Magnet Pull',
+   descOverride:'적을 코어로 천천히 끌어당김 (끌림 +8%/랭크)', descOverrideEn:'Slowly pulls enemies toward core (+8%/rank)',
+   iconOverride:'🧲'},
+  // Keystones — 극적 트레이드오프
   {id:'ks_timelord', tree:'util', tier:7, row:0, maxRank:1, type:'keystone', prereqs:['energy_storm','combo'],
    ksName:'시간의 주인', ksNameEn:'Timelord', ksIcon:'⏳',
-   ksDesc:'적 이동속도 -40%, XP 획득 -25%', ksDescEn:'Enemies -40% speed, XP gain -25%', ksExclusive:'util_ks'},
+   ksDesc:'적 속도 -50%, 자신 쿨다운 -40%', ksDescEn:'Enemies -50% speed, own cooldowns -40%', ksExclusive:'util_ks'},
+  {id:'ks_void',     tree:'util', tier:7, row:1, maxRank:1, type:'keystone', prereqs:['energy_storm','bonus_wave'],
+   ksName:'공허의 지배자', ksNameEn:'Void Master', ksIcon:'🕳️',
+   ksDesc:'5초마다 블랙홀: 모든 적을 중앙으로 흡수 + 데미지', ksDescEn:'Every 5s, blackhole pulls all enemies in + deals damage', ksExclusive:'util_ks'},
   {id:'ks_collector',tree:'util', tier:7, row:2, maxRank:1, type:'keystone', prereqs:['combo','energy_storm'],
    ksName:'수집가', ksNameEn:'Collector', ksIcon:'💰',
-   ksDesc:'XP 획득 +200%, 최대 HP -30%', ksDescEn:'+200% XP gain, -30% Max HP', ksExclusive:'util_ks'}
+   ksDesc:'XP 획득 ×3, 에너지 ×3, 최대 HP -50%', ksDescEn:'×3 XP, ×3 Energy, -50% Max HP', ksExclusive:'util_ks'}
 ];
 
 // 노드 조회 헬퍼

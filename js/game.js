@@ -23,6 +23,8 @@ const G={
   // R4: 키스톤 + R5: 메타 프로그레션
   keystones:{}, treeOpen:false,
   rp:0, metaUpgrades:{}, achievements:{},
+  // B-리팩토링: 빌드별 기믹 상태
+  bloodlustStacks:0, blackholeTimer:5,
   // 신규 업그레이드 전용 상태
   rageStacks:0, rageTimer:0,
   comboCount:0, comboTimer:0,
@@ -54,9 +56,8 @@ function xpFromEnemy(enemy){
   // R5: 메타 XP 배율
   const xpMult=(typeof getMetaEffect==='function'?getMetaEffect('xpMult'):0);
   if(xpMult>0) base=Math.ceil(base*(1+xpMult));
-  // R4: 키스톤 XP 효과
+  // R4: 키스톤 XP 효과 (B-리팩토링: 수집가 +200%, Timelord 패널티 제거 — 쿨다운으로 대체)
   if(hasKeystone('ks_collector')) base=Math.ceil(base*3);
-  if(hasKeystone('ks_timelord')) base=Math.ceil(base*0.75);
   return base;
 }
 // XP 획득 + 레벨업 체크
@@ -327,17 +328,102 @@ function recalcStats(){
   // R5: 메타 보너스 HP 추가 (런 시작 시 적용되지만, 업글 사서 maxHp 재계산 시 유지)
   const metaHp=(typeof getMetaEffect==='function'?getMetaEffect('maxHp'):0);
   if(metaHp>0) G.maxHp+=metaHp;
-  // R4: 키스톤 효과
+  // R4-B: 키스톤 로직 — 각 빌드마다 결정적 트레이드오프
   if(G.keystones){
+    // 🔥 광전사 (Berserker): 기본 ×2 데미지 + HP -40%. getKeystoneBonus()에서 HP 낮을수록 추가 스케일링
     if(G.keystones['ks_berserker']){ G.damage=Math.ceil(G.damage*2); G.maxHp=Math.floor(G.maxHp*0.6); }
-    if(G.keystones['ks_click_master']){ G.damage=Math.ceil(G.damage*3); G.autoRate=0; }
-    if(G.keystones['ks_immortal']){ G.maxHp=Math.floor(G.maxHp*2.5); G.hpRegen*=2; G.damage=Math.ceil(G.damage*0.7); }
+    // ⚡ 뇌신의 화신 (Thunder Avatar): 클릭 극대화, 자동 공격 비활성, 클릭마다 HP -3 (handleClick에서 처리)
+    if(G.keystones['ks_click_master']){ G.damage=Math.ceil(G.damage*5); G.autoRate=0; }
+    // 🛡️ 불멸의 코어 (Immortal): 탱커 빌드 - HP ×2.5, 재생 ×3, 데미지 -50%
+    if(G.keystones['ks_immortal']){ G.maxHp=Math.floor(G.maxHp*2.5); G.hpRegen*=3; G.damage=Math.ceil(G.damage*0.5); }
+    // 💎 유리 대포 (Glass Cannon): 고정 HP 1, 데미지 ×5
     if(G.keystones['ks_glass_cannon']){ G.maxHp=1; G.damage*=5; }
-    if(G.keystones['ks_collector']){ G.maxHp=Math.floor(G.maxHp*0.7); }
-    if(G.keystones['ks_timelord']){ /* 이동속도/XP는 xpFromEnemy·spawnEnemy에서 처리 */ }
+    // 💰 수집가 (Collector): XP/에너지 ×3, HP -50% (XP 배수는 xpFromEnemy에서)
+    if(G.keystones['ks_collector']){ G.maxHp=Math.floor(G.maxHp*0.5); }
+    // ⏳ 시간의 주인 (Timelord): 적 속도 -50% (spawnEnemy), 자신 쿨다운 -40% (getClickCd)
+    if(G.keystones['ks_timelord']){ /* spawnEnemy + click에서 처리 */ }
   }
-  // HP가 max 초과되지 않도록
   if(G.hp>G.maxHp) G.hp=G.maxHp;
+}
+
+// ================================================================
+//  B-리팩토링: 빌드별 시그니처 메커니즘
+// ================================================================
+
+// 🩸 피의 의지 (bloodlust): HP 소모 스택 — 1 스택당 다음 클릭 +50% dmg, 최대 3스택
+//   G.bloodlustStacks (0-3), handleClick이 consume+restock
+function consumeBloodlust(){
+  const s=G.bloodlustStacks||0;
+  G.bloodlustStacks=0;
+  return 1 + s*0.5;   // x1.0 ~ x2.5
+}
+// bloodlust 스택 추가 (최대 3) — 특정 업글/스킬이 trigger
+function addBloodlustStack(){
+  const max=3;
+  G.bloodlustStacks=Math.min((G.bloodlustStacks||0)+1,max);
+}
+
+// 광전사 보너스: HP % 낮을수록 데미지 증가 (HP 50%에서 ×1.5, HP 10%에서 ×2.0)
+function getBerserkerBonus(){
+  if(!hasKeystone('ks_berserker')) return 1;
+  const hpPct=G.hp/G.maxHp;
+  return 1 + (1 - hpPct); // x1.0 ~ x2.0 scaling
+}
+// 폭풍의 왕 (Storm Lord) 자동 체인 수 추가
+function getStormLordChainBonus(){
+  if(!hasKeystone('ks_storm_lord')) return 0;
+  return 5;
+}
+// 수집가 XP 배수 (이미 xpFromEnemy에서 ks_collector 체크)
+// 시간의 주인 쿨다운 배수 (click cd에서 체크)
+function getClickCdMult(){
+  if(hasKeystone('ks_timelord')) return 0.6; // -40%
+  return 1;
+}
+// 자석 효과: 적을 코어로 끌어당김 (update()에서 호출)
+function applyMagnetPull(enemies, coreX, coreY, dt){
+  const lv=upLv('magnet_pull')||0;
+  const skillMag=hasSkill('magnet')?0.5:0;
+  const force=lv*0.08 + skillMag;
+  if(force<=0) return;
+  enemies.forEach(e=>{
+    if(e.hp<=0) return;
+    const dx=coreX-e.x, dy=coreY-e.y;
+    const d=Math.sqrt(dx*dx+dy*dy)||1;
+    e.x += (dx/d)*force*60*dt;
+    e.y += (dy/d)*force*60*dt;
+  });
+}
+// 폭풍의 눈 (storm_eye): 코어 주변 지속 데미지 존
+function applyStormEye(enemies, coreX, coreY, dt){
+  const lv=upLv('storm_eye')||0;
+  if(lv<=0) return;
+  const radius=80+lv*20;
+  const dps=lv*3 + G.damage*0.15*lv;
+  enemies.forEach(e=>{
+    if(e.hp<=0) return;
+    const dx=e.x-coreX, dy=e.y-coreY;
+    const d=Math.sqrt(dx*dx+dy*dy);
+    if(d<=radius){
+      const dmg=Math.max(1, Math.floor(dps*dt));
+      if(typeof damageEnemy==='function') damageEnemy(e, dmg);
+    }
+  });
+}
+// 블랙홀 (blackhole): 주기적으로 모든 적을 중앙으로 당기고 데미지
+function applyBlackhole(enemies, coreX, coreY, dt){
+  if(!hasKeystone('ks_void')) return;
+  G.blackholeTimer=(G.blackholeTimer||0)-dt;
+  if(G.blackholeTimer<=0){
+    G.blackholeTimer=5;  // 5초마다
+    enemies.forEach(e=>{
+      if(e.hp<=0) return;
+      e.x += (coreX-e.x)*0.7;
+      e.y += (coreY-e.y)*0.7;
+      if(typeof damageEnemy==='function') damageEnemy(e, Math.max(5, G.damage*2));
+    });
+    if(typeof addShockwave==='function') addShockwave(coreX,coreY,'#aa44ff',220);
+  }
 }
 function getUpgradeDesc(id){
   const lv=upLv(id);
@@ -556,9 +642,10 @@ function getWaveConfig(wave){
   }
   if(count>120)count=120;
 
-  // R4: 키스톤 — 시간의 주인 (적 이동속도 -40%)
+  // B-리팩토링: 키스톤 — 시간의 주인 -50% (강화)
   let speedMod=speedMult*extraSpeed;
-  if(hasKeystone('ks_timelord')) speedMod*=0.6;
+  if(hasKeystone('ks_timelord')) speedMod*=0.5;
+  // 🌪️ 폭풍 군주: 자동 공격 범위 극대화 (damage에 반영 안 됨, main.js auto 처리에서 체크)
   return{count,hpMult:hpMult*extraHp,speedMult:speedMod,reward,isBoss,waveType};
 }
 
@@ -951,6 +1038,13 @@ function strikeEnemy(enemy,isDirect){
   const cx=w/2, cy=h/2;
   let dmg=G.damage;
 
+  // 🔥 광전사: 잃은 HP% 만큼 데미지 스케일링 (keystone)
+  if(typeof getBerserkerBonus==='function') dmg=Math.ceil(dmg*getBerserkerBonus());
+  // 🩸 피의 의지: 누적 스택을 직접 클릭 시 소모
+  if(isDirect&&typeof consumeBloodlust==='function'){
+    const mult=consumeBloodlust();
+    if(mult>1) dmg=Math.ceil(dmg*mult);
+  }
   // click_amp: 클릭 공격 보너스
   if(isDirect&&upLv('click_amp')>0) dmg+=upLv('click_amp')*3;
   // final_strike: 고정 데미지 추가
