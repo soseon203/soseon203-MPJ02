@@ -943,6 +943,21 @@ function initEvents(){
   }
 
   document.getElementById('go-retry').addEventListener('click',()=>resetGame());
+  const goHome=document.getElementById('go-home');
+  if(goHome) goHome.addEventListener('click',()=>{
+    // 런 상태 정리 후 랜딩으로 복귀
+    document.body.classList.remove('state-gameover');
+    document.getElementById('game-over').classList.remove('show');
+    document.getElementById('game-container').classList.remove('active');
+    document.getElementById('landing-screen').classList.remove('hidden');
+    const footer=document.getElementById('game-footer');
+    if(footer) footer.classList.remove('hidden');
+    if(window.startLandingAnim) window.startLandingAnim();
+    if(typeof updateLandingRpDisplay==='function') updateLandingRpDisplay();
+    if(typeof showLandingLastRun==='function') showLandingLastRun();
+    // 런 상태만 리셋 (메타/RP는 유지)
+    if(typeof resetGame==='function') resetGame();
+  });
 
   // 랭킹: 닉네임 저장
   document.getElementById('go-save-rank').addEventListener('click',async()=>{

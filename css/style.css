@@ -484,9 +484,13 @@ body.state-gameover #enemy-roster{display:none !important}
 #go-save-rank:hover{transform:translateY(-1px);box-shadow:0 0 15px rgba(255,200,0,.4)}
 #go-save-rank:disabled{opacity:.4;cursor:not-allowed;transform:none!important;box-shadow:none!important}
 #go-rank-saved{color:#00ffaa;font-size:.78em;margin-top:6px;animation:fadeIn .3s}
-#go-buttons-row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,.08);width:100%;max-width:420px}
-#go-retry{flex:1;max-width:180px}
-#go-view-rank{flex:1;max-width:180px;background:rgba(255,255,255,.08)!important;border:1px solid rgba(255,204,0,.4)!important;color:#ffcc00!important;padding:10px 25px!important;font-size:.9em!important}
+#go-buttons-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;justify-content:center;margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,.08);width:100%;max-width:420px}
+#go-retry{grid-column:1/-1}
+#go-meta{background:linear-gradient(135deg,rgba(255,100,255,.2),rgba(120,60,200,.3))!important;border:1px solid rgba(255,100,255,.5)!important;color:#ff99ff!important;padding:10px 16px!important;font-size:.85em!important}
+#go-meta:hover{background:linear-gradient(135deg,rgba(255,100,255,.35),rgba(140,70,220,.45))!important}
+#go-home{background:rgba(255,255,255,.08)!important;border:1px solid rgba(255,255,255,.25)!important;color:rgba(255,255,255,.85)!important;padding:10px 16px!important;font-size:.85em!important}
+#go-home:hover{background:rgba(255,255,255,.15)!important}
+#go-view-rank{background:rgba(255,255,255,.08)!important;border:1px solid rgba(255,204,0,.4)!important;color:#ffcc00!important;padding:10px 16px!important;font-size:.85em!important;grid-column:1/-1}
 #go-view-rank:hover{background:rgba(255,204,0,.15)!important}
 /* 업글/스킬 섹션 빈 상태 감춤 */
 #go-upgrade-detail:empty,#go-skill-list:empty{display:none}
