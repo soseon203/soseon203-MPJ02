@@ -421,7 +421,8 @@ function updateUI(){
   }
 
   const evo=EVOLUTIONS[G.evolutionStage];
-  document.getElementById('evolution-badge').textContent=`Lv.${G.evolutionStage+1} ${t('evo.'+G.evolutionStage)}`;
+  // 진화 배지: XP 바의 Lv.N과 중복되므로 진화 이름만 표시
+  document.getElementById('evolution-badge').textContent=`⚡ ${t('evo.'+G.evolutionStage)}`;
   document.getElementById('evolution-badge').style.color=evo.color;
 
   // 업그레이드 버튼 갱신 (동적)

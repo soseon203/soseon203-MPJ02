@@ -161,7 +161,8 @@ body{font-family:'Noto Sans KR','Malgun Gothic',sans-serif;background:#05051a;co
 .float-text.energy-gain{color:#00ffaa;text-shadow:0 0 8px #00ffaa}
 .float-text.chain{color:#b44aff;text-shadow:0 0 10px #b44aff}
 @keyframes floatUp{0%{opacity:1;transform:translateY(0) scale(1)}50%{opacity:.8}100%{opacity:0;transform:translateY(-70px) scale(1.2)}}
-#bottom-panel{position:fixed;bottom:0;left:0;width:100%;z-index:10;padding:8px 10px 10px;background:linear-gradient(0deg,rgba(10,10,40,.92) 0%,rgba(10,10,40,.85) 80%,rgba(10,10,40,0) 100%);pointer-events:none}
+#bottom-panel{display:none}
+#bottom-panel.legacy-show{display:block;position:fixed;bottom:0;left:0;width:100%;z-index:10;padding:8px 10px 10px;background:linear-gradient(0deg,rgba(10,10,40,.92) 0%,rgba(10,10,40,.85) 80%,rgba(10,10,40,0) 100%);pointer-events:none}
 #bottom-panel *{pointer-events:auto}
 #energy-display{text-align:center;margin-bottom:8px}
 #energy-value{font-size:1.6em;font-weight:900;color:#ffee00;text-shadow:0 0 12px rgba(255,238,0,.4);display:inline-block}
