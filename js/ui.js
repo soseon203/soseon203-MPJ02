@@ -40,18 +40,67 @@ function selectSkill(id){
 }
 
 function updateSkillDisplay(){
+  // U3: 활성 스킬 아이콘 표시 (우하단 패널)
   const el=document.getElementById('active-skills');
+  if(!el) return;
   el.innerHTML='';
   G.specialSkills.forEach(id=>{
     const skill=SKILL_POOL.find(s=>s.id===id);
     if(skill){
-      const badge=document.createElement('span');
-      badge.className='mini-skill';
-      badge.textContent=skill.icon+' '+t('sk.'+skill.id);
-      badge.title=t('sk.'+skill.id+'_d');
-      el.appendChild(badge);
+      const icon=document.createElement('span');
+      icon.className='active-skill-icon';
+      icon.textContent=skill.icon;
+      icon.title=t('sk.'+skill.id)+'\n'+t('sk.'+skill.id+'_d');
+      el.appendChild(icon);
     }
   });
+  updateActiveKeystones();
+}
+
+// U3: 키스톤 활성 표시
+function updateActiveKeystones(){
+  const el=document.getElementById('active-keystones');
+  if(!el) return;
+  el.innerHTML='';
+  if(!G.keystones) return;
+  Object.keys(G.keystones).forEach(kid=>{
+    if(!G.keystones[kid]) return;
+    const node=TREE_NODES.find(n=>n.id===kid);
+    if(!node) return;
+    const badge=document.createElement('div');
+    badge.className='keystone-badge';
+    badge.title=node.ksDesc;
+    badge.innerHTML=`
+      <span class="keystone-badge-ico">${node.ksIcon}</span>
+      <div class="keystone-badge-info">
+        <div class="keystone-badge-name">${node.ksName}</div>
+        <div class="keystone-badge-desc">${node.ksDesc}</div>
+      </div>`;
+    el.appendChild(badge);
+  });
+}
+
+// U4: 콤보 표시 (processKill에서 호출)
+function updateComboDisplay(){
+  const el=document.getElementById('active-combo');
+  if(!el) return;
+  if(G.comboCount&&G.comboCount>=3){
+    el.textContent='🔥 '+G.comboCount+' COMBO';
+    el.classList.remove('hidden');
+  }else{
+    el.classList.add('hidden');
+  }
+}
+
+// U4: 레벨업 대형 텍스트 연출
+function showLevelUpBanner(level){
+  const area=document.getElementById('game-area');
+  if(!area) return;
+  const el=document.createElement('div');
+  el.className='level-up-banner';
+  el.innerHTML=`<div class="lub-main">LEVEL UP!</div><div class="lub-sub">Lv.${level}</div>`;
+  area.appendChild(el);
+  setTimeout(()=>el.remove(),1600);
 }
 
 // ================================================================
@@ -406,9 +455,36 @@ function updateUI(){
   updateEnemyRoster();
 
   const hpPct=Math.max(0,G.hp/G.maxHp*100);
-  document.getElementById('hp-bar').style.width=hpPct+'%';
-  document.getElementById('hp-bar').style.background=hpPct>50?'linear-gradient(90deg,#44ff44,#88ff44)':hpPct>25?'linear-gradient(90deg,#ffaa00,#ff6600)':'linear-gradient(90deg,#ff4444,#ff0000)';
-  document.getElementById('hp-text').textContent=Math.ceil(G.hp)+' / '+G.maxHp;
+  const _hpBar=document.getElementById('hp-bar');
+  if(_hpBar){
+    _hpBar.style.width=hpPct+'%';
+    _hpBar.style.background=hpPct>50?'linear-gradient(90deg,#44ff44,#88ff44)':hpPct>25?'linear-gradient(90deg,#ffaa00,#ff6600)':'linear-gradient(90deg,#ff4444,#ff0000)';
+  }
+  const _hpTx=document.getElementById('hp-text'); if(_hpTx) _hpTx.textContent=Math.ceil(G.hp)+' / '+G.maxHp;
+  // U2: HP 링 갱신
+  const ring=document.getElementById('hp-ring');
+  const ringFg=ring&&ring.querySelector('.hp-ring-fg');
+  if(ringFg){
+    const circ=2*Math.PI*44; // ≈ 276.46
+    ringFg.setAttribute('stroke-dashoffset',circ*(1-hpPct/100));
+    ring.classList.toggle('low',hpPct<=50&&hpPct>25);
+    ring.classList.toggle('critical',hpPct<=25);
+    const ringTx=document.getElementById('hp-ring-text');
+    if(ringTx) ringTx.textContent=Math.ceil(G.hp)+' / '+G.maxHp;
+  }
+  // U4: 트리 버튼 SP 뱃지 펄스
+  const spBadge=document.getElementById('tree-sp-badge');
+  const treeBtn=document.getElementById('tree-btn');
+  if(spBadge){
+    if(G.skillPoints>0){
+      spBadge.textContent=G.skillPoints;
+      spBadge.classList.remove('hidden');
+      if(treeBtn) treeBtn.classList.add('has-sp');
+    }else{
+      spBadge.classList.add('hidden');
+      if(treeBtn) treeBtn.classList.remove('has-sp');
+    }
+  }
 
   // R1: XP 바 갱신
   const xpNeed=xpNeeded();

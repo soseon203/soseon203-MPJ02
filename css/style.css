@@ -28,20 +28,79 @@ body{font-family:'Noto Sans KR','Malgun Gothic',sans-serif;background:#05051a;co
 @keyframes shake{0%{transform:translate(2px,1px)}25%{transform:translate(-2px,-1px)}50%{transform:translate(1px,2px)}75%{transform:translate(-1px,-2px)}100%{transform:translate(0,0)}}
 @keyframes bigShake{0%{transform:translate(5px,3px)}20%{transform:translate(-6px,-4px)}40%{transform:translate(4px,5px)}60%{transform:translate(-4px,-3px)}80%{transform:translate(2px,3px)}100%{transform:translate(0,0)}}
 #bg-canvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none}
-#top-panel{position:fixed;top:0;left:0;width:100%;z-index:10;text-align:center;padding:10px 10px 8px;background:linear-gradient(180deg,rgba(10,10,40,.92) 0%,rgba(10,10,40,0) 100%);pointer-events:none}
-#top-panel .top-btn{pointer-events:auto}
-#game-title{font-size:1.3em;font-weight:900;background:linear-gradient(90deg,#ffee00,#00d4ff,#b44aff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:2px;margin-bottom:4px;text-transform:uppercase}
-#top-buttons{position:absolute;top:8px;right:8px;display:flex;gap:6px}
-.top-btn{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);color:#fff;border-radius:20px;padding:6px 12px;font-size:.75em;cursor:pointer;display:flex;align-items:center;gap:5px;transition:all .2s;white-space:nowrap}
-.top-btn:hover{background:rgba(255,255,255,.15)}
-.top-btn.muted{opacity:.4}
-.top-btn-icon{font-size:1.1em;line-height:1}
-.top-btn-label{font-weight:600;letter-spacing:.5px}
-#wave-info{display:flex;justify-content:center;align-items:center;gap:12px;margin-bottom:6px;font-size:.8em}
-#wave-badge{padding:2px 12px;border-radius:15px;font-weight:700;background:rgba(255,68,68,.15);border:1px solid rgba(255,68,68,.4);color:#ff6644}
-#enemy-count{color:rgba(255,255,255,.5)}
-#hp-bar-container{width:100%;max-width:320px;margin:0 auto 6px;height:16px;background:rgba(255,255,255,.12);border-radius:8px;overflow:hidden;position:relative;border:1px solid rgba(255,255,255,.15)}
-#hp-bar{height:100%;background:linear-gradient(90deg,#ff4444,#ff8844);border-radius:8px;transition:width .3s;width:100%}
+/* ═══════════════════════════════════════════
+   U1: 슬림 상단바
+   ═══════════════════════════════════════════ */
+#top-bar{position:fixed;top:0;left:0;width:100%;height:38px;z-index:12;display:flex;justify-content:space-between;align-items:center;padding:6px 10px;pointer-events:none}
+#top-bar-left{display:flex;align-items:center;gap:8px;pointer-events:auto}
+#top-brand{font-size:1.4em;filter:drop-shadow(0 0 6px rgba(255,238,0,.5))}
+#top-bar-right{display:flex;gap:5px;pointer-events:auto}
+.icon-btn{position:relative;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);color:#fff;border-radius:50%;width:34px;height:34px;font-size:1em;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .18s;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.icon-btn:hover{background:rgba(255,238,0,.15);border-color:rgba(255,238,0,.45);transform:scale(1.06)}
+.icon-btn-ico{font-size:1em;line-height:1}
+#tree-sp-badge{position:absolute;top:-4px;right:-4px;background:#ffee00;color:#1a1400;font-size:.58em;font-weight:900;padding:1px 5px;border-radius:10px;min-width:16px;text-align:center;animation:spPulse 1.2s ease-in-out infinite}
+#tree-sp-badge.hidden{display:none}
+@keyframes spPulse{0%,100%{transform:scale(1);box-shadow:0 0 0 0 rgba(255,238,0,.6)}50%{transform:scale(1.15);box-shadow:0 0 0 8px rgba(255,238,0,0)}}
+#tree-btn.has-sp{background:rgba(255,238,0,.2);border-color:rgba(255,238,0,.7);animation:spPulse 1.5s ease-in-out infinite}
+
+/* 더보기 드롭다운 */
+#more-menu{position:fixed;top:44px;right:10px;display:flex;flex-direction:column;gap:4px;background:rgba(0,10,28,.96);border:1px solid rgba(255,255,255,.2);border-radius:10px;padding:6px;z-index:13;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);box-shadow:0 4px 14px rgba(0,0,0,.5)}
+#more-menu.hidden{display:none}
+.more-btn{background:transparent;border:none;color:#fff;padding:8px 14px;display:flex;align-items:center;gap:8px;font-size:.82em;cursor:pointer;border-radius:6px;text-align:left;white-space:nowrap}
+.more-btn:hover{background:rgba(255,255,255,.1)}
+
+/* ═══════════════════════════════════════════
+   U2: 좌상단 웨이브/XP, 우상단 스탯
+   ═══════════════════════════════════════════ */
+#hud-left{position:fixed;top:46px;left:10px;z-index:11;display:flex;flex-direction:column;gap:3px;min-width:140px;max-width:220px}
+#hud-right{position:fixed;top:46px;right:10px;z-index:11;display:flex;flex-direction:column;gap:4px;background:rgba(0,10,28,.55);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:6px 10px;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.hud-stat{display:flex;align-items:center;gap:6px;font-size:.8em;color:#fff}
+.hud-stat-ico{font-size:.95em;opacity:.8}
+.hud-stat-v{font-weight:700;color:#ffee00;min-width:32px;text-align:right;font-variant-numeric:tabular-nums}
+
+/* 웨이브 뱃지 (큰, 눈에 띄게) */
+#wave-badge{display:inline-block;padding:4px 14px;border-radius:14px;font-weight:900;font-size:.95em;background:linear-gradient(135deg,rgba(255,68,68,.25),rgba(255,136,68,.2));border:1px solid rgba(255,68,68,.55);color:#ff9966;letter-spacing:1px;box-shadow:0 2px 8px rgba(255,68,68,.2);text-align:center}
+#enemy-count{color:rgba(255,255,255,.55);font-size:.72em;padding:0 4px}
+#xp-bar-container{width:100%;height:14px;background:rgba(255,255,255,.08);border-radius:7px;overflow:hidden;position:relative;border:1px solid rgba(255,238,0,.3);margin-top:2px}
+#xp-bar{height:100%;background:linear-gradient(90deg,#00d4ff,#ffee00);border-radius:7px;transition:width .25s;width:0%;box-shadow:0 0 8px rgba(255,238,0,.5)}
+#xp-text{position:absolute;top:0;left:0;width:100%;text-align:center;font-size:.66em;font-weight:700;line-height:14px;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.9);padding:0 6px;display:flex;justify-content:space-between}
+#level-text{color:#ffee00}
+#xp-progress{color:rgba(255,255,255,.85)}
+
+/* ═══════════════════════════════════════════
+   U2: HP 링 (코어 주변 floating)
+   ═══════════════════════════════════════════ */
+#hp-ring-container{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:130px;height:130px;z-index:4;pointer-events:none}
+#hp-ring{width:100%;height:100%;transform:rotate(-90deg)}
+#hp-ring .hp-ring-bg{fill:none;stroke:rgba(255,255,255,.06);stroke-width:3}
+#hp-ring .hp-ring-fg{fill:none;stroke:#44ff66;stroke-width:4;stroke-linecap:round;stroke-dasharray:276.46;stroke-dashoffset:0;transition:stroke-dashoffset .3s,stroke .3s;filter:drop-shadow(0 0 4px currentColor)}
+#hp-ring.low .hp-ring-fg{stroke:#ffaa00}
+#hp-ring.critical .hp-ring-fg{stroke:#ff3344;animation:hpPulse 1s ease-in-out infinite}
+@keyframes hpPulse{0%,100%{opacity:1}50%{opacity:.55}}
+#hp-ring-text{position:absolute;bottom:-24px;left:50%;transform:translateX(-50%);font-size:.75em;font-weight:900;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.9);letter-spacing:.5px;white-space:nowrap}
+
+/* ═══════════════════════════════════════════
+   진화 배지 (하단으로)
+   ═══════════════════════════════════════════ */
+#evolution-badge-bottom{position:fixed;bottom:8px;left:50%;transform:translateX(-50%);z-index:10;pointer-events:none}
+#evolution-badge{display:inline-block;padding:3px 14px;border-radius:15px;font-size:.72em;font-weight:700;background:rgba(0,10,28,.7);border:1px solid rgba(0,212,255,.4);color:#00d4ff;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);transition:all .5s}
+
+/* ═══════════════════════════════════════════
+   U3: 우하단 활성 효과 패널
+   ═══════════════════════════════════════════ */
+#active-panel{position:fixed;bottom:40px;right:10px;z-index:11;display:flex;flex-direction:column;gap:6px;max-width:200px;pointer-events:none}
+#active-keystones{display:flex;flex-direction:column;gap:4px}
+.keystone-badge{display:flex;align-items:center;gap:6px;padding:5px 10px;background:linear-gradient(135deg,rgba(150,50,200,.35),rgba(255,100,200,.25));border:1.5px solid rgba(255,100,255,.7);border-radius:10px;box-shadow:0 0 12px rgba(255,100,255,.3);animation:keystoneGlow 2.4s ease-in-out infinite}
+@keyframes keystoneGlow{0%,100%{box-shadow:0 0 12px rgba(255,100,255,.3)}50%{box-shadow:0 0 18px rgba(255,100,255,.6)}}
+.keystone-badge-ico{font-size:1.2em}
+.keystone-badge-info{display:flex;flex-direction:column;min-width:0}
+.keystone-badge-name{font-size:.75em;font-weight:700;color:#ffccff;white-space:nowrap}
+.keystone-badge-desc{font-size:.62em;color:rgba(255,255,255,.75);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#active-skills{display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end}
+.active-skill-icon{width:28px;height:28px;display:flex;align-items:center;justify-content:center;background:rgba(0,212,255,.15);border:1px solid rgba(0,212,255,.5);border-radius:8px;font-size:.95em;box-shadow:0 0 6px rgba(0,212,255,.3)}
+#active-combo{padding:3px 10px;background:rgba(255,170,0,.2);border:1px solid rgba(255,170,0,.6);border-radius:10px;color:#ffbb33;font-weight:700;font-size:.85em;text-align:center;animation:comboBounce .3s ease-out}
+#active-combo.hidden{display:none}
+@keyframes comboBounce{0%{transform:scale(1.3)}100%{transform:scale(1)}}
 #hp-text{position:absolute;top:0;left:0;width:100%;text-align:center;font-size:.72em;font-weight:900;line-height:16px;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.8),0 0 6px rgba(0,0,0,.5)}
 #xp-bar-container{width:100%;max-width:320px;margin:0 auto 6px;height:12px;background:rgba(255,255,255,.08);border-radius:6px;overflow:hidden;position:relative;border:1px solid rgba(255,238,0,.25)}
 #xp-bar{height:100%;background:linear-gradient(90deg,#00d4ff,#ffee00);border-radius:6px;transition:width .25s;width:0%;box-shadow:0 0 8px rgba(255,238,0,.4)}
@@ -159,6 +218,41 @@ body{font-family:'Noto Sans KR','Malgun Gothic',sans-serif;background:#05051a;co
 .meta-item.maxed .meta-item-cost{color:#ffaa00}
 .landing-meta-btn{background:linear-gradient(135deg,rgba(255,100,255,.2),rgba(150,80,255,.2));border-color:rgba(255,100,255,.4)!important;color:#ff99ff!important}
 
+/* ═══════════════════════════════════════════
+   U4: 레벨업 대형 배너
+   ═══════════════════════════════════════════ */
+.level-up-banner{position:absolute;top:42%;left:50%;transform:translate(-50%,-50%);text-align:center;pointer-events:none;z-index:50;animation:lubIn .4s cubic-bezier(.2,1.3,.5,1) both,lubOut .5s ease-in 1.1s both}
+.level-up-banner .lub-main{font-size:3.2em;font-weight:900;background:linear-gradient(90deg,#ffee00,#00d4ff,#ff99ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:4px;filter:drop-shadow(0 0 20px rgba(255,238,0,.6))}
+.level-up-banner .lub-sub{font-size:1.4em;font-weight:800;color:#ffee00;letter-spacing:6px;margin-top:-4px;text-shadow:0 0 16px rgba(255,238,0,.8)}
+@keyframes lubIn{0%{opacity:0;transform:translate(-50%,-50%) scale(.3)}100%{opacity:1;transform:translate(-50%,-50%) scale(1)}}
+@keyframes lubOut{0%{opacity:1;transform:translate(-50%,-50%) scale(1)}100%{opacity:0;transform:translate(-50%,-80%) scale(1.1)}}
+
+/* ═══════════════════════════════════════════
+   U5: 모바일 반응형
+   ═══════════════════════════════════════════ */
+@media (max-width:720px){
+  #top-bar{height:36px;padding:4px 6px}
+  #top-brand{font-size:1.1em}
+  .icon-btn{width:30px;height:30px;font-size:.9em}
+  #hud-left{top:40px;left:6px;min-width:110px;max-width:160px;gap:2px}
+  #hud-right{top:40px;right:6px;padding:4px 8px;gap:2px}
+  .hud-stat{font-size:.7em}
+  #wave-badge{font-size:.8em;padding:2px 10px}
+  #enemy-count{font-size:.62em}
+  #xp-bar-container{height:11px}
+  #xp-text{font-size:.58em;line-height:11px}
+  #hp-ring-container{width:100px;height:100px}
+  #hp-ring-text{font-size:.68em;bottom:-20px}
+  #active-panel{bottom:30px;max-width:140px;right:6px}
+  .keystone-badge{padding:3px 6px}
+  .keystone-badge-name{font-size:.65em}
+  .keystone-badge-desc{font-size:.55em}
+  .active-skill-icon{width:24px;height:24px;font-size:.82em}
+  #active-combo{font-size:.72em;padding:2px 6px}
+  .level-up-banner .lub-main{font-size:2.1em;letter-spacing:2px}
+  .level-up-banner .lub-sub{font-size:1em;letter-spacing:3px}
+  #evolution-badge{font-size:.6em;padding:2px 10px}
+}
 /* 모바일 트리 */
 @media (max-width:720px){
   #tree-content{padding:6px}
@@ -296,7 +390,7 @@ body{font-family:'Noto Sans KR','Malgun Gothic',sans-serif;background:#05051a;co
 .upgrade-choice-name{font-weight:700;font-size:.85em;margin-bottom:2px}
 .upgrade-choice-desc{font-size:.68em;color:rgba(255,255,255,.5)}
 .upgrade-choice-cat{font-size:.55em;color:rgba(0,212,255,.6);margin-top:2px}
-#active-skills{display:flex;gap:4px;justify-content:center;flex-wrap:wrap;margin-top:4px}
+/* legacy #active-skills 정의는 U3 구간의 #active-panel > #active-skills로 대체됨 */
 .mini-skill{font-size:.65em;padding:1px 6px;border-radius:8px;background:rgba(0,212,255,.1);border:1px solid rgba(0,212,255,.25);color:#00d4ff}
 #enemy-roster{position:fixed;left:0;top:50%;transform:translateY(-50%);z-index:12;display:flex;flex-direction:column;gap:3px;padding:8px 6px;max-height:60vh;overflow-y:auto;overflow-x:hidden;background:linear-gradient(90deg,rgba(10,10,40,.85) 0%,rgba(10,10,40,.6) 80%,transparent 100%);border-radius:0 10px 10px 0;pointer-events:none;scrollbar-width:none}
 #enemy-roster::-webkit-scrollbar{display:none}

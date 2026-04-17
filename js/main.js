@@ -22,7 +22,7 @@ function update(dt){
   // rage: 광전사 스택 감소
   if(G.rageTimer>0){G.rageTimer-=dt;if(G.rageTimer<=0){G.rageStacks=0;G.rageTimer=0}}
   // combo: 콤보 타이머 감소
-  if(G.comboTimer>0){G.comboTimer-=dt;if(G.comboTimer<=0){G.comboCount=0;G.comboTimer=0}}
+  if(G.comboTimer>0){G.comboTimer-=dt;if(G.comboTimer<=0){G.comboCount=0;G.comboTimer=0;if(typeof updateComboDisplay==='function') updateComboDisplay();}}
   // emp: EMP 펄스
   if(upLv('emp')>0){
     G.empTimer+=dt;
@@ -945,6 +945,20 @@ function initEvents(){
   document.getElementById('ranking-close').addEventListener('click',()=>hideRankingPopup());
 
   document.getElementById('pause-btn').addEventListener('click',()=>togglePause());
+  // U1: 더보기 드롭다운
+  const moreBtn=document.getElementById('more-btn');
+  const moreMenu=document.getElementById('more-menu');
+  if(moreBtn&&moreMenu){
+    moreBtn.addEventListener('click',e=>{
+      e.stopPropagation();
+      moreMenu.classList.toggle('hidden');
+    });
+    document.addEventListener('click',e=>{
+      if(!moreMenu.classList.contains('hidden')&&!moreMenu.contains(e.target)&&e.target!==moreBtn){
+        moreMenu.classList.add('hidden');
+      }
+    });
+  }
   // R3: 스킬 트리 버튼 / 메타 팝업 / 닫기
   const treeBtn=document.getElementById('tree-btn');
   if(treeBtn) treeBtn.addEventListener('click',()=>{ if(G.treeOpen) closeTreePopup(); else openTreePopup(false); });

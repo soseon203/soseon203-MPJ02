@@ -55,17 +55,25 @@ function xpFromEnemy(enemy){
 function gainXP(amount){
   if(amount<=0) return;
   G.xp += amount;
+  let leveled=false;
   while(G.xp >= xpNeeded()){
     G.xp -= xpNeeded();
     G.level++;
     G.totalLevels++;
     G.skillPoints++;
     G.levelUpQueue++;
+    leveled=true;
+  }
+  // U4: 레벨업 시 대형 배너 + 화면 플래시
+  if(leveled){
+    if(typeof showLevelUpBanner==='function') showLevelUpBanner(G.level);
+    if(typeof screenFlash==='function') screenFlash('evo');
+    if(typeof sfx!=='undefined'&&sfx.upgrade) sfx.upgrade();
   }
   // 레벨업 큐가 있고, 현재 아무 팝업도 안 열려있으면 선택 팝업 트리거
   if(G.levelUpQueue>0 && !G.skillSelecting && !G.upgradeSelecting && !G.levelUpSelecting && !G.treeOpen && !G.paused && G.hp>0){
-    // R4: 하이브리드 — 레벨업 시 트리 자동 오픈
-    if(typeof openTreeOnLevelUp==='function') openTreeOnLevelUp();
+    // R4: 하이브리드 — 레벨업 시 트리 자동 오픈 (0.8s 후 — 배너 감상 시간)
+    if(typeof openTreeOnLevelUp==='function') setTimeout(openTreeOnLevelUp,800);
   }
 }
 
@@ -786,15 +794,16 @@ function killEnemy(enemy){
   const mEng=(typeof getMetaEffect==='function'?getMetaEffect('energyMult'):0);
   if(mEng>0) reward=Math.ceil(reward*(1+mEng));
   if(hasKeystone('ks_collector')) reward=Math.ceil(reward*3);
-  // combo: 연속 처치 보너스
-  if(upLv('combo')>0){
-    G.comboCount++;G.comboTimer=2;
-    if(G.comboCount>1){
-      const comboBonus=G.comboCount*upLv('combo')*3;
-      reward+=comboBonus;
-      if(G.comboCount%5===0) showFloatText(enemy.x,enemy.y-40,G.comboCount+'COMBO!','chain');
-    }
+  // combo: 연속 처치 보너스 (combo 업글 없어도 카운트는 돌림 — U4 콤보 UI용)
+  G.comboCount=(G.comboCount||0)+1;
+  G.comboTimer=2;
+  if(upLv('combo')>0&&G.comboCount>1){
+    const comboBonus=G.comboCount*upLv('combo')*3;
+    reward+=comboBonus;
+    if(G.comboCount%5===0) showFloatText(enemy.x,enemy.y-40,G.comboCount+'COMBO!','chain');
   }
+  // U4: 콤보 UI 업데이트 (3 이상일 때만 노출)
+  if(typeof updateComboDisplay==='function') updateComboDisplay();
   G.energy+=reward;
   G.totalEnergy+=reward;
   // R1: XP 획득 & 레벨업 체크
