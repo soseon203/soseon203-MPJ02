@@ -82,32 +82,26 @@ const TREE_NODES = [
    ksName:'유리 대포', ksIcon:'💎', ksDesc:'최대 HP 고정 1, 모든 데미지 ×5', ksExclusive:'def_ks'},
 
   // ═══════════════════════════════════════════════════
-  //  유틸 트리 (UTIL) — 15 nodes + 2 keystones
+  //  유틸 트리 (UTIL) — 8 nodes + 2 keystones
+  //  (순수 에너지 노드 7개 제거: harvest/energy_flat/fortune/
+  //   bonus_wave/victory/combo/elite_hunter — 스킬트리 전환으로 무의미)
   // ═══════════════════════════════════════════════════
-  // Tier 1
-  {id:'harvest',     tree:'util', tier:1, row:0, maxRank:10, type:'basic', prereqs:[]},
-  {id:'energy_flat', tree:'util', tier:1, row:1, maxRank:10, type:'basic', prereqs:[]},
+  // Tier 1 (시작)
+  {id:'range',     tree:'util', tier:1, row:0, maxRank:5, type:'basic',   prereqs:[]},
+  {id:'quick',     tree:'util', tier:1, row:1, maxRank:5, type:'basic',   prereqs:[]},
   // Tier 2
-  {id:'range',     tree:'util', tier:2, row:0, maxRank:5, type:'notable', prereqs:['harvest']},
-  {id:'quick',     tree:'util', tier:2, row:1, maxRank:5, type:'notable', prereqs:[]},
-  {id:'bolt_size', tree:'util', tier:2, row:2, maxRank:5, type:'notable', prereqs:['range']},
+  {id:'bolt_size', tree:'util', tier:2, row:0, maxRank:5, type:'notable', prereqs:['range']},
+  {id:'slow_aura', tree:'util', tier:2, row:1, maxRank:5, type:'notable', prereqs:['range']},
   // Tier 3
-  {id:'slow_aura',    tree:'util', tier:3, row:0, maxRank:5, type:'notable', prereqs:['range']},
-  {id:'elite_hunter', tree:'util', tier:3, row:1, maxRank:5, type:'notable', prereqs:['harvest']},
+  {id:'cooldown',  tree:'util', tier:3, row:0, maxRank:5, type:'notable', prereqs:['quick']},
   // Tier 4
-  {id:'victory',  tree:'util', tier:4, row:0, maxRank:5, type:'notable', prereqs:['harvest']},
-  {id:'cooldown', tree:'util', tier:4, row:1, maxRank:5, type:'notable', prereqs:['quick']},
+  {id:'chain_range',  tree:'util', tier:4, row:0, maxRank:5, type:'notable', prereqs:['range']},
+  {id:'field_expand', tree:'util', tier:4, row:1, maxRank:5, type:'notable', prereqs:['bolt_size']},
   // Tier 5
-  {id:'fortune',      tree:'util', tier:5, row:0, maxRank:5, type:'notable', prereqs:['harvest']},
-  {id:'chain_range',  tree:'util', tier:5, row:1, maxRank:5, type:'notable', prereqs:['range']},
-  {id:'field_expand', tree:'util', tier:5, row:2, maxRank:5, type:'notable', prereqs:['bolt_size']},
-  {id:'bonus_wave',   tree:'util', tier:5, row:3, maxRank:5, type:'notable', prereqs:['elite_hunter']},
-  // Tier 6
-  {id:'combo',        tree:'util', tier:6, row:0, maxRank:5, type:'notable', prereqs:['fortune']},
-  {id:'energy_storm', tree:'util', tier:6, row:1, maxRank:5, type:'notable', prereqs:['field_expand']},
+  {id:'energy_storm', tree:'util', tier:5, row:0, maxRank:5, type:'notable', prereqs:['field_expand']},
   // Keystones
-  {id:'ks_collector', tree:'util', tier:7, row:0, maxRank:1, type:'keystone', prereqs:['combo'],
-   ksName:'수집가', ksIcon:'💰', ksDesc:'에너지/XP 획득 +200%, 최대 HP -30%', ksExclusive:'util_ks'},
+  {id:'ks_collector', tree:'util', tier:7, row:0, maxRank:1, type:'keystone', prereqs:['energy_storm'],
+   ksName:'수집가', ksIcon:'💰', ksDesc:'XP 획득 +200%, 최대 HP -30%', ksExclusive:'util_ks'},
   {id:'ks_timelord',  tree:'util', tier:7, row:1, maxRank:1, type:'keystone', prereqs:['slow_aura'],
    ksName:'시간의 주인', ksIcon:'⏳', ksDesc:'적 이동속도 -40%, XP 획득 -25%', ksExclusive:'util_ks'}
 ];
@@ -122,14 +116,40 @@ function getNodeRank(node){
   return G.upgrades&&G.upgrades[node.id]?G.upgrades[node.id].level:0;
 }
 
-// 선행 조건 충족 여부 (any 만족 — prereqs에 하나라도 1랭크 이상이면 OK)
+// 특정 트리의 주어진 티어 "이하"(<)에 투자된 포인트 총합 — 티어 게이트 계산용
+function getTreeInvestedBelow(treeId, tier){
+  let sum=0;
+  TREE_NODES.forEach(n=>{
+    if(n.tree===treeId && n.tier<tier) sum+=getNodeRank(n);
+  });
+  return sum;
+}
+// 티어 T 진입에 필요한 누적 포인트 (T1 무료, T2+ 가중)
+function tierGateRequired(tier){
+  if(tier<=1) return 0;
+  if(tier===7) return 14;           // 키스톤: 14포인트 필요
+  return (tier-1)*2;                 // T2=2, T3=4, T4=6, T5=8, T6=10
+}
+
+// 티어 게이트 통과 여부
+function isTierGateOpen(treeId, tier){
+  return getTreeInvestedBelow(treeId,tier) >= tierGateRequired(tier);
+}
+
+// 선행 조건 충족 여부 (any 만족 + 티어 게이트)
 function isNodeUnlocked(node){
   if(!node) return false;
-  if(!node.prereqs||node.prereqs.length===0) return true;
-  return node.prereqs.some(pid=>{
-    const p=getTreeNode(pid);
-    return p && getNodeRank(p)>0;
-  });
+  // 티어 게이트 먼저 체크
+  if(!isTierGateOpen(node.tree, node.tier)) return false;
+  // prereq 체크 (있다면 최소 하나가 1랭크 이상)
+  if(node.prereqs&&node.prereqs.length>0){
+    const ok=node.prereqs.some(pid=>{
+      const p=getTreeNode(pid);
+      return p && getNodeRank(p)>0;
+    });
+    if(!ok) return false;
+  }
+  return true;
 }
 
 // 같은 배타 그룹의 다른 키스톤이 이미 찍혔으면 선택 불가

@@ -472,6 +472,7 @@ function closeTreePopup(){
   const popup=document.getElementById('tree-popup');
   if(!popup) return;
   popup.classList.remove('show');
+  hideTreeTooltip();
   G.treeOpen=false;
   G.paused=false;
   saveGame();
@@ -483,22 +484,89 @@ function renderTree(){
     const container=document.getElementById('tree-col-'+treeId);
     if(!container) return;
     container.innerHTML='';
+    // SVG 연결선 오버레이 (노드 위에 그리지 않도록 맨 아래 배치)
+    const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
+    svg.setAttribute('class','tree-svg');
+    container.appendChild(svg);
+
     const nodes=nodesByTree(treeId);
-    // tier별 그룹핑
     const byTier={};
     nodes.forEach(n=>{ (byTier[n.tier]=byTier[n.tier]||[]).push(n); });
     Object.keys(byTier).sort((a,b)=>+a-+b).forEach(tier=>{
       const tierBlock=document.createElement('div');
       tierBlock.className='tree-tier';
+      const gateOpen=isTierGateOpen(treeId,+tier);
+      if(!gateOpen) tierBlock.classList.add('gate-locked');
+      // 티어 라벨 + 게이트 상태
       const label=document.createElement('div');
       label.className='tree-tier-label';
-      label.textContent=(+tier===7)?'◆ KEYSTONE':'TIER '+tier;
+      const req=tierGateRequired(+tier);
+      const inv=getTreeInvestedBelow(treeId,+tier);
+      const labelText=(+tier===7)?'◆ KEYSTONE':'TIER '+tier;
+      if(req>0){
+        label.innerHTML=`<span>${labelText}</span><span class="tree-gate-info ${gateOpen?'ok':''}">${gateOpen?'✓':'🔒'} ${Math.min(inv,req)}/${req}</span>`;
+      }else{
+        label.textContent=labelText;
+      }
       tierBlock.appendChild(label);
+      // 노드 그리드 (최대 5 col)
+      const grid=document.createElement('div');
+      grid.className='tree-tier-grid';
       byTier[tier].sort((a,b)=>a.row-b.row).forEach(node=>{
         const el=buildTreeNodeEl(node);
-        tierBlock.appendChild(el);
+        el.style.gridColumn=(node.row+1)+'/ span 1';
+        grid.appendChild(el);
       });
+      tierBlock.appendChild(grid);
       container.appendChild(tierBlock);
+    });
+  });
+  // 레이아웃 완료 후 연결선 그리기 (rAF + setTimeout 2중 안전망)
+  requestAnimationFrame(()=>{
+    drawTreeConnections();
+    // 스크롤/이미지 로딩 후 최종 위치 보정
+    setTimeout(drawTreeConnections,60);
+  });
+}
+
+// SVG 연결선 그리기
+function drawTreeConnections(){
+  ['atk','def','util'].forEach(treeId=>{
+    const container=document.getElementById('tree-col-'+treeId);
+    if(!container) return;
+    const svg=container.querySelector('.tree-svg');
+    if(!svg) return;
+    svg.innerHTML='';
+    const cRect=container.getBoundingClientRect();
+    svg.setAttribute('width',cRect.width);
+    svg.setAttribute('height',container.scrollHeight);
+    svg.style.height=container.scrollHeight+'px';
+    const nodes=nodesByTree(treeId);
+    nodes.forEach(node=>{
+      if(!node.prereqs||node.prereqs.length===0) return;
+      const childEl=container.querySelector('[data-node-id="'+node.id+'"]');
+      if(!childEl) return;
+      const cr=childEl.getBoundingClientRect();
+      const cx=cr.left-cRect.left+cr.width/2;
+      const cy=cr.top-cRect.top+container.scrollTop+cr.height/2;
+      node.prereqs.forEach(pid=>{
+        const pEl=container.querySelector('[data-node-id="'+pid+'"]');
+        if(!pEl) return;
+        const pr=pEl.getBoundingClientRect();
+        const px=pr.left-cRect.left+pr.width/2;
+        const py=pr.top-cRect.top+container.scrollTop+pr.height/2;
+        const line=document.createElementNS('http://www.w3.org/2000/svg','line');
+        line.setAttribute('x1',px);line.setAttribute('y1',py);
+        line.setAttribute('x2',cx);line.setAttribute('y2',cy);
+        const parent=getTreeNode(pid);
+        const parentInvested=getNodeRank(parent)>0;
+        const childInvested=getNodeRank(node)>0;
+        let cls='tree-line-locked';
+        if(childInvested) cls='tree-line-active';
+        else if(parentInvested) cls='tree-line-available';
+        line.setAttribute('class',cls);
+        svg.appendChild(line);
+      });
     });
   });
 }
@@ -511,21 +579,15 @@ function buildTreeNodeEl(node){
 
   const el=document.createElement('div');
   el.className='tree-node';
+  el.dataset.nodeId=node.id;
   if(node.type==='keystone') el.classList.add('keystone');
   if(rank>0) el.classList.add('invested');
   if(maxed) el.classList.add('maxed');
   else if(canInvest) el.classList.add('available');
   else if(!unlocked||ksBlocked) el.classList.add('locked');
 
-  const icon=getNodeIcon(node);
-  const name=getNodeName(node);
-  const desc=getNodeDesc(node);
   el.innerHTML=`
-    <div class="tree-node-icon">${icon}</div>
-    <div class="tree-node-info">
-      <div class="tree-node-name">${name}</div>
-      <div class="tree-node-desc">${desc}</div>
-    </div>
+    <div class="tree-node-icon">${getNodeIcon(node)}</div>
     <div class="tree-node-rank">${rank}/${node.maxRank}</div>
   `;
   el.addEventListener('click',()=>{
@@ -536,7 +598,90 @@ function buildTreeNodeEl(node){
       saveGame();
     }
   });
+  // 호버 툴팁
+  el.addEventListener('mouseenter',e=>showTreeTooltip(node,e.currentTarget));
+  el.addEventListener('mouseleave',hideTreeTooltip);
+  el.addEventListener('touchstart',e=>{ showTreeTooltip(node,e.currentTarget); });
   return el;
+}
+
+// ================================================================
+//  트리 노드 호버 툴팁
+// ================================================================
+function showTreeTooltip(node,anchor){
+  const tip=document.getElementById('tree-tooltip');
+  if(!tip) return;
+  const rank=getNodeRank(node);
+  const maxed=rank>=node.maxRank;
+  const unlocked=isNodeUnlocked(node);
+  const ksBlocked=node.type==='keystone'&&isKeystoneBlocked(node);
+  const icon=getNodeIcon(node);
+  const name=getNodeName(node);
+
+  let html='';
+  html+=`<div class="tt-header"><span class="tt-ico">${icon}</span><span class="tt-name">${name}</span></div>`;
+  const tierLabel=(node.tier===7)?'◆ 키스톤':`Tier ${node.tier}`;
+  html+=`<div class="tt-meta">${tierLabel} · 랭크 <b>${rank}/${node.maxRank}</b></div>`;
+  html+=`<div class="tt-desc">${getNodeDesc(node)}</div>`;
+
+  // 현재 → 다음 랭크 변화
+  if(node.type!=='keystone'){
+    if(maxed){
+      html+=`<div class="tt-progress tt-max">✦ 최대 랭크</div>`;
+    }else if(G.skillPoints>0 && canInvestNode(node)){
+      const progDesc=getUpgradeDesc(node.id);
+      if(progDesc){
+        html+=`<div class="tt-progress">
+          <div class="tt-arrow-label">⚡ SP 투자 시</div>
+          <div class="tt-change">${progDesc}</div>
+        </div>`;
+      }
+    }else if(!unlocked){
+      const req=tierGateRequired(node.tier);
+      const inv=getTreeInvestedBelow(node.tree,node.tier);
+      if(inv<req){
+        html+=`<div class="tt-locked">🔒 티어 ${node.tier} 해금: ${inv}/${req} 포인트 필요</div>`;
+      }else if(node.prereqs&&node.prereqs.length>0){
+        const names=node.prereqs.map(pid=>{const p=getTreeNode(pid);return p?getNodeName(p):pid;}).join(' 또는 ');
+        html+=`<div class="tt-locked">🔒 선행 노드 1랭크 필요: ${names}</div>`;
+      }
+    }else if(G.skillPoints<=0){
+      html+=`<div class="tt-locked">⚠️ 스킬 포인트 부족</div>`;
+    }
+  }else{
+    // 키스톤
+    if(rank>0){
+      html+=`<div class="tt-progress tt-max">✦ 활성됨</div>`;
+    }else if(ksBlocked){
+      html+=`<div class="tt-locked">🔒 다른 ${node.ksExclusive} 키스톤 선택됨</div>`;
+    }else if(!unlocked){
+      const req=tierGateRequired(7);
+      const inv=getTreeInvestedBelow(node.tree,7);
+      if(inv<req){
+        html+=`<div class="tt-locked">🔒 ${inv}/${req} 포인트 필요</div>`;
+      }
+    }
+    html+=`<div class="tt-warn">⚠ 배타적: 같은 트리의 다른 키스톤 잠금</div>`;
+  }
+
+  tip.innerHTML=html;
+  tip.classList.add('show');
+  // 위치 계산 — 노드 오른쪽 or 왼쪽
+  const rect=anchor.getBoundingClientRect();
+  const tipW=260;
+  const tipH=tip.offsetHeight||140;
+  let left=rect.right+8;
+  if(left+tipW>window.innerWidth-8) left=rect.left-tipW-8;
+  if(left<8) left=8;
+  let top=rect.top+rect.height/2-tipH/2;
+  if(top<8) top=8;
+  if(top+tipH>window.innerHeight-8) top=window.innerHeight-tipH-8;
+  tip.style.left=left+'px';
+  tip.style.top=top+'px';
+}
+function hideTreeTooltip(){
+  const tip=document.getElementById('tree-tooltip');
+  if(tip) tip.classList.remove('show');
 }
 
 // ================================================================
