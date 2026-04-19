@@ -1,6 +1,15 @@
 // ================================================================
 //  상수 & 설정
 // ================================================================
+// 난이도 설정 — 적 HP / 획득 자원 배수
+const DIFFICULTY_CONFIG={
+  easy:     {name:'쉬움',       nameEn:'Easy',      hpMult:0.7, speedMult:0.9, rewardMult:1.2, color:'#44ff88'},
+  normal:   {name:'보통',       nameEn:'Normal',    hpMult:1.0, speedMult:1.0, rewardMult:1.0, color:'#ffee00'},
+  hard:     {name:'어려움',     nameEn:'Hard',      hpMult:1.4, speedMult:1.1, rewardMult:0.9, color:'#ff8844'},
+  nightmare:{name:'악몽',       nameEn:'Nightmare', hpMult:2.2, speedMult:1.25,rewardMult:0.8, color:'#ff4488'}
+};
+const DIFFICULTY_ORDER=['easy','normal','hard','nightmare'];
+
 const EVOLUTIONS=(()=>{
   const list=[
     // Tier 1: 전기 입문 (1~10)

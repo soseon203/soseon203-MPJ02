@@ -1070,6 +1070,10 @@ function initEvents(){
   document.querySelectorAll('.rank-tab').forEach(tab=>{
     tab.addEventListener('click',()=>showRankingPopup(tab.dataset.sort));
   });
+  // 랭킹: 난이도 필터 탭
+  document.querySelectorAll('.rank-diff-tab').forEach(tab=>{
+    tab.addEventListener('click',()=>setRankDiffFilter(tab.dataset.diff));
+  });
 
   // 랭킹: 닫기
   document.getElementById('ranking-close').addEventListener('click',()=>hideRankingPopup());
@@ -1244,6 +1248,20 @@ function showLandingLastRun(){
   }catch(e){}
 }
 
+// 난이도 버튼 초기화 — 현재 선택 표시 + 클릭 바인딩
+function initDifficultyButtons(){
+  const current=G.difficulty||'normal';
+  document.querySelectorAll('.diff-btn').forEach(btn=>{
+    btn.classList.toggle('active', btn.dataset.diff===current);
+    btn.addEventListener('click',()=>{
+      const d=btn.dataset.diff;
+      G.difficulty=d;
+      try{ localStorage.setItem('lightningDifficulty',d); }catch(e){}
+      document.querySelectorAll('.diff-btn').forEach(b=>b.classList.toggle('active', b.dataset.diff===d));
+    });
+  });
+}
+
 function initLanding(){
   // 페이지 로드 즉시 죽은 세이브 데이터 정리 (기존 버그 브라우저 대응)
   try{
@@ -1260,9 +1278,10 @@ function initLanding(){
       if(!s.xp&&!s.level){ localStorage.removeItem('lightningGame2'); }
     }
   }catch(e){}
-  // U-Landing: RP 배지 & 마지막 런 표시
+  // U-Landing: RP 배지 & 마지막 런 표시 & 난이도 버튼
   updateLandingRpDisplay();
   showLandingLastRun();
+  initDifficultyButtons();
   // 우주 운석 애니메이션 시작
   if(window.startLandingAnim)window.startLandingAnim();
   // 초기 언어 반영 (아이콘은 별도 브랜드, 언어 버튼은 원형 아이콘만)
@@ -1289,8 +1308,11 @@ function initLanding(){
     document.getElementById('landing-screen').classList.add('hidden');
     startGame();
   });
-  // 랜딩에서도 랭킹 닫기·탭 작동하도록
+  // 랜딩에서도 랭킹 닫기·탭·난이도 필터 작동하도록
   document.getElementById('ranking-close').addEventListener('click',()=>hideRankingPopup());
+  document.querySelectorAll('.rank-diff-tab').forEach(tab=>{
+    tab.addEventListener('click',()=>setRankDiffFilter(tab.dataset.diff));
+  });
   document.querySelectorAll('.rank-tab').forEach(tab=>{
     tab.addEventListener('click',()=>showRankingPopup(tab.dataset.sort));
   });

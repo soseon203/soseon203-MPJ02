@@ -25,6 +25,8 @@ const G={
   rp:0, metaUpgrades:{}, achievements:{},
   // B-리팩토링: 빌드별 기믹 상태
   bloodlustStacks:0, blackholeTimer:5,
+  // 난이도 (영구 설정 — localStorage 복원)
+  difficulty:(localStorage.getItem('lightningDifficulty')||'normal'),
   // 신규 업그레이드 전용 상태
   rageStacks:0, rageTimer:0,
   comboCount:0, comboTimer:0,
@@ -45,6 +47,9 @@ function xpFromEnemy(enemy){
   let base=Math.max(1, Math.ceil((enemy.reward||1)/8));
   if(enemy.isBoss) base*=8;
   else if(enemy.isElite) base*=2;
+  // 난이도 XP 배율
+  const diff=DIFFICULTY_CONFIG[G.difficulty]||DIFFICULTY_CONFIG.normal;
+  base=Math.ceil(base*diff.rewardMult);
   // 유틸 트리 XP 노드 (energy_flat=XP 증폭, harvest=XP 수확, elite_hunter=엘리트 XP, bonus_wave=보스 XP, fortune=럭키)
   if(upLv('energy_flat')>0) base+=upLv('energy_flat')*2;
   if(upLv('harvest')>0) base=Math.ceil(base*(1+upLv('harvest')*0.1));
@@ -199,6 +204,7 @@ async function addRankEntry(nickname){
     damage:G.damage,
     autoRate:G.autoRate,
     skills:G.specialSkills.length,
+    difficulty:G.difficulty||'normal',   // 난이도별 랭킹 구분
     date:Date.now()
   };
   // Firestore 저장
@@ -222,10 +228,13 @@ async function fetchRanking(sortBy){
   if(!isFirebaseReady()) return _localLoad();
   try{
     const field=sortBy==='kills'?'kills':sortBy==='level'?'level':'wave';
-    const snap=await _db.collection(RANKING_COLLECTION)
+    const diffFilter=G._rankDiffFilter||G.difficulty||'normal';
+    // 난이도별로 top N 따로 쿼리 (Firestore where + orderBy)
+    let query=_db.collection(RANKING_COLLECTION)
+      .where('difficulty','==',diffFilter)
       .orderBy(field,'desc')
-      .limit(RANKING_MAX)
-      .get();
+      .limit(RANKING_MAX);
+    const snap=await query.get();
     const remote=[];
     snap.forEach(doc=>remote.push(doc.data()));
     // 로컬 + 원격 병합 (키: name+date) — Firestore 쓰기 실패한 로컬 엔트리 보존
@@ -246,14 +255,16 @@ async function fetchRanking(sortBy){
   }
 }
 
-// 랭킹 목록 렌더링
+// 랭킹 목록 렌더링 — 현재 선택된 난이도로 필터
 function _renderRankList(list,sortBy){
   const container=document.getElementById('ranking-list');
-  if(!list||list.length===0){
+  const curDiff=G._rankDiffFilter||G.difficulty||'normal';
+  const filtered=(list||[]).filter(e=>(e.difficulty||'normal')===curDiff);
+  if(filtered.length===0){
     container.innerHTML='<div class="rank-empty">'+t('ui.no_records')+'</div>';
     return;
   }
-  const sorted=[...list];
+  const sorted=[...filtered];
   if(sortBy==='kills')sorted.sort((a,b)=>b.kills-a.kills||b.wave-a.wave);
   else if(sortBy==='level')sorted.sort((a,b)=>(b.level||0)-(a.level||0)||b.wave-a.wave);
   else sorted.sort((a,b)=>b.wave-a.wave||b.kills-a.kills);
@@ -301,11 +312,26 @@ function escapeHtml(str){
 
 function showRankingPopup(sortBy){
   sortBy=sortBy||'wave';
+  // 난이도 필터 현재값으로 설정
+  if(!G._rankDiffFilter) G._rankDiffFilter=G.difficulty||'normal';
+  document.querySelectorAll('.rank-diff-tab').forEach(t=>{
+    t.classList.toggle('active',t.dataset.diff===G._rankDiffFilter);
+  });
   document.querySelectorAll('.rank-tab').forEach(t=>{
     t.classList.toggle('active',t.dataset.sort===sortBy);
   });
   renderRanking(sortBy);
   document.getElementById('ranking-popup').classList.add('show');
+}
+function setRankDiffFilter(diff){
+  G._rankDiffFilter=diff;
+  document.querySelectorAll('.rank-diff-tab').forEach(t=>{
+    t.classList.toggle('active',t.dataset.diff===diff);
+  });
+  // 현재 sort 유지하며 재렌더
+  const activeTab=document.querySelector('.rank-tab.active');
+  const sortBy=activeTab?activeTab.dataset.sort:'wave';
+  renderRanking(sortBy);
 }
 
 function hideRankingPopup(){
@@ -636,14 +662,14 @@ function getWaveType(wave){
 function getWaveConfig(wave){
   const waveType=G.currentWaveType||getWaveType(wave);
   const isBoss=waveType==='boss';
+  // 난이도 배수
+  const diff=DIFFICULTY_CONFIG[G.difficulty]||DIFFICULTY_CONFIG.normal;
   // 초반 완만 + 후반 가속 (플레이어 곱셈 데미지 성장에 맞춤)
-  //   - 초반 1-10: 기존과 동일 (완만한 선형)
-  //   - Wave 10 이후: 다항식 가속으로 파워 크립 역전 방지
   const baseHp=1+Math.max(0,wave-1)*0.55+(wave>=1?0.1:0);
-  const lateBonus=Math.pow(Math.max(0,wave-10)/8,2.3);  // W10=0, W20=1.67, W30=8.33, W50=41.6
-  const hpMult=baseHp+lateBonus;
-  const speedMult=1+Math.max(0,wave-1)*0.03;
-  const reward=Math.floor(4+wave*2);
+  const lateBonus=Math.pow(Math.max(0,wave-10)/8,2.3);
+  const hpMult=(baseHp+lateBonus)*diff.hpMult;
+  const speedMult=(1+Math.max(0,wave-1)*0.03)*diff.speedMult;
+  const reward=Math.floor((4+wave*2)*diff.rewardMult);
   let count,extraHp=1,extraSpeed=1;
 
   switch(waveType){
