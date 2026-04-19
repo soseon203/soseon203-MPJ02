@@ -496,7 +496,8 @@ function update(dt){
 }
 
 function startWave(){
-  G.currentWaveType=getWaveType(G.wave);
+  // waveClear에서 미리 확정된 타입 사용 (없으면 (최초 실행) 새로 결정)
+  if(!G.currentWaveType) G.currentWaveType=getWaveType(G.wave);
   const wc=getWaveConfig(G.wave);
   G.waveState='active';
   G.enemies=[];
@@ -530,7 +531,8 @@ function startWave(){
 function waveClear(){
   G.waveState='ready';
   G.waveTimer=0;
-  G.currentWaveType='normal';
+  // 다음 웨이브 타입을 미리 확정 — "대기 중..." 2초 동안 로스터가 정확히 예고
+  G.currentWaveType=getWaveType(G.wave+1);
   // wave_bonus (스킬): 승전 시 XP 보너스 (에너지 대체)
   if(hasSkill('wave_bonus')&&typeof gainXP==='function'){
     const bonus=Math.floor(5+G.wave*3);
