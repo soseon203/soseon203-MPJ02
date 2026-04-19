@@ -1088,13 +1088,8 @@ function initEvents(){
   });
 
   window.addEventListener('keydown',(e)=>{
-    if(e.key==='Escape'){
-      if(document.getElementById('ranking-popup').classList.contains('show')){
-        hideRankingPopup();return;
-      }
-      togglePause();
-      return;
-    }
+    // Esc 처리는 document 레벨 핸들러에 위임 (중복 방지) — 여기서는 Space 등만 처리
+    if(e.key==='Escape') return;
     if(G.paused)return;
     // 스페이스바: 진화 팝업 닫기 또는 공격
     if(e.key===' '||e.code==='Space'){
