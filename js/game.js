@@ -905,8 +905,9 @@ function killEnemy(enemy){
   if(typeof updateComboDisplay==='function') updateComboDisplay();
   G.energy+=reward;
   G.totalEnergy+=reward;
-  // R1: XP 획득 & 레벨업 체크
-  gainXP(xpFromEnemy(enemy));
+  // R1: XP 획득 & 레벨업 체크 (실제 게임에 의미 있는 지표)
+  const xpGain=xpFromEnemy(enemy);
+  gainXP(xpGain);
   // rage: 광전사 스택
   if(upLv('rage')>0){
     const maxStacks=upLv('rage')*3;
@@ -920,7 +921,9 @@ function killEnemy(enemy){
   addShockwave(enemy.x,enemy.y,enemy.color,enemy.isBoss?250:60);
   if(enemy.isBoss){addShockwave(enemy.x,enemy.y,'#ff8800',180);addShockwave(enemy.x,enemy.y,'#ffcc00',120)}
 
-  showFloatText(enemy.x,enemy.y-15,'+'+reward,'energy-gain');
+  // 처치 플로팅 텍스트: 에너지 대신 XP 표시 (스킬트리의 실제 진행 지표)
+  // 보스만 표시, 일반 적은 숨김 (시각적 노이즈 감소)
+  if(enemy.isBoss||enemy.isElite) showFloatText(enemy.x,enemy.y-15,'+'+xpGain+' XP','energy-gain');
 
   if(enemy.isBoss){
     screenFlash('big');

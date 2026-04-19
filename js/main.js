@@ -545,12 +545,11 @@ function waveClear(){
     const bw2=gameCanvas.width/dpr,bh2=gameCanvas.height/dpr;
     showFloatText(bw2/2,bh2/2-70,'+'+healAmt+' HP','energy-gain');
   }
-  // victory: 승전 보상 (업그레이드)
+  // victory: 승전 보상 — 에너지 대신 XP 표시 (실제 gainXP는 waveClear 끝에서 별도 적용)
   if(upLv('victory')>0){
     const vBonus=upLv('victory')*15;
-    G.energy+=vBonus;G.totalEnergy+=vBonus;
     const bw=gameCanvas.width/dpr,bh=gameCanvas.height/dpr;
-    showFloatText(bw/2,bh/2-55,'+'+vBonus+' '+t('msg.victory'),'energy-gain');
+    showFloatText(bw/2,bh/2-55,'+'+vBonus+' XP','energy-gain');
   }
   // 업그레이드 선택 (홀수 웨이브 클리어 시)
   const shouldSelect=G.wave%2===1||G.wave===1;
@@ -824,7 +823,7 @@ function handleClick(px,py){
       sfx.zap(0.3);
       const w=gameCanvas.width/dpr,h=gameCanvas.height/dpr;
       addSparks(w/2,h/2,3,evoColor());
-      showFloatText(px,py,'+1','energy-gain');
+      // 빈 클릭 '+1' 플로팅 제거 (에너지가 스코어용이라 시각 노이즈)
     }else{
       sfx.zap(0.1);
       addSparks(px,py,2,'#555555');
