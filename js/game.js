@@ -519,28 +519,31 @@ const PAT_INFO={
   titan:{name:'타이탄',color:'#cc6633',icon:'⬟',trait:'초고HP'}
 };
 
-function getWavePatterns(wave,waveType){
-  const wt=waveType||G.currentWaveType||'normal';
-  const result=new Set();
-  if(wt==='boss'){result.add('boss');result.add('normal');return result}
-  // 패턴 목록 (spawnEnemy 로직과 동일)
+// 단일 진실의 원천 (SSOT): 웨이브 타입별 스폰 풀
+//   spawnEnemy와 getWavePatterns 둘 다 이 함수를 사용 → 로스터와 실제 스폰 항상 일치
+function buildSpawnPool(wave, wt){
   let pats;
-  if(wt==='swarm'){
-    pats=['normal','zigzag'];
+  if(wt==='boss'){
+    pats=['normal','normal','zigzag','charger','spiral','comet','comet'];
+    if(wave>=10)pats.push('tank','splitter','dodger','orbiter','freezer');
+    if(wave>=15)pats.push('bomber','shield_bearer','teleporter','pulse');
+    if(wave>=20)pats.push('phaser','healer','mirror','absorber','swarm_mother','titan');
+  }else if(wt==='swarm'){
+    pats=['normal','normal','zigzag','zigzag'];
     if(wave>=4)pats.push('spiral');
-    if(wave>=5)pats.push('comet');
-    if(wave>=7)pats.push('splitter');
+    if(wave>=5)pats.push('comet','comet');
+    if(wave>=7)pats.push('splitter','splitter');
     if(wave>=8)pats.push('orbiter');
     if(wave>=12)pats.push('swarm_mother');
   }else if(wt==='rush'){
-    pats=['charger','zigzag','normal'];
-    if(wave>=4)pats.push('comet');
+    pats=['charger','charger','zigzag','normal'];
+    if(wave>=4)pats.push('comet','comet');
     if(wave>=6)pats.push('dodger','teleporter');
     if(wave>=8)pats.push('orbiter');
-    if(wave>=10)pats.push('phaser');
+    if(wave>=10)pats.push('dodger','phaser');
   }else if(wt==='fortress'){
-    pats=['tank','normal'];
-    if(wave>=7)pats.push('shield_bearer');
+    pats=['tank','tank','tank','normal'];
+    if(wave>=7)pats.push('shield_bearer','shield_bearer');
     if(wave>=8)pats.push('bomber');
     if(wave>=9)pats.push('freezer');
     if(wave>=12)pats.push('healer');
@@ -559,21 +562,21 @@ function getWavePatterns(wave,waveType){
     pats=['normal','zigzag','spiral','charger','tank','splitter'];
     if(wave>=5)pats.push('comet','orbiter');
     if(wave>=7)pats.push('teleporter','shield_bearer','freezer');
-    if(wave>=8)pats.push('dodger');
+    if(wave>=8)pats.push('dodger','dodger');
     if(wave>=9)pats.push('pulse','mirror');
-    if(wave>=10)pats.push('bomber');
+    if(wave>=10)pats.push('bomber','bomber');
     if(wave>=11)pats.push('absorber','swarm_mother');
     if(wave>=12)pats.push('healer');
     if(wave>=14)pats.push('titan');
-    if(wave>=15)pats.push('phaser');
+    if(wave>=15)pats.push('phaser','phaser');
   }else if(wt==='nightmare'){
     pats=['charger','tank','splitter','dodger','bomber','spiral'];
-    if(wave>=16)pats.push('healer','teleporter','shield_bearer','freezer','pulse','comet');
-    if(wave>=18)pats.push('phaser','mirror','absorber','orbiter','swarm_mother');
-    if(wave>=20)pats.push('titan');
+    if(wave>=16)pats.push('healer','healer','teleporter','shield_bearer','freezer','pulse','comet');
+    if(wave>=18)pats.push('phaser','phaser','phaser','mirror','absorber','orbiter','swarm_mother');
+    if(wave>=20)pats.push('titan','titan');
   }else{
-    pats=['normal'];
-    if(wave>=2)pats.push('zigzag');
+    pats=['normal','normal'];
+    if(wave>=2)pats.push('zigzag','zigzag');
     if(wave>=3)pats.push('spiral','comet');
     if(wave>=4)pats.push('charger','orbiter');
     if(wave>=5)pats.push('teleporter');
@@ -587,8 +590,16 @@ function getWavePatterns(wave,waveType){
     if(wave>=14)pats.push('titan');
     if(wave>=15)pats.push('phaser');
   }
-  pats.forEach(p=>result.add(p));
-  result.add('elite');
+  return pats;
+}
+
+function getWavePatterns(wave,waveType){
+  const wt=waveType||G.currentWaveType||'normal';
+  const result=new Set(buildSpawnPool(wave, wt));
+  // 보스 웨이브는 본체(boss)도 로스터에 표시
+  if(wt==='boss') result.add('boss');
+  // 엘리트는 보스 웨이브에서만 실제 스폰됨 — 해당 경우만 표시
+  if(wt==='boss') result.add('elite');
   return result;
 }
 
@@ -668,81 +679,11 @@ function spawnEnemy(){
   const isBossEnemy=wc.isBoss&&G.enemiesSpawned===0;
   const isElite=wc.isBoss&&!isBossEnemy;
 
-  // 패턴 선택 (웨이브 타입에 따라 가중치 변경)
+  // 패턴 선택 — buildSpawnPool 공유 (로스터와 완전 일치 보장)
   let pattern='normal';
   if(!isBossEnemy){
     const wt=wc.waveType||'normal';
-    let pats;
-
-    if(wt==='boss'){
-      // 보스 웨이브 잡몹: 다양한 패턴 혼합
-      pats=['normal','normal','zigzag','charger','spiral','comet','comet'];
-      if(G.wave>=10)pats.push('tank','splitter','dodger','orbiter','freezer');
-      if(G.wave>=15)pats.push('bomber','shield_bearer','teleporter','pulse');
-      if(G.wave>=20)pats.push('phaser','healer','mirror','absorber','swarm_mother','titan');
-    }else if(wt==='swarm'){
-      pats=['normal','normal','zigzag','zigzag'];
-      if(G.wave>=4)pats.push('spiral');
-      if(G.wave>=5)pats.push('comet','comet');
-      if(G.wave>=7)pats.push('splitter','splitter');
-      if(G.wave>=8)pats.push('orbiter');
-      if(G.wave>=12)pats.push('swarm_mother');
-    }else if(wt==='rush'){
-      pats=['charger','charger','zigzag','normal'];
-      if(G.wave>=4)pats.push('comet','comet');
-      if(G.wave>=6)pats.push('dodger','teleporter');
-      if(G.wave>=8)pats.push('orbiter');
-      if(G.wave>=10)pats.push('dodger','phaser');
-    }else if(wt==='fortress'){
-      pats=['tank','tank','tank','normal'];
-      if(G.wave>=7)pats.push('shield_bearer','shield_bearer');
-      if(G.wave>=8)pats.push('bomber');
-      if(G.wave>=9)pats.push('freezer');
-      if(G.wave>=12)pats.push('healer');
-      if(G.wave>=14)pats.push('titan');
-    }else if(wt==='elite'){
-      pats=['charger','tank','spiral','zigzag'];
-      if(G.wave>=6)pats.push('dodger','shield_bearer');
-      if(G.wave>=8)pats.push('pulse');
-      if(G.wave>=9)pats.push('bomber');
-      if(G.wave>=10)pats.push('teleporter','mirror');
-      if(G.wave>=12)pats.push('healer');
-      if(G.wave>=14)pats.push('absorber');
-      if(G.wave>=15)pats.push('phaser');
-      if(G.wave>=16)pats.push('titan');
-    }else if(wt==='mixed'||wt==='chaos'){
-      pats=['normal','zigzag','spiral','charger','tank','splitter'];
-      if(G.wave>=5)pats.push('comet','orbiter');
-      if(G.wave>=7)pats.push('teleporter','shield_bearer','freezer');
-      if(G.wave>=8)pats.push('dodger','dodger');
-      if(G.wave>=9)pats.push('pulse','mirror');
-      if(G.wave>=10)pats.push('bomber','bomber');
-      if(G.wave>=11)pats.push('absorber','swarm_mother');
-      if(G.wave>=12)pats.push('healer');
-      if(G.wave>=14)pats.push('titan');
-      if(G.wave>=15)pats.push('phaser','phaser');
-    }else if(wt==='nightmare'){
-      pats=['charger','tank','splitter','dodger','bomber','spiral'];
-      if(G.wave>=16)pats.push('healer','healer','teleporter','shield_bearer','freezer','pulse','comet');
-      if(G.wave>=18)pats.push('phaser','phaser','phaser','mirror','absorber','orbiter','swarm_mother');
-      if(G.wave>=20)pats.push('titan','titan');
-    }else{
-      // normal
-      pats=['normal','normal'];
-      if(G.wave>=2)pats.push('zigzag','zigzag');
-      if(G.wave>=3)pats.push('spiral','comet');
-      if(G.wave>=4)pats.push('charger','orbiter');
-      if(G.wave>=5)pats.push('teleporter');
-      if(G.wave>=6)pats.push('tank','shield_bearer');
-      if(G.wave>=7)pats.push('splitter','freezer');
-      if(G.wave>=8)pats.push('dodger','pulse');
-      if(G.wave>=9)pats.push('mirror');
-      if(G.wave>=10)pats.push('bomber');
-      if(G.wave>=11)pats.push('absorber');
-      if(G.wave>=12)pats.push('healer','swarm_mother');
-      if(G.wave>=14)pats.push('titan');
-      if(G.wave>=15)pats.push('phaser');
-    }
+    const pats=buildSpawnPool(G.wave, wt);
     pattern=pats[Math.floor(Math.random()*pats.length)];
   }
 
@@ -1004,13 +945,16 @@ function killEnemy(enemy){
     _splashActive=true;
     const splashDmg=Math.max(1,Math.floor(G.damage*0.3));
     const ex=enemy.x,ey=enemy.y;
+    let splashed=false;
     G.enemies.forEach(e2=>{
       if(e2.hp>0&&Math.hypot(e2.x-ex,e2.y-ey)<80){
         damageEnemy(e2,splashDmg);
         addSparks(e2.x,e2.y,2,'#ff8800');
+        splashed=true;
       }
     });
     addShockwave(ex,ey,'#ff6600',80);
+    if(splashed) showFloatText(ex,ey-30,'폭발!','chain');
     _splashActive=false;
   }
 
@@ -1037,9 +981,15 @@ function strikeEnemy(enemy,isDirect){
   // final_strike: 고정 데미지 추가
   if(upLv('final_strike')>0) dmg+=upLv('final_strike')*5;
   // berserk: HP 30% 이하일 때 2배
-  if(hasSkill('berserk')&&G.hp<=G.maxHp*0.3) dmg*=2;
+  if(hasSkill('berserk')&&G.hp<=G.maxHp*0.3){
+    dmg*=2;
+    if(isDirect&&Math.random()<0.3) showFloatText(enemy.x,enemy.y-35,'광폭!','chain');
+  }
   // executioner: 적 HP 30% 이하일 때 2배
-  if(hasSkill('executioner')&&enemy.hp<=enemy.maxHp*0.3) dmg*=2;
+  if(hasSkill('executioner')&&enemy.hp<=enemy.maxHp*0.3){
+    dmg*=2;
+    if(isDirect&&Math.random()<0.3) showFloatText(enemy.x,enemy.y-35,'처형!','chain');
+  }
   // weak_point: 적 HP 50% 이하 데미지 +15%
   if(upLv('weak_point')>0&&enemy.hp<=enemy.maxHp*0.5) dmg=Math.ceil(dmg*(1+upLv('weak_point')*0.15));
   // execute: 적 HP 20% 이하 데미지 +50%
@@ -1088,9 +1038,13 @@ function strikeEnemy(enemy,isDirect){
   addSparks(enemy.x,enemy.y,6,evoColor());
 
   // mark: 약점 표시 (이후 공격 +30%)
-  if(hasSkill('mark')) enemy.markTimer=3;
+  if(hasSkill('mark')){
+    if(!enemy.markTimer) showFloatText(enemy.x,enemy.y-30,'표식!','chain');
+    enemy.markTimer=3;
+  }
   // venom: 독 부여
   if(hasSkill('venom')){
+    if(!enemy.poisonTimer) showFloatText(enemy.x,enemy.y-30,'중독!','chain');
     enemy.poisonTimer=3;
     enemy.poisonDmg=Math.max(1,Math.floor(G.damage*0.2));
     enemy.poisonTick=0;
@@ -1098,6 +1052,7 @@ function strikeEnemy(enemy,isDirect){
 
   // double_strike: 20% 확률 2회 공격
   if(hasSkill('double_strike')&&isDirect&&Math.random()<0.2){
+    showFloatText(enemy.x,enemy.y-30,'2연타!','chain');
     setTimeout(()=>{
       if(enemy.hp<=0)return;
       zapBolts.push(createZapBolt(cx,cy,enemy.x,enemy.y));

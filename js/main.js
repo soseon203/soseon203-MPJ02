@@ -347,6 +347,7 @@ function update(dt){
             zapBolts.push(createZapBolt(cx,cy,tt.x,tt.y));
             damageEnemy(tt,thornDmg);
             addSparks(tt.x,tt.y,3,'#ff44ff');
+            showFloatText(tt.x,tt.y-20,'반사!','chain');
           }
         }
         // thorns_up: 업그레이드 반사
@@ -783,14 +784,17 @@ function handleClick(px,py){
     if(hasSkill('multishot')){
       const nearby=G.enemies.filter(e=>e!==hit&&e.hp>0)
         .sort((a,b)=>Math.hypot(a.x-hit.x,a.y-hit.y)-Math.hypot(b.x-hit.x,b.y-hit.y));
+      let multiFired=false;
       for(let m=0;m<Math.min(2,nearby.length);m++){
         if(Math.hypot(nearby[m].x-hit.x,nearby[m].y-hit.y)<150){
           const mdmg=Math.max(1,Math.floor(G.damage*0.4));
           zapBolts.push(createZapBolt(hit.x,hit.y,nearby[m].x,nearby[m].y));
           damageEnemy(nearby[m],mdmg);
           addSparks(nearby[m].x,nearby[m].y,3,'#ffee00');
+          multiFired=true;
         }
       }
+      if(multiFired) showFloatText(hit.x,hit.y-25,'산란!','chain');
     }
     if(hasSkill('pierce')){
       const w2=gameCanvas.width/dpr,h2=gameCanvas.height/dpr;
@@ -804,6 +808,7 @@ function handleClick(px,py){
         zapBolts.push(createZapBolt(hit.x,hit.y,behind[0].x,behind[0].y));
         damageEnemy(behind[0],pdmg);
         addSparks(behind[0].x,behind[0].y,4,evoColor());
+        showFloatText(behind[0].x,behind[0].y-25,'관통!','chain');
       }
     }
     // multi: 다중 낙뢰 업그레이드
