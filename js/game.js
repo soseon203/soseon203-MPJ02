@@ -448,12 +448,12 @@ function getUpgradeDesc(id){
     range:{cur:lv*5,next:(lv+1)*5},
     quick:{cur:lv*8,next:(lv+1)*8},
     barrier:{cur:lv,next:lv+1},
-    overload:{cur:lv*8,next:(lv+1)*8},
+    overload:{cur:lv*6,next:(lv+1)*6},
     harvest:{cur:lv*10,next:(lv+1)*10},
     regen:{cur:(lv*0.5).toFixed(1),next:((lv+1)*0.5).toFixed(1)},
     splash:{cur:lv*5,next:(lv+1)*5},
     slow_aura:{cur:lv*5,next:(lv+1)*5},
-    crit_dmg:{cur:(lv*0.25).toFixed(2),next:((lv+1)*0.25).toFixed(2)},
+    crit_dmg:{cur:(lv*0.15).toFixed(2),next:((lv+1)*0.15).toFixed(2)},
     chain_dmg:{cur:lv*10,next:(lv+1)*10},
     auto_dmg:{cur:lv*15,next:(lv+1)*15},
     vampiric:{cur:lv*2,next:(lv+1)*2},
@@ -482,7 +482,7 @@ function getUpgradeDesc(id){
     recover:{cur:lv*2,next:(lv+1)*2},
     double_tap:{cur:lv*12,next:(lv+1)*12},
     resilience:{cur:lv>0?'2':'1',next:(lv+1)>0?'2':'1'},
-    weak_point:{cur:lv*15,next:(lv+1)*15},
+    weak_point:{cur:lv*10,next:(lv+1)*10},
     elite_hunter:{cur:lv*50,next:(lv+1)*50},
     iron_core:{cur:lv*5,next:(lv+1)*5},
     chain_crit:{cur:lv*5,next:(lv+1)*5},
@@ -490,14 +490,14 @@ function getUpgradeDesc(id){
     splash_range:{cur:lv*20,next:(lv+1)*20},
     cooldown:{cur:lv,next:lv+1},
     energy_shield:{cur:lv*15,next:(lv+1)*15},
-    execute:{cur:lv*50,next:(lv+1)*50},
+    execute:{cur:lv*20,next:(lv+1)*20},
     lifeline:{cur:lv*2,next:(lv+1)*2},
-    surge:{cur:lv*6,next:(lv+1)*6},
+    surge:{cur:lv*5,next:(lv+1)*5},
     field_expand:{cur:lv*8,next:(lv+1)*8},
     bonus_wave:{cur:lv*80,next:(lv+1)*80},
     plasma:{cur:lv*20,next:(lv+1)*20},
     rebirth:{cur:lv*20,next:(lv+1)*20},
-    final_strike:{cur:lv*5,next:(lv+1)*5},
+    final_strike:{cur:lv*3,next:(lv+1)*3},
     energy_storm:{cur:lv*15,next:(lv+1)*15},
     titan_guard:{cur:lv*50,next:(lv+1)*50,curR:lv*2,nextR:(lv+1)*2}
   };
@@ -636,8 +636,12 @@ function getWaveType(wave){
 function getWaveConfig(wave){
   const waveType=G.currentWaveType||getWaveType(wave);
   const isBoss=waveType==='boss';
-  // 튜토리얼 웨이브(1~2) 완화: HP/스피드/카운트 모두 부드럽게 시작
-  const hpMult=1+Math.max(0,wave-1)*0.55+(wave>=1?0.1:0);
+  // 초반 완만 + 후반 가속 (플레이어 곱셈 데미지 성장에 맞춤)
+  //   - 초반 1-10: 기존과 동일 (완만한 선형)
+  //   - Wave 10 이후: 다항식 가속으로 파워 크립 역전 방지
+  const baseHp=1+Math.max(0,wave-1)*0.55+(wave>=1?0.1:0);
+  const lateBonus=Math.pow(Math.max(0,wave-10)/8,2.3);  // W10=0, W20=1.67, W30=8.33, W50=41.6
+  const hpMult=baseHp+lateBonus;
   const speedMult=1+Math.max(0,wave-1)*0.03;
   const reward=Math.floor(4+wave*2);
   let count,extraHp=1,extraSpeed=1;
@@ -979,66 +983,71 @@ function strikeEnemy(enemy,isDirect){
   const cx=w/2, cy=h/2;
   let dmg=G.damage;
 
-  // 🔥 광전사: 잃은 HP% 만큼 데미지 스케일링 (keystone)
-  if(typeof getBerserkerBonus==='function') dmg=Math.ceil(dmg*getBerserkerBonus());
-  // 🩸 피의 의지: 누적 스택을 직접 클릭 시 소모
+  // ─────── 1단계: 키스톤 곱배수 (밸런스 설계상 유지) ───────
+  if(typeof getBerserkerBonus==='function') dmg*=getBerserkerBonus();
   if(isDirect&&typeof consumeBloodlust==='function'){
     const mult=consumeBloodlust();
-    if(mult>1) dmg=Math.ceil(dmg*mult);
+    if(mult>1) dmg*=mult;
   }
-  // click_amp: 클릭 공격 보너스
+
+  // ─────── 2단계: 가산 보너스 (base에 직접 더함) ───────
   if(isDirect&&upLv('click_amp')>0) dmg+=upLv('click_amp')*3;
-  // final_strike: 고정 데미지 추가
-  if(upLv('final_strike')>0) dmg+=upLv('final_strike')*5;
-  // berserk: HP 30% 이하일 때 2배
+  if(upLv('final_strike')>0) dmg+=upLv('final_strike')*3; // 5→3 완화
+
+  // ─────── 3단계: "조건부 가산 멀티플라이어" — 전부 한 번에 합산 후 곱 ───────
+  // (이전: 각 조건마다 독립 곱셈 → 중첩 시 수십배 폭주)
+  // (현재: 전부 가산 → 최대 조건 중첩 시에도 통제 가능한 범위)
+  let condMult=1;
+  // 보스 스킬 조건부 (가산 +1 each, 기존 ×2씩 → 가산)
   if(hasSkill('berserk')&&G.hp<=G.maxHp*0.3){
-    dmg*=2;
+    condMult+=1;
     if(isDirect&&Math.random()<0.3) showFloatText(enemy.x,enemy.y-35,'광폭!','chain');
   }
-  // executioner: 적 HP 30% 이하일 때 2배
   if(hasSkill('executioner')&&enemy.hp<=enemy.maxHp*0.3){
-    dmg*=2;
+    condMult+=1;
     if(isDirect&&Math.random()<0.3) showFloatText(enemy.x,enemy.y-35,'처형!','chain');
   }
-  // weak_point: 적 HP 50% 이하 데미지 +15%
-  if(upLv('weak_point')>0&&enemy.hp<=enemy.maxHp*0.5) dmg=Math.ceil(dmg*(1+upLv('weak_point')*0.15));
-  // execute: 적 HP 20% 이하 데미지 +50%
-  if(upLv('execute')>0&&enemy.hp<=enemy.maxHp*0.2) dmg=Math.ceil(dmg*(1+upLv('execute')*0.5));
-  // boss_hunter: 보스 데미지 +15%
-  if(upLv('boss_hunter')>0&&enemy.isBoss) dmg=Math.ceil(dmg*(1+upLv('boss_hunter')*0.15));
-  // sniper: 먼 적일수록 +80%
+  // 업그레이드 조건부 (계수 대폭 하향)
+  if(upLv('weak_point')>0&&enemy.hp<=enemy.maxHp*0.5) condMult+=upLv('weak_point')*0.1;  // lv10: +1 (was +1.5)
+  if(upLv('execute')>0&&enemy.hp<=enemy.maxHp*0.2) condMult+=upLv('execute')*0.2;        // lv10: +2 (was +5)
+  if(upLv('boss_hunter')>0&&enemy.isBoss) condMult+=upLv('boss_hunter')*0.12;
+  // 거리/위치 기반
   if(hasSkill('sniper')){
     const sd=Math.hypot(enemy.x-cx,enemy.y-cy);
     const maxD=Math.max(w,h)/2;
-    dmg=Math.ceil(dmg*(1+(sd/maxD)*0.8));
+    condMult+=(sd/maxD)*0.8;
   }
-  // rage: 광전사 버프
-  if(G.rageStacks>0&&upLv('rage')>0) dmg=Math.ceil(dmg*(1+G.rageStacks*upLv('rage')*0.1));
-  // critical (스킬 + 업그레이드)
-  // precision: 클릭 전용 크리 확률 (기존 crit_dmg 중복 문제 해소)
+  if(hasSkill('magnet')){
+    const md=Math.hypot(enemy.x-cx,enemy.y-cy);
+    const maxD=Math.max(w,h)/2;
+    condMult+=(1-md/maxD)*0.5;
+  }
+  // rage (연속 처치 스택)
+  if(G.rageStacks>0&&upLv('rage')>0) condMult+=G.rageStacks*upLv('rage')*0.08;  // 0.1→0.08
+  dmg*=condMult;
+
+  // ─────── 4단계: 전역 % 증폭 (overload/surge/energy_storm) — 가산 통합 ───────
+  let globalMult=1;
+  if(upLv('overload')>0) globalMult+=upLv('overload')*0.06;      // lv10: +0.6 (was ×1.8)
+  if(upLv('surge')>0) globalMult+=upLv('surge')*0.05;            // lv10: +0.5
+  if(upLv('energy_storm')>0&&G.hp>=G.maxHp*0.8) globalMult+=upLv('energy_storm')*0.12;
+  dmg*=globalMult;
+
+  // ─────── 5단계: 크리티컬 (대폭 하향) ───────
   let isCrit=false;
   let critChance=upLv('crit')*0.03;
   if(isDirect&&upLv('precision')>0) critChance+=upLv('precision')*0.04;
   if(hasSkill('critical')) critChance+=0.15;
   if(critChance>0&&Math.random()<critChance){
-    const critMult=3+upLv('crit')*0.15+upLv('crit_dmg')*0.25;
-    dmg=Math.ceil(dmg*critMult);isCrit=true;
+    // 기본 2x (3→2), 상승폭도 하향
+    const critMult=2+upLv('crit')*0.1+upLv('crit_dmg')*0.15;  // lv10: 2+1+1.5 = 4.5x (was 9.5x)
+    dmg*=critMult;
+    isCrit=true;
   }
-  // lifeline: 크리티컬 적중 시 HP 회복
   if(isCrit&&upLv('lifeline')>0) G.hp=Math.min(G.maxHp,G.hp+upLv('lifeline')*2);
-  // overload: 전체 데미지 증폭
-  if(upLv('overload')>0) dmg=Math.ceil(dmg*(1+upLv('overload')*0.08));
-  // surge: 전류 급등
-  if(upLv('surge')>0) dmg=Math.ceil(dmg*(1+upLv('surge')*0.06));
-  // energy_storm: 에너지 200 이상 시 데미지 +15%
-  // energy_storm: HP 80% 이상일 때 데미지 +15% (에너지 조건 제거)
-  if(upLv('energy_storm')>0&&G.hp>=G.maxHp*0.8) dmg=Math.ceil(dmg*(1+upLv('energy_storm')*0.15));
-  // magnet
-  if(hasSkill('magnet')){
-    const md=Math.hypot(enemy.x-cx,enemy.y-cy);
-    const maxD=Math.max(w,h)/2;
-    dmg=Math.ceil(dmg*(1+(1-md/maxD)*0.5));
-  }
+
+  // 최종 반올림 (Math.ceil 체이닝 제거 → 누적 오차 해소)
+  dmg=Math.max(1,Math.ceil(dmg));
 
   zapBolts.push(createZapBolt(cx,cy,enemy.x,enemy.y));
 

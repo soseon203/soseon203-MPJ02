@@ -440,16 +440,16 @@ I18N.ko['up.recover']='긴급 복구';    I18N.ko['up.recover_d']='HP 30% 이하
 // Tier 3
 I18N.ko['up.crit']='치명타';          I18N.ko['up.crit_d']='크리티컬 확률 +3%';
 I18N.ko['up.barrier']='보호막';       I18N.ko['up.barrier_d']='받는 피해 감소 +1';
-I18N.ko['up.overload']='전력 증폭';   I18N.ko['up.overload_d']='전체 데미지 +8%';
+I18N.ko['up.overload']='전력 증폭';   I18N.ko['up.overload_d']='전체 데미지 +6%';
 I18N.ko['up.splash']='충격파';        I18N.ko['up.splash_d']='공격 시 주변 5% 스플래시';
 I18N.ko['up.slow_aura']='감속장';     I18N.ko['up.slow_aura_d']='적 이동속도 -5%';
 I18N.ko['up.double_tap']='이중 타격'; I18N.ko['up.double_tap_d']='클릭 12% 확률 2회 공격';
 I18N.ko['up.resilience']='회복 탄성'; I18N.ko['up.resilience_d']='HP 50% 이하 시 재생 2배';
-I18N.ko['up.weak_point']='약점 공략'; I18N.ko['up.weak_point_d']='적 HP 50% 이하 데미지 +15%';
+I18N.ko['up.weak_point']='약점 공략'; I18N.ko['up.weak_point_d']='적 HP 50% 이하 데미지 +10%';
 I18N.ko['up.elite_hunter']='엘리트 사냥';I18N.ko['up.elite_hunter_d']='엘리트 처치 에너지 +50%';
 I18N.ko['up.iron_core']='철벽 코어';  I18N.ko['up.iron_core_d']='피해 감소 +5%';
 // Tier 4
-I18N.ko['up.crit_dmg']='치명 강화';   I18N.ko['up.crit_dmg_d']='크리티컬 배율 +0.25';
+I18N.ko['up.crit_dmg']='치명 강화';   I18N.ko['up.crit_dmg_d']='크리티컬 배율 +0.15';
 I18N.ko['up.chain_dmg']='체인 증폭';  I18N.ko['up.chain_dmg_d']='체인 데미지 비율 +10%';
 I18N.ko['up.auto_dmg']='자동 강화';   I18N.ko['up.auto_dmg_d']='자동 공격 데미지 +15%';
 I18N.ko['up.vampiric']='흡혈';        I18N.ko['up.vampiric_d']='적 처치 시 HP +2 회복';
@@ -467,9 +467,9 @@ I18N.ko['up.absorption']='에너지 변환';I18N.ko['up.absorption_d']='받는 �
 I18N.ko['up.thorns_up']='반사 번개';  I18N.ko['up.thorns_up_d']='피격 시 반사 데미지 20%';
 I18N.ko['up.fortune']='행운';         I18N.ko['up.fortune_d']='2배 에너지 확률 +5%';
 I18N.ko['up.chain_range']='체인 범위';I18N.ko['up.chain_range_d']='체인 사거리 +30';
-I18N.ko['up.execute']='처형';         I18N.ko['up.execute_d']='적 HP 20% 이하 데미지 +50%';
+I18N.ko['up.execute']='처형';         I18N.ko['up.execute_d']='적 HP 20% 이하 데미지 +20%';
 I18N.ko['up.lifeline']='생명선';      I18N.ko['up.lifeline_d']='크리티컬 적중 시 HP 2 회복';
-I18N.ko['up.surge']='전류 급등';      I18N.ko['up.surge_d']='전체 데미지 +6%';
+I18N.ko['up.surge']='전류 급등';      I18N.ko['up.surge_d']='전체 데미지 +5%';
 I18N.ko['up.field_expand']='필드 확장';I18N.ko['up.field_expand_d']='전체 공격 범위 +8';
 I18N.ko['up.bonus_wave']='추가 보상'; I18N.ko['up.bonus_wave_d']='보스 처치 에너지 +80%';
 // Tier 6
@@ -480,7 +480,7 @@ I18N.ko['up.auto_shield']='에너지 실드';I18N.ko['up.auto_shield_d']='12초�
 I18N.ko['up.rapid_fire']='속사';      I18N.ko['up.rapid_fire_d']='자동 공격 속도 +20%';
 I18N.ko['up.plasma']='플라즈마';      I18N.ko['up.plasma_d']='공격 15% 확률 범위 폭발';
 I18N.ko['up.rebirth']='부활';         I18N.ko['up.rebirth_d']='HP 0 시 20% 부활 (전투당 1회)';
-I18N.ko['up.final_strike']='최종 일격';I18N.ko['up.final_strike_d']='모든 공격에 고정 데미지 +5';
+I18N.ko['up.final_strike']='최종 일격';I18N.ko['up.final_strike_d']='모든 공격에 고정 데미지 +3';
 I18N.ko['up.energy_storm']='에너지 폭풍';I18N.ko['up.energy_storm_d']='에너지 200 이상 시 데미지 +15%';
 I18N.ko['up.titan_guard']='타이탄 가드';I18N.ko['up.titan_guard_d']='최대 HP +50, 피해 감소 +2';
 
@@ -505,15 +505,15 @@ I18N.en['up.bolt_size']='Bolt Expand';   I18N.en['up.bolt_size_d']='Click hit ra
 I18N.en['up.recover']='Emergency Heal';  I18N.en['up.recover_d']='Regen +2/s when HP below 30%';
 I18N.en['up.crit']='Critical Hit';       I18N.en['up.crit_d']='Critical chance +3%';
 I18N.en['up.barrier']='Barrier';         I18N.en['up.barrier_d']='Damage reduction +1';
-I18N.en['up.overload']='Power Surge';    I18N.en['up.overload_d']='All damage +8%';
+I18N.en['up.overload']='Power Surge';    I18N.en['up.overload_d']='All damage +6%';
 I18N.en['up.splash']='Shockwave';        I18N.en['up.splash_d']='5% splash on attack';
 I18N.en['up.slow_aura']='Slow Aura';     I18N.en['up.slow_aura_d']='Enemy speed -5%';
 I18N.en['up.double_tap']='Double Tap';   I18N.en['up.double_tap_d']='12% chance to attack twice';
 I18N.en['up.resilience']='Resilience';   I18N.en['up.resilience_d']='x2 regen when HP below 50%';
-I18N.en['up.weak_point']='Weak Point';   I18N.en['up.weak_point_d']='Damage +15% to enemies below 50% HP';
+I18N.en['up.weak_point']='Weak Point';   I18N.en['up.weak_point_d']='Damage +10% to enemies below 50% HP';
 I18N.en['up.elite_hunter']='Elite Hunter';I18N.en['up.elite_hunter_d']='Elite kill energy +50%';
 I18N.en['up.iron_core']='Iron Core';     I18N.en['up.iron_core_d']='Damage reduction +5%';
-I18N.en['up.crit_dmg']='Critical Boost'; I18N.en['up.crit_dmg_d']='Critical multiplier +0.25';
+I18N.en['up.crit_dmg']='Critical Boost'; I18N.en['up.crit_dmg_d']='Critical multiplier +0.15';
 I18N.en['up.chain_dmg']='Chain Boost';   I18N.en['up.chain_dmg_d']='Chain damage ratio +10%';
 I18N.en['up.auto_dmg']='Auto Boost';     I18N.en['up.auto_dmg_d']='Auto-attack damage +15%';
 I18N.en['up.vampiric']='Vampiric';       I18N.en['up.vampiric_d']='Recover 2 HP on kill';
@@ -530,7 +530,7 @@ I18N.en['up.absorption']='Absorption';   I18N.en['up.absorption_d']='Convert 5% 
 I18N.en['up.thorns_up']='Reflect Bolt';  I18N.en['up.thorns_up_d']='Reflect 20% damage on hit';
 I18N.en['up.fortune']='Fortune';         I18N.en['up.fortune_d']='Double energy chance +5%';
 I18N.en['up.chain_range']='Chain Range'; I18N.en['up.chain_range_d']='Chain range +30';
-I18N.en['up.execute']='Execute';         I18N.en['up.execute_d']='Damage +50% to enemies below 20% HP';
+I18N.en['up.execute']='Execute';         I18N.en['up.execute_d']='Damage +20% to enemies below 20% HP';
 I18N.en['up.lifeline']='Lifeline';       I18N.en['up.lifeline_d']='Recover 2 HP on critical hit';
 I18N.en['up.surge']='Power Surge';       I18N.en['up.surge_d']='All damage +6%';
 I18N.en['up.field_expand']='Field Expand';I18N.en['up.field_expand_d']='All attack range +8';
@@ -542,7 +542,7 @@ I18N.en['up.auto_shield']='Energy Shield';I18N.en['up.auto_shield_d']='Block 1 h
 I18N.en['up.rapid_fire']='Rapid Fire';   I18N.en['up.rapid_fire_d']='Auto-attack speed +20%';
 I18N.en['up.plasma']='Plasma';           I18N.en['up.plasma_d']='15% chance area explosion';
 I18N.en['up.rebirth']='Rebirth';         I18N.en['up.rebirth_d']='Revive at 20% HP (once per battle)';
-I18N.en['up.final_strike']='Final Strike';I18N.en['up.final_strike_d']='All attacks +5 flat damage';
+I18N.en['up.final_strike']='Final Strike';I18N.en['up.final_strike_d']='All attacks +3 flat damage';
 I18N.en['up.energy_storm']='Energy Storm';I18N.en['up.energy_storm_d']='Damage +15% when energy 200+';
 I18N.en['up.titan_guard']='Titan Guard'; I18N.en['up.titan_guard_d']='Max HP +50, damage reduction +2';
 
