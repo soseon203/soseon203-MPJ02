@@ -776,7 +776,10 @@ function handleClick(px,py){
   G.enemies.forEach(e=>{
     if(e.hp<=0)return;
     const d=Math.hypot(e.x-px,e.y-py);
-    if(d<CLICK_RADIUS&&d<minDist){minDist=d;hit=e}
+    // 보스/대형 적: 몸체 반지름만큼 거리 할인 (외곽 클릭도 인식)
+    const bodyR=Math.max(0,(e.size||12)*0.9);
+    const effD=Math.max(0, d-bodyR);
+    if(effD<CLICK_RADIUS&&d<minDist){minDist=d;hit=e}
   });
 
   let hitProj=-1;
@@ -958,6 +961,8 @@ function initEvents(){
     openSoundSettings();
     closeMoreMenu();
   });
+  // 초기 아이콘 동기화 — 저장된 볼륨이 0이면 🔇 로 시작
+  setTimeout(()=>{ try{ syncSoundBtnIcon&&syncSoundBtnIcon(); }catch(e){} }, 0);
 
   // ─────── 사운드 설정 팝오버 ───────
   function openSoundSettings(){
@@ -965,6 +970,8 @@ function initEvents(){
     if(!pop) return;
     pop.classList.remove('hidden');
     refreshSoundBars();
+    // BGM 볼륨이 0 초과인데 아직 재생 안 됐으면 이 사용자 제스처로 시작 시도
+    if(sfx.bgmVolume>0 && !sfx._bgmStarted) sfx.startBgm();
   }
   function closeSoundSettings(){
     const pop=document.getElementById('sound-settings');
@@ -979,6 +986,26 @@ function initEvents(){
         btn.classList.toggle('active', lv===cur);
       });
     });
+    syncSoundBtnIcon();
+  }
+  // 사운드 버튼 아이콘/라벨을 현재 볼륨 상태에 맞춰 갱신
+  function syncSoundBtnIcon(){
+    const sb=document.getElementById('sound-btn');
+    if(!sb) return;
+    const iconEl=sb.querySelector('span:first-child');
+    const labelEl=sb.querySelector('span:nth-child(2)');
+    const both0=sfx.sfxVolume===0&&sfx.bgmVolume===0;
+    const anyMute=sfx.sfxVolume===0||sfx.bgmVolume===0;
+    let icon='🔊';
+    if(both0) icon='🔇';
+    else if(anyMute) icon='🔉';
+    if(iconEl) iconEl.textContent=icon;
+    sb.classList.toggle('muted', both0);
+    // 라벨에 현재 레벨 요약 표시
+    if(labelEl){
+      const name=(typeof t==='function')?t('ui.sound'):'사운드';
+      labelEl.textContent=`${name} ${sfx.sfxVolume}/${sfx.bgmVolume}`;
+    }
   }
   document.getElementById('sound-settings-close').addEventListener('click',closeSoundSettings);
   // 바 클릭으로 볼륨 변경
@@ -1148,11 +1175,7 @@ function initEvents(){
   document.getElementById('pause-sound').addEventListener('click',()=>{
     sfx.init();
     const on=sfx.toggle();
-    // more-menu 버튼 아이콘 동기화 (first-child span)
-    const sb=document.getElementById('sound-btn');
-    const sbIcon=sb&&sb.querySelector('span:first-child');
-    if(sbIcon) sbIcon.textContent=on?'🔊':'🔇';
-    if(sb) sb.classList.toggle('muted',!on);
+    syncSoundBtnIcon();
     document.getElementById('pause-sound').textContent=(on?'🔊 ':'🔇 ')+t('ui.sound');
     document.getElementById('pause-sound').classList.toggle('muted',!on);
   });

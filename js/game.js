@@ -1195,7 +1195,12 @@ function autoAttack(){
   if(G.autoRate<=0||G.enemies.length===0)return;
   const w=gameCanvas.width/dpr, h=gameCanvas.height/dpr;
   const cx=w/2,cy=h/2;
-  const alive=G.enemies.filter(e=>e.hp>0&&e.x>=0&&e.x<=w&&e.y>=0&&e.y<=h);
+  // 보스/큰 적은 중심이 살짝 화면 밖이어도 본체가 보이면 타겟 허용 (크기 반영)
+  const alive=G.enemies.filter(e=>{
+    if(e.hp<=0) return false;
+    const m=e.size||12;
+    return e.x+m>=0 && e.x-m<=w && e.y+m>=0 && e.y-m<=h;
+  });
   if(alive.length===0)return;
   alive.sort((a,b)=>Math.hypot(a.x-cx,a.y-cy)-Math.hypot(b.x-cx,b.y-cy));
   const target=alive[0];

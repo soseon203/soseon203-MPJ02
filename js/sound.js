@@ -7,7 +7,7 @@ class SFX {
     this._mp3Buffers={};this._mp3Audio={};
     // 볼륨 시스템 — 0~5 단계 (0=음소거, 5=최대)
     this.sfxVolume=3;  // 기본 60% (너무 시끄럽지 않게)
-    this.bgmVolume=2;  // 기본 40% (배경음은 더 조용히)
+    this.bgmVolume=3;  // 기본 60% (배경음도 또렷하게 들리도록)
     // BGM 상태
     this.bgmTracks=['sounds/Meteor cascade_1.mp3','sounds/Meteor cascade_2.mp3'];
     this.bgmAudio=null;this.bgmCurrentIdx=-1;this._bgmFadeTimer=null;this._bgmStarted=false;
