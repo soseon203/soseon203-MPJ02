@@ -73,16 +73,14 @@ function gainXP(amount){
     G.levelUpQueue++;
     leveled=true;
   }
-  // U4: 레벨업 시 대형 배너 + 화면 플래시
+  // U4: 레벨업 시 대형 배너 + 화면 플래시 (게임은 계속 진행, 트리는 수동 오픈)
   if(leveled){
     if(typeof showLevelUpBanner==='function') showLevelUpBanner(G.level);
     if(typeof screenFlash==='function') screenFlash('evo');
     if(typeof sfx!=='undefined'&&sfx.upgrade) sfx.upgrade();
-  }
-  // 레벨업 큐가 있고, 현재 아무 팝업도 안 열려있으면 선택 팝업 트리거
-  if(G.levelUpQueue>0 && !G.skillSelecting && !G.upgradeSelecting && !G.levelUpSelecting && !G.treeOpen && !G.paused && G.hp>0){
-    // R4: 하이브리드 — 레벨업 시 트리 자동 오픈 (0.8s 후 — 배너 감상 시간)
-    if(typeof openTreeOnLevelUp==='function') setTimeout(openTreeOnLevelUp,800);
+    // 트리 버튼 SP 강조 — UI 업데이트로 has-sp 펄스 자동 반영
+    G.levelUpQueue=0; // 큐 소진 (자동 오픈 안 함)
+    if(typeof updateUI==='function') updateUI();
   }
 }
 

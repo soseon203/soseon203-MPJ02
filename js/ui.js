@@ -98,7 +98,8 @@ function showLevelUpBanner(level){
   if(!area) return;
   const el=document.createElement('div');
   el.className='level-up-banner';
-  el.innerHTML=`<div class="lub-main">${t('ui.level_up')}</div><div class="lub-sub">Lv.${level}</div>`;
+  const hint=LANG==='en'?'Skill Point acquired — check 🧬':'🧬 스킬 포인트 획득';
+  el.innerHTML=`<div class="lub-main">${t('ui.level_up')}</div><div class="lub-sub">Lv.${level}</div><div class="lub-hint">${hint}</div>`;
   area.appendChild(el);
   setTimeout(()=>el.remove(),1600);
 }
