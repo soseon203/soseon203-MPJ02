@@ -928,6 +928,12 @@ function initEvents(){
 
   // 업그레이드 버튼은 rebuildUpgradeGrid에서 동적으로 이벤트 바인딩
 
+  // more-menu 닫기 헬퍼
+  const closeMoreMenu=()=>{
+    const mm=document.getElementById('more-menu');
+    if(mm) mm.classList.add('hidden');
+  };
+
   document.getElementById('lang-btn').addEventListener('click',e=>{
     e.stopPropagation();
     const newLang=LANG==='ko'?'en':'ko';
@@ -938,13 +944,19 @@ function initEvents(){
     updateSkillDisplay();
     updateUI();
     updateEnemyRoster();
+    closeMoreMenu();
   });
 
   document.getElementById('sound-btn').addEventListener('click',e=>{
-    e.stopPropagation();sfx.init();
+    e.stopPropagation();
+    sfx.init();
     const on=sfx.toggle();
-    document.getElementById('sound-btn').querySelector('.top-btn-icon').textContent=on?'🔊':'🔇';
-    document.getElementById('sound-btn').classList.toggle('muted',!on);
+    // more-menu 내부 버튼 구조: <span>🔊</span><span>사운드</span> — 첫 span이 아이콘
+    const btn=document.getElementById('sound-btn');
+    const icon=btn&&btn.querySelector('span:first-child');
+    if(icon) icon.textContent=on?'🔊':'🔇';
+    if(btn) btn.classList.toggle('muted',!on);
+    closeMoreMenu();
   });
 
   // 진화 토스트: 클릭 시 즉시 닫기 (자동 사라짐 타이머가 있어도 수동 dismiss 가능)
@@ -996,11 +1008,12 @@ function initEvents(){
   // 랭킹: 게임오버에서 랭킹 보기
   document.getElementById('go-view-rank').addEventListener('click',()=>showRankingPopup());
 
-  // 랭킹: 상단 버튼
+  // 랭킹: 더보기 메뉴 버튼
   document.getElementById('ranking-btn').addEventListener('click',e=>{
     e.stopPropagation();
     if(!G.paused&&G.hp>0&&G.waveState!=='ready'){togglePause()}
     showRankingPopup();
+    closeMoreMenu();
   });
 
   // 랭킹: 탭 전환
@@ -1081,8 +1094,11 @@ function initEvents(){
   document.getElementById('pause-sound').addEventListener('click',()=>{
     sfx.init();
     const on=sfx.toggle();
-    document.getElementById('sound-btn').querySelector('.top-btn-icon').textContent=on?'🔊':'🔇';
-    document.getElementById('sound-btn').classList.toggle('muted',!on);
+    // more-menu 버튼 아이콘 동기화 (first-child span)
+    const sb=document.getElementById('sound-btn');
+    const sbIcon=sb&&sb.querySelector('span:first-child');
+    if(sbIcon) sbIcon.textContent=on?'🔊':'🔇';
+    if(sb) sb.classList.toggle('muted',!on);
     document.getElementById('pause-sound').textContent=(on?'🔊 ':'🔇 ')+t('ui.sound');
     document.getElementById('pause-sound').classList.toggle('muted',!on);
   });
