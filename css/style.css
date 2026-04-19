@@ -198,6 +198,15 @@ body{font-family:'Noto Sans KR','Malgun Gothic',sans-serif;background:#05051a;co
 #tree-close{background:rgba(255,68,68,.2);border:1px solid rgba(255,68,68,.4);color:#ff6644;width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:.85em}
 #tree-close:hover{background:rgba(255,68,68,.35)}
 /* 창 넓이가 커져도 컬럼이 과하게 벌어지지 않도록 고정폭 근처 유지 */
+/* 보스 스킬 목록 (트리 팝업 상단) */
+#tree-boss-skills{display:flex;align-items:center;gap:10px;padding:8px 12px;background:rgba(0,212,255,.08);border:1px solid rgba(0,212,255,.3);border-radius:10px;margin-bottom:8px;max-width:1000px;width:100%;flex-shrink:0}
+#tree-boss-skills.hidden{display:none}
+#tree-boss-skills-label{font-size:.68em;color:rgba(0,212,255,.9);font-weight:700;letter-spacing:1px;white-space:nowrap}
+#tree-boss-skills-list{display:flex;flex-wrap:wrap;gap:6px;flex:1}
+.tree-boss-skill{display:flex;align-items:center;gap:6px;padding:4px 10px;background:rgba(0,212,255,.12);border:1px solid rgba(0,212,255,.35);border-radius:8px;font-size:.72em;line-height:1.3}
+.tree-boss-skill-ico{font-size:1.1em}
+.tree-boss-skill-name{color:#cceeff;font-weight:700}
+.tree-boss-skill-desc{color:rgba(255,255,255,.6);font-size:.88em}
 #tree-columns{display:flex;gap:10px;flex:1;overflow:hidden;min-height:0;justify-content:center;width:100%;max-width:1000px;margin:0 auto}
 .tree-col{flex:0 1 320px;min-width:240px;max-width:340px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:8px;display:flex;flex-direction:column}
 .tree-col[data-tree="atk"]{flex:0 1 360px;max-width:380px}
@@ -425,6 +434,11 @@ body.state-gameover #enemy-roster{display:none !important}
 .go-stat-label{font-size:.62em;color:rgba(255,255,255,.5);margin-bottom:3px;white-space:nowrap;letter-spacing:.5px}
 .go-stat-value{font-size:1.2em;font-weight:900;color:#ffee00;white-space:nowrap}
 .go-section-title{font-size:.72em;color:rgba(255,255,255,.4);text-align:center;margin-bottom:6px;letter-spacing:1px}
+/* RP 획득 강조 카드 */
+#go-rp-card{max-width:420px;width:100%;background:linear-gradient(135deg,rgba(255,100,255,.18),rgba(150,80,200,.12));border:1px solid rgba(255,100,255,.5);border-radius:12px;padding:10px 14px;text-align:center;box-shadow:0 0 18px rgba(255,100,255,.2)}
+.go-rp-label{font-size:.68em;color:rgba(255,200,255,.85);letter-spacing:1px;margin-bottom:2px}
+.go-rp-value{font-size:1.4em;font-weight:900;color:#ff99ff;text-shadow:0 0 12px rgba(255,100,255,.6)}
+.go-rp-unit{font-size:.68em;color:rgba(255,200,255,.8);margin-left:4px}
 /* legacy (구버전 정의는 위쪽에서 420px로 통합됨) */
 #go-upgrade-detail{display:grid;grid-template-columns:1fr 1fr;gap:5px}
 .go-upg-item{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:6px 8px;display:flex;justify-content:space-between;align-items:center;font-size:.72em}

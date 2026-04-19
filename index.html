@@ -11,7 +11,7 @@
   <meta property="og:type" content="website">
   <meta name="description" content="번개를 진화시키며 끝없는 웨이브에 도전하는 HTML5 캐주얼 게임">
   <link rel="icon" type="image/png" href="img/favicon.png">
-  <link rel="stylesheet" href="css/style.css?v=53">
+  <link rel="stylesheet" href="css/style.css?v=54">
 </head>
 
 <body>
@@ -216,6 +216,11 @@
         <div id="tree-sp-display">SP: <span id="tree-sp">0</span></div>
         <button id="tree-close" title="닫기">✕</button>
       </div>
+      <!-- 보스 드롭 스킬 목록 (획득한 경우만 표시) -->
+      <div id="tree-boss-skills" class="hidden">
+        <span id="tree-boss-skills-label">보스 스킬</span>
+        <div id="tree-boss-skills-list"></div>
+      </div>
       <div id="tree-columns">
         <div class="tree-col" data-tree="atk">
           <div class="tree-col-title">🗡️ 낙뢰 <span class="tree-col-sub">단일 극딜</span></div>
@@ -279,16 +284,16 @@
 
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
-  <script src="js/firebase-config.js?v=53"></script>
-  <script src="js/locales.js?v=53"></script>
-  <script src="js/sound.js?v=53"></script>
-  <script src="js/config.js?v=53"></script>
-  <script src="js/game.js?v=53"></script>
-  <script src="js/tree.js?v=53"></script>
-  <script src="js/render.js?v=53"></script>
-  <script src="js/ui.js?v=53"></script>
-  <script src="js/landing-anim.js?v=53"></script>
-  <script src="js/main.js?v=53"></script>
+  <script src="js/firebase-config.js?v=54"></script>
+  <script src="js/locales.js?v=54"></script>
+  <script src="js/sound.js?v=54"></script>
+  <script src="js/config.js?v=54"></script>
+  <script src="js/game.js?v=54"></script>
+  <script src="js/tree.js?v=54"></script>
+  <script src="js/render.js?v=54"></script>
+  <script src="js/ui.js?v=54"></script>
+  <script src="js/landing-anim.js?v=54"></script>
+  <script src="js/main.js?v=54"></script>
 </body>
 
 </html>

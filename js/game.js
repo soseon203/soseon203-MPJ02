@@ -210,7 +210,8 @@ async function addRankEntry(nickname){
   // localStorage 캐시에도 저장
   const list=_localLoad();
   list.push(entry);
-  list.sort((a,b)=>b.wave-a.wave||b.kills-a.kills||b.energy-a.energy);
+  // 정렬 타이브레이커: wave → kills → level (energy 제거됨)
+  list.sort((a,b)=>b.wave-a.wave||b.kills-a.kills||(b.level||0)-(a.level||0));
   if(list.length>RANKING_MAX)list.length=RANKING_MAX;
   _localSave(list);
   return entry;

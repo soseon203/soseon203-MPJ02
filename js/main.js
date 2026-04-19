@@ -593,16 +593,24 @@ function gameOver(){
   try{
     localStorage.setItem('lightningLastRun',JSON.stringify({wave:G.wave,level:G.level,kills:G.totalKills,rp:runRp}));
   }catch(e){}
-  // 게임오버 화면에 RP 표시
-  const go=document.getElementById('go-stats-grid');
-  if(go && runRp>0 && !document.getElementById('go-rp-item')){
-    const rpItem=document.createElement('div');
-    rpItem.id='go-rp-item';
-    rpItem.className='go-stat';
-    rpItem.innerHTML='<div class="go-stat-label">🌟 RP</div><div class="go-stat-value" style="color:#ff99ff">+'+runRp+'</div>';
-    go.appendChild(rpItem);
-  }else if(document.getElementById('go-rp-item')&&runRp>0){
-    document.querySelector('#go-rp-item .go-stat-value').textContent='+'+runRp;
+  // 게임오버 화면에 RP 표시 (stats grid 바깥 featured 카드)
+  const gameOverEl=document.getElementById('game-over');
+  let rpCard=document.getElementById('go-rp-card');
+  if(runRp>0){
+    if(!rpCard){
+      rpCard=document.createElement('div');
+      rpCard.id='go-rp-card';
+      rpCard.innerHTML='<div class="go-rp-label">🌟 영구 성장 포인트 획득</div><div class="go-rp-value"><span id="go-rp-value-num">+'+runRp+'</span> <span class="go-rp-unit">RP</span></div>';
+      // stats grid 바로 아래 배치
+      const statsGrid=document.getElementById('go-stats-grid');
+      if(statsGrid&&statsGrid.parentNode) statsGrid.parentNode.insertBefore(rpCard, statsGrid.nextSibling);
+    }else{
+      const num=document.getElementById('go-rp-value-num');
+      if(num) num.textContent='+'+runRp;
+      rpCard.style.display='';
+    }
+  }else if(rpCard){
+    rpCard.style.display='none';
   }
 
   const evo=EVOLUTIONS[G.evolutionStage];

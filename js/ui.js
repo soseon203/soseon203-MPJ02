@@ -57,6 +57,31 @@ function updateSkillDisplay(){
   updateActiveKeystones();
 }
 
+// 트리 팝업 상단 — 획득한 보스 드롭 스킬 목록
+function renderTreeBossSkills(){
+  const wrap=document.getElementById('tree-boss-skills');
+  const list=document.getElementById('tree-boss-skills-list');
+  const label=document.getElementById('tree-boss-skills-label');
+  if(!wrap||!list) return;
+  if(!G.specialSkills||G.specialSkills.length===0){
+    wrap.classList.add('hidden');
+    return;
+  }
+  wrap.classList.remove('hidden');
+  if(label) label.textContent=LANG==='en'?'BOSS SKILLS':'보스 스킬';
+  list.innerHTML='';
+  G.specialSkills.forEach(id=>{
+    const skill=SKILL_POOL.find(s=>s.id===id);
+    if(!skill) return;
+    const item=document.createElement('div');
+    item.className='tree-boss-skill';
+    item.innerHTML=`<span class="tree-boss-skill-ico">${skill.icon}</span>
+      <span class="tree-boss-skill-name">${t('sk.'+skill.id)}</span>
+      <span class="tree-boss-skill-desc">${t('sk.'+skill.id+'_d')}</span>`;
+    list.appendChild(item);
+  });
+}
+
 // U3: 키스톤 활성 표시
 function updateActiveKeystones(){
   const el=document.getElementById('active-keystones');
@@ -540,6 +565,8 @@ function openTreePopup(isLevelUp){
   G.treeOpen=true;
   if(typeof G.paused!=='undefined') G.paused=true; // 트리 열면 게임 일시정지
   document.getElementById('tree-title').textContent=isLevelUp?('⚡ '+t('ui.tree_lvup')):('🧬 '+t('ui.tree'));
+  // 보스 스킬 섹션 렌더
+  renderTreeBossSkills();
   // 컬럼 헤더/서브타이틀 재생성
   const colTitles=document.querySelectorAll('.tree-col-title');
   const colMap=[['atk','🗡️','ui.col_atk','ui.col_atk_sub'],['def','🌩️','ui.col_def','ui.col_def_sub'],['util','🔋','ui.col_util','ui.col_util_sub']];
