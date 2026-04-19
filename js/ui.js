@@ -445,7 +445,7 @@ function updateEnemyRoster(){
 //  UI 업데이트
 // ================================================================
 function updateUI(){
-  document.getElementById('energy-value').textContent=formatNum(G.energy);
+  // energy-value DOM 업데이트 생략 — 하단 패널 제거됨 (legacy hidden)
   document.getElementById('stat-dmg').textContent=G.damage;
   document.getElementById('stat-auto').textContent=G.autoRate.toFixed(1);
   document.getElementById('stat-kills').textContent=G.totalKills;
@@ -502,16 +502,14 @@ function updateUI(){
   document.getElementById('evolution-badge').textContent=`⚡ ${t('evo.'+G.evolutionStage)}`;
   document.getElementById('evolution-badge').style.color=evo.color;
 
-  // 업그레이드 버튼 갱신 (동적)
+  // 업그레이드 버튼 갱신 — 하단 패널은 숨김 상태이지만 DOM이 남아있을 수 있어 방어적 처리
   document.querySelectorAll('.upgrade-btn').forEach(btn=>{
     const uid=btn.dataset.upgrade;
     if(!uid||!G.upgrades[uid])return;
-    const cost=getCost(uid);
     const lv=upLv(uid);
-    const ok=G.energy>=cost;
-    btn.classList.toggle('affordable',ok);
-    btn.disabled=!ok;
-    btn.querySelector('.upgrade-cost').textContent=formatNum(cost);
+    // 에너지 구매 비활성화 — 항상 disabled로 (트리에서만 투자)
+    btn.classList.remove('affordable');
+    btn.disabled=true;
     btn.querySelector('.upgrade-level').textContent='Lv.'+lv;
     btn.querySelector('.upgrade-desc').textContent=getUpgradeDesc(uid);
   });

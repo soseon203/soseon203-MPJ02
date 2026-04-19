@@ -2,7 +2,7 @@
 //  게임 상태
 // ================================================================
 const G={
-  energy:0, totalEnergy:0, kills:0, totalKills:0,
+  kills:0, totalKills:0,
   hp:100, maxHp:100, hpRegen:0,
   damage:1, autoRate:0, chainCount:0,
   wave:1, waveState:'ready',
@@ -51,6 +51,9 @@ function xpFromEnemy(enemy){
   if(upLv('elite_hunter')>0&&enemy.isElite) base=Math.ceil(base*(1+upLv('elite_hunter')*0.5));
   if(upLv('bonus_wave')>0&&enemy.isBoss) base=Math.ceil(base*(1+upLv('bonus_wave')*0.8));
   if(upLv('fortune')>0&&Math.random()<upLv('fortune')*0.05){ base*=2; }
+  // 보스 스킬 (bounty/lucky) — 에너지 배수에서 XP 배수로 전환
+  if(hasSkill('bounty')) base=Math.ceil(base*1.5);
+  if(hasSkill('lucky')&&Math.random()<0.25) base*=2;
   // combo: 콤보 카운트에 비례한 XP 보너스
   if(upLv('combo')>0&&G.comboCount>1) base+=Math.floor(G.comboCount*upLv('combo')*0.5);
   // R5: 메타 XP 배율
@@ -191,7 +194,7 @@ async function addRankEntry(nickname){
     name:nickname.trim()||'???',
     wave:G.wave,
     kills:G.totalKills,
-    energy:G.totalEnergy,
+    level:G.level||1,
     evoStage:G.evolutionStage,
     damage:G.damage,
     autoRate:G.autoRate,
@@ -217,7 +220,7 @@ async function addRankEntry(nickname){
 async function fetchRanking(sortBy){
   if(!isFirebaseReady()) return _localLoad();
   try{
-    const field=sortBy==='kills'?'kills':sortBy==='energy'?'energy':'wave';
+    const field=sortBy==='kills'?'kills':sortBy==='level'?'level':'wave';
     const snap=await _db.collection(RANKING_COLLECTION)
       .orderBy(field,'desc')
       .limit(RANKING_MAX)
@@ -241,11 +244,11 @@ function _renderRankList(list,sortBy){
   }
   const sorted=[...list];
   if(sortBy==='kills')sorted.sort((a,b)=>b.kills-a.kills||b.wave-a.wave);
-  else if(sortBy==='energy')sorted.sort((a,b)=>b.energy-a.energy||b.wave-a.wave);
+  else if(sortBy==='level')sorted.sort((a,b)=>(b.level||0)-(a.level||0)||b.wave-a.wave);
   else sorted.sort((a,b)=>b.wave-a.wave||b.kills-a.kills);
 
-  const scoreKey=sortBy==='kills'?'kills':sortBy==='energy'?'energy':'wave';
-  const scoreLabel=sortBy==='kills'?t('go.kills'):sortBy==='energy'?t('go.energy'):t('go.wave');
+  const scoreKey=sortBy==='kills'?'kills':sortBy==='level'?'level':'wave';
+  const scoreLabel=sortBy==='kills'?t('go.kills'):sortBy==='level'?'레벨':t('go.wave');
 
   container.innerHTML='';
   sorted.forEach((e,i)=>{
@@ -874,38 +877,18 @@ function killEnemy(enemy){
   G.kills++;
   G.totalKills++;
 
-  let reward=enemy.reward;
-  // energy_flat: 고정 에너지 추가
-  if(upLv('energy_flat')>0) reward+=upLv('energy_flat')*2;
-  // harvest: 에너지 수확 업그레이드
-  if(upLv('harvest')>0) reward=Math.ceil(reward*(1+upLv('harvest')*0.1));
-  // elite_hunter: 엘리트 처치 에너지 +50%
-  if(upLv('elite_hunter')>0&&enemy.isElite) reward=Math.ceil(reward*(1+upLv('elite_hunter')*0.5));
-  // bonus_wave: 보스 처치 에너지 +80%
-  if(upLv('bonus_wave')>0&&enemy.isBoss) reward=Math.ceil(reward*(1+upLv('bonus_wave')*0.8));
-  // bounty: +50% 에너지
-  if(hasSkill('bounty')) reward=Math.ceil(reward*1.5);
-  // lucky: 25% 확률 2배 (스킬)
-  if(hasSkill('lucky')&&Math.random()<0.25){ reward*=2; showFloatText(enemy.x,enemy.y-30,'LUCKY!','chain'); }
-  // fortune: 업그레이드 행운 (5%/레벨 확률 2배)
-  if(upLv('fortune')>0&&Math.random()<upLv('fortune')*0.05){ reward*=2; showFloatText(enemy.x,enemy.y-30,'FORTUNE!','chain'); }
-  // R4/R5: 키스톤·메타 에너지 배율
-  const mEng=(typeof getMetaEffect==='function'?getMetaEffect('energyMult'):0);
-  if(mEng>0) reward=Math.ceil(reward*(1+mEng));
-  if(hasKeystone('ks_collector')) reward=Math.ceil(reward*3);
-  // combo: 연속 처치 보너스 (combo 업글 없어도 카운트는 돌림 — U4 콤보 UI용)
+  // 에너지 시스템 제거 — 이전 에너지 업글은 XP 배율로 재활용됨 (xpFromEnemy 참조)
+  // lucky/fortune: 행운 알림 이펙트만 유지 (XP 2배는 xpFromEnemy에서 처리)
+  if(hasSkill('lucky')&&Math.random()<0.25) showFloatText(enemy.x,enemy.y-30,'LUCKY!','chain');
+  if(upLv('fortune')>0&&Math.random()<upLv('fortune')*0.05) showFloatText(enemy.x,enemy.y-30,'FORTUNE!','chain');
+  // combo: 카운트는 계속 돌림 (UI 표시 + energy_storm 대체 조건용)
   G.comboCount=(G.comboCount||0)+1;
   G.comboTimer=2;
-  if(upLv('combo')>0&&G.comboCount>1){
-    const comboBonus=G.comboCount*upLv('combo')*3;
-    reward+=comboBonus;
-    if(G.comboCount%5===0) showFloatText(enemy.x,enemy.y-40,G.comboCount+'COMBO!','chain');
+  if(upLv('combo')>0&&G.comboCount>1&&G.comboCount%5===0){
+    showFloatText(enemy.x,enemy.y-40,G.comboCount+'COMBO!','chain');
   }
-  // U4: 콤보 UI 업데이트 (3 이상일 때만 노출)
   if(typeof updateComboDisplay==='function') updateComboDisplay();
-  G.energy+=reward;
-  G.totalEnergy+=reward;
-  // R1: XP 획득 & 레벨업 체크 (실제 게임에 의미 있는 지표)
+  // R1: XP 획득 & 레벨업 체크
   const xpGain=xpFromEnemy(enemy);
   gainXP(xpGain);
   // rage: 광전사 스택
@@ -1087,7 +1070,8 @@ function strikeEnemy(enemy,isDirect){
   // surge: 전류 급등
   if(upLv('surge')>0) dmg=Math.ceil(dmg*(1+upLv('surge')*0.06));
   // energy_storm: 에너지 200 이상 시 데미지 +15%
-  if(upLv('energy_storm')>0&&G.energy>=200) dmg=Math.ceil(dmg*(1+upLv('energy_storm')*0.15));
+  // energy_storm: HP 80% 이상일 때 데미지 +15% (에너지 조건 제거)
+  if(upLv('energy_storm')>0&&G.hp>=G.maxHp*0.8) dmg=Math.ceil(dmg*(1+upLv('energy_storm')*0.15));
   // magnet
   if(hasSkill('magnet')){
     const md=Math.hypot(enemy.x-cx,enemy.y-cy);
@@ -1226,7 +1210,7 @@ function autoAttack(){
   // surge: 전류 급등
   if(upLv('surge')>0) autoDmg=Math.ceil(autoDmg*(1+upLv('surge')*0.06));
   // energy_storm: 에너지 200 이상 시 데미지 +15%
-  if(upLv('energy_storm')>0&&G.energy>=200) autoDmg=Math.ceil(autoDmg*(1+upLv('energy_storm')*0.15));
+  if(upLv('energy_storm')>0&&G.hp>=G.maxHp*0.8) autoDmg=Math.ceil(autoDmg*(1+upLv('energy_storm')*0.15));
   // weak_point: 적 HP 50% 이하 데미지 +15%
   if(upLv('weak_point')>0&&target.hp<=target.maxHp*0.5) autoDmg=Math.ceil(autoDmg*(1+upLv('weak_point')*0.15));
   // execute: 적 HP 20% 이하 데미지 +50%

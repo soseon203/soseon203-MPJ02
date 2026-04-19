@@ -303,7 +303,7 @@ function update(dt){
         // iron_core: 퍼센트 피해 감소
         if(upLv('iron_core')>0) dmg=Math.max(1,Math.ceil(dmg*(1-upLv('iron_core')*0.05)));
         // energy_shield: 에너지 100 이상 시 피해 감소
-        if(upLv('energy_shield')>0&&G.energy>=100) dmg=Math.max(1,Math.ceil(dmg*(1-upLv('energy_shield')*0.15)));
+        if(upLv('energy_shield')>0&&G.hp>=G.maxHp*0.8) dmg=Math.max(1,Math.ceil(dmg*(1-upLv('energy_shield')*0.15)));
         // dodge: 15% 회피 (스킬) + dodge_up 업그레이드
         const totalDodge=(hasSkill('dodge')?0.15:0)+upLv('dodge_up')*0.03;
         if(totalDodge>0&&Math.random()<totalDodge){
@@ -325,17 +325,16 @@ function update(dt){
           sfx.hit();
           screenShake(true);
           showFloatText(cx,cy-20,'-'+dmg,'critical');
-          // absorb: 피해의 30%를 에너지로 (스킬)
+          // absorb / absorption: 받은 피해의 일부를 HP로 전환 (에너지 시스템 제거 이후)
           if(hasSkill('absorb')){
-            const absorbed=Math.ceil(dmg*0.3);
-            G.energy+=absorbed;G.totalEnergy+=absorbed;
-            showFloatText(cx,cy-35,'+'+absorbed,'energy-gain');
+            const heal=Math.ceil(dmg*0.3);
+            G.hp=Math.min(G.maxHp,G.hp+heal);
+            showFloatText(cx,cy-35,'+'+heal+' HP','energy-gain');
           }
-          // absorption: 업그레이드 에너지 변환
           if(upLv('absorption')>0){
-            const abAmt=Math.ceil(dmg*upLv('absorption')*0.05);
-            G.energy+=abAmt;G.totalEnergy+=abAmt;
-            showFloatText(cx,cy-45,'+'+abAmt,'energy-gain');
+            const heal=Math.ceil(dmg*upLv('absorption')*0.05);
+            G.hp=Math.min(G.maxHp,G.hp+heal);
+            showFloatText(cx,cy-45,'+'+heal+' HP','energy-gain');
           }
         }
         // thorns: 반사 번개 (스킬)
@@ -413,7 +412,7 @@ function update(dt){
           if(upLv('titan_guard')>0) quakeDmg=Math.max(1,quakeDmg-upLv('titan_guard')*2);
           if(upLv('shield_wall')>0) quakeDmg=Math.max(1,Math.ceil(quakeDmg*(1-upLv('shield_wall')*0.08)));
           if(upLv('iron_core')>0) quakeDmg=Math.max(1,Math.ceil(quakeDmg*(1-upLv('iron_core')*0.05)));
-          if(upLv('energy_shield')>0&&G.energy>=100) quakeDmg=Math.max(1,Math.ceil(quakeDmg*(1-upLv('energy_shield')*0.15)));
+          if(upLv('energy_shield')>0&&G.hp>=G.maxHp*0.8) quakeDmg=Math.max(1,Math.ceil(quakeDmg*(1-upLv('energy_shield')*0.15)));
           if(bossDist<250){
             const _bDodge=(hasSkill('dodge')?0.15:0)+upLv('dodge_up')*0.03;
             if(_bDodge>0&&Math.random()<_bDodge){
@@ -463,18 +462,18 @@ function update(dt){
           if(upLv('titan_guard')>0) pDmg=Math.max(1,pDmg-upLv('titan_guard')*2);
           if(upLv('shield_wall')>0) pDmg=Math.max(1,Math.ceil(pDmg*(1-upLv('shield_wall')*0.08)));
           if(upLv('iron_core')>0) pDmg=Math.max(1,Math.ceil(pDmg*(1-upLv('iron_core')*0.05)));
-          if(upLv('energy_shield')>0&&G.energy>=100) pDmg=Math.max(1,Math.ceil(pDmg*(1-upLv('energy_shield')*0.15)));
+          if(upLv('energy_shield')>0&&G.hp>=G.maxHp*0.8) pDmg=Math.max(1,Math.ceil(pDmg*(1-upLv('energy_shield')*0.15)));
           G.hp-=pDmg;
           screenShake(true);
           showFloatText(cx,cy-20,'-'+pDmg,'critical');
           if(hasSkill('absorb')){
-            const absorbed=Math.ceil(pDmg*0.3);
-            G.energy+=absorbed;G.totalEnergy+=absorbed;
-            showFloatText(cx,cy-35,'+'+absorbed,'energy-gain');
+            const heal=Math.ceil(pDmg*0.3);
+            G.hp=Math.min(G.maxHp,G.hp+heal);
+            showFloatText(cx,cy-35,'+'+heal+' HP','energy-gain');
           }
           if(upLv('absorption')>0){
-            const abAmt=Math.ceil(pDmg*upLv('absorption')*0.05);
-            G.energy+=abAmt;G.totalEnergy+=abAmt;
+            const heal=Math.ceil(pDmg*upLv('absorption')*0.05);
+            G.hp=Math.min(G.maxHp,G.hp+heal);
           }
         }
         sfx.hit();
@@ -531,12 +530,12 @@ function waveClear(){
   G.waveState='ready';
   G.waveTimer=0;
   G.currentWaveType='normal';
-  // wave_bonus: 승전 보상 (스킬)
-  if(hasSkill('wave_bonus')){
+  // wave_bonus (스킬): 승전 시 XP 보너스 (에너지 대체)
+  if(hasSkill('wave_bonus')&&typeof gainXP==='function'){
     const bonus=Math.floor(5+G.wave*3);
-    G.energy+=bonus;G.totalEnergy+=bonus;
+    gainXP(bonus);
     const bw=gameCanvas.width/dpr,bh=gameCanvas.height/dpr;
-    showFloatText(bw/2,bh/2-40,'+'+bonus+' '+t('msg.bonus'),'energy-gain');
+    showFloatText(bw/2,bh/2-40,'+'+bonus+' XP','energy-gain');
   }
   // wave_heal: 웨이브 클리어 시 HP 회복
   if(upLv('wave_heal')>0){
@@ -613,7 +612,9 @@ function gameOver(){
   // 핵심 스탯
   document.getElementById('go-wave').textContent=G.wave;
   document.getElementById('go-kills').textContent=formatNum(G.totalKills);
-  document.getElementById('go-energy').textContent=formatNum(G.totalEnergy);
+  // 에너지 스탯 제거 → 레벨로 교체
+  const lvEl=document.getElementById('go-level');
+  if(lvEl) lvEl.textContent='Lv.'+G.level;
   document.getElementById('go-evo-stage').textContent=`Lv.${G.evolutionStage+1}`;
   document.getElementById('go-dmg').textContent=G.damage;
   document.getElementById('go-auto').textContent=G.autoRate.toFixed(1);
@@ -683,7 +684,7 @@ function resetGame(){
   G.upgradeSelecting=false;
   G.levelUpSelecting=false;
   // 게임 상태 초기화
-  G.energy=0;G.totalEnergy=0;G.kills=0;G.totalKills=0;
+  G.kills=0;G.totalKills=0;
   G.hp=100;G.maxHp=100;G.hpRegen=0;
   G.damage=1;G.autoRate=0;G.chainCount=0;
   G.specialSkills=[];G.shieldActive=false;G.shieldTimer=0;G.stormTimer=0;G.staticTimer=0;
@@ -819,11 +820,10 @@ function handleClick(px,py){
   }else{
     const alive=G.enemies.filter(e=>e.hp>0);
     if(alive.length===0){
-      G.energy+=1;G.totalEnergy+=1;
+      // 빈 클릭 — 효과 없음 (과거: +1 에너지 표시, 에너지 시스템 제거 후 의미 상실)
       sfx.zap(0.3);
       const w=gameCanvas.width/dpr,h=gameCanvas.height/dpr;
       addSparks(w/2,h/2,3,evoColor());
-      // 빈 클릭 '+1' 플로팅 제거 (에너지가 스코어용이라 시각 노이즈)
     }else{
       sfx.zap(0.1);
       addSparks(px,py,2,'#555555');
@@ -841,7 +841,7 @@ function handleClick(px,py){
 function saveGame(){
   if(G.hp<=0)return; // 게임오버 상태에서는 저장하지 않음
   try{
-    const save={energy:G.energy,totalEnergy:G.totalEnergy,kills:G.kills,totalKills:G.totalKills,
+    const save={kills:G.kills,totalKills:G.totalKills,
       hp:G.hp,maxHp:G.maxHp,hpRegen:G.hpRegen,damage:G.damage,autoRate:G.autoRate,
       chainCount:G.chainCount,wave:G.wave,evolutionStage:G.evolutionStage,
       upgrades:G.upgrades,unlockedUpgrades:G.unlockedUpgrades,

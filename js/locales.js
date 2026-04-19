@@ -41,7 +41,7 @@ I18N.ko['ui.rank_saved']='기록이 저장되었습니다!';
 I18N.ko['ui.view_rank']='🏆 랭킹 보기';
 I18N.ko['ui.rank_wave']='웨이브';
 I18N.ko['ui.rank_kills']='처치수';
-I18N.ko['ui.rank_energy']='에너지';
+I18N.ko['ui.rank_level']='레벨';
 I18N.ko['ui.close']='닫기';
 I18N.ko['ui.clear_rank']='기록 초기화';
 I18N.ko['ui.rank_clear_confirm']='모든 랭킹 기록을 삭제하시겠습니까?';
@@ -137,7 +137,7 @@ I18N.en['ui.rank_saved']='Record saved!';
 I18N.en['ui.view_rank']='🏆 View Ranking';
 I18N.en['ui.rank_wave']='Wave';
 I18N.en['ui.rank_kills']='Kills';
-I18N.en['ui.rank_energy']='Energy';
+I18N.en['ui.rank_level']='Level';
 I18N.en['ui.close']='Close';
 I18N.en['ui.clear_rank']='Clear Records';
 I18N.en['ui.rank_clear_confirm']='Delete all ranking records?';
@@ -157,7 +157,7 @@ I18N.en['ui.help']='Help';
 // ================================================================
 I18N.ko['go.wave']='웨이브';
 I18N.ko['go.kills']='처치';
-I18N.ko['go.energy']='에너지';
+I18N.ko['go.level']='레벨';
 I18N.ko['go.evo']='진화';
 I18N.ko['go.damage']='데미지';
 I18N.ko['go.auto']='자동/초';
@@ -166,7 +166,7 @@ I18N.ko['go.skills']='획득 스킬';
 
 I18N.en['go.wave']='Wave';
 I18N.en['go.kills']='Kills';
-I18N.en['go.energy']='Energy';
+I18N.en['go.level']='Level';
 I18N.en['go.evo']='Evolution';
 I18N.en['go.damage']='Damage';
 I18N.en['go.auto']='Auto/s';
@@ -369,18 +369,18 @@ I18N.ko['sk.thorns']='반사 번개';        I18N.ko['sk.thorns_d']='피해 시 
 I18N.ko['sk.dodge']='위상 변환';         I18N.ko['sk.dodge_d']='15% 확률로 피해 무시';
 I18N.ko['sk.fortress']='요새화';         I18N.ko['sk.fortress_d']='최대 HP +50, 즉시 회복';
 I18N.ko['sk.regen_boost']='생명력 파동'; I18N.ko['sk.regen_boost_d']='HP 재생 속도 2배';
-I18N.ko['sk.absorb']='에너지 변환';      I18N.ko['sk.absorb_d']='받는 피해의 30%를 에너지로 변환';
+I18N.ko['sk.absorb']='생명 흡수';        I18N.ko['sk.absorb_d']='받는 피해의 30%를 HP로 회복';
 // 유틸
 I18N.ko['sk.slow']='시간 왜곡';          I18N.ko['sk.slow_d']='적 이동 속도 20% 감소';
 I18N.ko['sk.static_field']='정전기 필드';I18N.ko['sk.static_field_d']='코어 주변 적에게 초당 데미지';
 I18N.ko['sk.storm']='에너지 폭풍';       I18N.ko['sk.storm_d']='8초마다 전체 적에게 데미지';
 I18N.ko['sk.magnet']='자석 필드';        I18N.ko['sk.magnet_d']='가까운 적일수록 데미지 최대 +50%';
 I18N.ko['sk.quickcharge']='빠른 충전';   I18N.ko['sk.quickcharge_d']='클릭 쿨다운 40% 감소';
-I18N.ko['sk.bounty']='현상금 사냥';      I18N.ko['sk.bounty_d']='에너지 획득량 +50%';
-I18N.ko['sk.lucky']='행운의 번개';       I18N.ko['sk.lucky_d']='에너지 획득 시 25% 확률로 2배';
+I18N.ko['sk.bounty']='현상금 사냥';      I18N.ko['sk.bounty_d']='XP 획득량 +50%';
+I18N.ko['sk.lucky']='행운의 번개';       I18N.ko['sk.lucky_d']='XP 획득 시 25% 확률로 2배';
 I18N.ko['sk.aoe_click']='확장 전격';     I18N.ko['sk.aoe_click_d']='클릭 적중 범위 +60%';
 I18N.ko['sk.auto_boost']='터보 충전';    I18N.ko['sk.auto_boost_d']='자동 공격 속도 +50%';
-I18N.ko['sk.wave_bonus']='승전 보상';    I18N.ko['sk.wave_bonus_d']='웨이브 클리어 시 보너스 에너지';
+I18N.ko['sk.wave_bonus']='승전 보상';    I18N.ko['sk.wave_bonus_d']='웨이브 클리어 시 보너스 XP';
 I18N.ko['sk.gravity']='중력장';          I18N.ko['sk.gravity_d']='코어 근처 적 이동 속도 대폭 감소';
 
 I18N.en['sk.pierce']='Piercing Bolt';       I18N.en['sk.pierce_d']='Lightning pierces 1 extra enemy in same direction (50%)';
@@ -401,13 +401,13 @@ I18N.en['sk.thorns']='Reflect Lightning';  I18N.en['sk.thorns_d']='Counter-attac
 I18N.en['sk.dodge']='Phase Shift';         I18N.en['sk.dodge_d']='15% chance to dodge damage';
 I18N.en['sk.fortress']='Fortify';          I18N.en['sk.fortress_d']='Max HP +50, instant heal';
 I18N.en['sk.regen_boost']='Vitality Wave'; I18N.en['sk.regen_boost_d']='HP regen speed x2';
-I18N.en['sk.absorb']='Energy Convert';     I18N.en['sk.absorb_d']='Convert 30% of damage taken to energy';
+I18N.en['sk.absorb']='Life Siphon';        I18N.en['sk.absorb_d']='Heal 30% of damage taken as HP';
 I18N.en['sk.slow']='Time Warp';           I18N.en['sk.slow_d']='Enemy move speed -20%';
 I18N.en['sk.static_field']='Static Field'; I18N.en['sk.static_field_d']='Damage nearby enemies per second';
 I18N.en['sk.storm']='Energy Storm';        I18N.en['sk.storm_d']='Damage all enemies every 8s';
 I18N.en['sk.magnet']='Magnet Field';       I18N.en['sk.magnet_d']='Up to +50% damage to close enemies';
 I18N.en['sk.quickcharge']='Quick Charge';  I18N.en['sk.quickcharge_d']='Click cooldown -40%';
-I18N.en['sk.bounty']='Bounty Hunter';     I18N.en['sk.bounty_d']='Energy gain +50%';
+I18N.en['sk.bounty']='Bounty Hunter';     I18N.en['sk.bounty_d']='XP gain +50%';
 I18N.en['sk.lucky']='Lucky Lightning';     I18N.en['sk.lucky_d']='25% chance for double energy';
 I18N.en['sk.aoe_click']='Expanded Strike'; I18N.en['sk.aoe_click_d']='Click range +60%';
 I18N.en['sk.auto_boost']='Turbo Charge';  I18N.en['sk.auto_boost_d']='Auto-attack speed +50%';
@@ -701,7 +701,7 @@ function applyI18nHTML(){
   setText(s('energy-unit'),t('ui.energy'));
   // game over labels (순서 고정)
   const goLabels=document.querySelectorAll('.go-stat-label');
-  const goKeys=['go.wave','go.kills','go.energy','go.evo','go.damage','go.auto'];
+  const goKeys=['go.wave','go.kills','go.level','go.evo','go.damage','go.auto'];
   goLabels.forEach((el,i)=>{if(goKeys[i])el.textContent=t(goKeys[i])});
   const secTitles=document.querySelectorAll('.go-section-title');
   const secKeys=['go.upgrades','go.skills','ui.nickname_prompt'];
@@ -714,7 +714,7 @@ function applyI18nHTML(){
   if(s('go-view-rank'))s('go-view-rank').textContent=t('ui.view_rank');
   // ranking popup
   const rankTabs=document.querySelectorAll('.rank-tab');
-  const tabKeys=['ui.rank_wave','ui.rank_kills','ui.rank_energy'];
+  const tabKeys=['ui.rank_wave','ui.rank_kills','ui.rank_level'];
   rankTabs.forEach((el,i)=>{if(tabKeys[i])el.textContent=t(tabKeys[i])});
   if(s('ranking-close'))s('ranking-close').textContent=t('ui.close');
   if(s('ranking-clear'))s('ranking-clear').textContent=t('ui.clear_rank');
