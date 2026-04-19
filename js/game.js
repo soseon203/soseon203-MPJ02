@@ -95,7 +95,7 @@ const META_UPGRADES=[
   {id:'m_sp',    name:'시작 스킬포인트', nameEn:'Starter SP',   desc:'시작 시 스킬포인트 +1', descEn:'Start with +1 Skill Point',  icon:'⭐', maxRank:5, costBase:8, costMult:2.2, effect:(r)=>({sp:r})},
   {id:'m_xp',    name:'경험 증폭',    nameEn:'XP Amplify',    desc:'XP 획득 +8%',          descEn:'+8% XP gain',                   icon:'📘', maxRank:5, costBase:5, costMult:2.0, effect:(r)=>({xpMult:r*0.08})},
   {id:'m_dmg',   name:'시작 데미지',  nameEn:'Starter Damage',desc:'시작 데미지 +1',       descEn:'Start with +1 Damage',          icon:'⚡', maxRank:5, costBase:4, costMult:1.9, effect:(r)=>({damage:r})},
-  {id:'m_eng',   name:'에너지 부스트', nameEn:'Energy Boost',  desc:'에너지 획득 +10%',     descEn:'+10% Energy gain',              icon:'💰', maxRank:5, costBase:5, costMult:2.0, effect:(r)=>({energyMult:r*0.1})},
+  {id:'m_eng',   name:'시작 자동 공격', nameEn:'Starter Auto',  desc:'시작 시 자동 공격 +0.2/초', descEn:'Start with +0.2/s auto attack', icon:'🔋', maxRank:5, costBase:5, costMult:2.0, effect:(r)=>({autoRate:r*0.2})},
   {id:'m_revive',name:'부활 부적',    nameEn:'Revival Charm', desc:'런당 1회 HP 30%로 부활', descEn:'Once per run, revive at 30% HP',icon:'✨', maxRank:1, costBase:50, costMult:1, effect:(r)=>({revive:r>0})}
 ];
 function metaName(mu){ return LANG==='en'&&mu.nameEn?mu.nameEn:mu.name; }

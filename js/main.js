@@ -714,9 +714,11 @@ function resetGame(){
   const mHp=getMetaEffect('maxHp');
   const mSp=getMetaEffect('sp');
   const mDmg=getMetaEffect('damage');
+  const mAuto=getMetaEffect('autoRate');
   if(mHp>0){ G.maxHp+=mHp; G.hp=G.maxHp; }
   if(mSp>0) G.skillPoints+=mSp;
   if(mDmg>0) G.damage+=mDmg;
+  if(mAuto>0) G.autoRate+=mAuto;
   zapBolts=[];fxEffects=[];G.bossProjectiles=[];G.orbitals=[];
   // 화면 흔들림 제거
   const gameArea=document.getElementById('game-area');
