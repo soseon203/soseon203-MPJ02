@@ -518,7 +518,8 @@ function updateUI(){
   const xpBar=document.getElementById('xp-bar');
   if(xpBar){
     xpBar.style.width=xpPct+'%';
-    document.getElementById('level-text').textContent='Lv.'+G.level+(G.skillPoints>0?' (+'+G.skillPoints+' SP)':'');
+    // SP 개수는 우상단 🧬 버튼 뱃지에서 표시되므로 XP 바에는 레벨만
+    document.getElementById('level-text').textContent='Lv.'+G.level;
     document.getElementById('xp-progress').textContent=G.xp+' / '+xpNeed;
   }
 

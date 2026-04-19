@@ -111,7 +111,7 @@ body{font-family:'Noto Sans KR','Malgun Gothic',sans-serif;background:#05051a;co
 /* ═══════════════════════════════════════════
    U2: 좌상단 웨이브/XP, 우상단 스탯
    ═══════════════════════════════════════════ */
-#hud-left{position:fixed;top:46px;left:10px;z-index:11;display:flex;flex-direction:column;gap:3px;min-width:140px;max-width:220px}
+#hud-left{position:fixed;top:46px;left:10px;z-index:11;display:flex;flex-direction:column;gap:3px;min-width:150px;max-width:240px}
 #hud-right{position:fixed;top:46px;right:10px;z-index:11;display:flex;flex-direction:column;gap:4px;background:rgba(0,10,28,.55);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:6px 10px;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
 .hud-stat{display:flex;align-items:center;gap:6px;font-size:.75em;color:#fff}
 .hud-stat-ico{font-size:1em;opacity:.8}
