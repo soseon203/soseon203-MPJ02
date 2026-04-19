@@ -1,4 +1,33 @@
 *{margin:0;padding:0;box-sizing:border-box}
+/* ═══════════════════════════════════════════
+   디자인 시스템 (프로젝트 전역 토큰)
+   ═══════════════════════════════════════════ */
+:root{
+  /* 라운드 */
+  --r-xs:6px; --r-sm:8px; --r-md:10px; --r-lg:12px; --r-xl:14px;
+  /* 간격 */
+  --sp-xs:4px; --sp-sm:6px; --sp-md:10px; --sp-lg:14px; --sp-xl:20px;
+  /* 폰트 스케일 — 계층적 */
+  --fs-caption:.62em;   /* 캡션/라벨 */
+  --fs-tiny:.68em;      /* 작은 설명 */
+  --fs-small:.75em;     /* 보조 텍스트 */
+  --fs-body:.85em;      /* 본문 */
+  --fs-heading:1em;     /* 카드 제목 */
+  --fs-title:1.2em;     /* 팝업 제목 */
+  --fs-display:1.5em;   /* 대형 배너 */
+  /* 배경/테두리/텍스트 */
+  --bg-card:rgba(255,255,255,.04);
+  --bg-card-hover:rgba(255,255,255,.08);
+  --bg-popup:rgba(5,3,20,.96);
+  --border-soft:rgba(255,255,255,.1);
+  --border-med:rgba(255,255,255,.2);
+  --text-primary:#fff;
+  --text-secondary:rgba(255,255,255,.7);
+  --text-muted:rgba(255,255,255,.45);
+  /* 액센트 */
+  --accent-yellow:#ffee00; --accent-cyan:#00d4ff; --accent-purple:#b44aff;
+  --accent-pink:#ff99ff; --accent-red:#ff6644; --accent-green:#00ffaa;
+}
 body{font-family:'Noto Sans KR','Malgun Gothic',sans-serif;background:#05051a;color:#fff;overflow:hidden;height:100vh;width:100vw;user-select:none;-webkit-user-select:none}
 /* ── 랜딩 화면 ── */
 #landing-screen{position:fixed;top:0;left:0;width:100%;height:100%;z-index:200;display:flex;align-items:center;justify-content:center;background:#05051a}
@@ -10,41 +39,41 @@ body{font-family:'Noto Sans KR','Malgun Gothic',sans-serif;background:#05051a;co
 #landing-topbar #landing-lang{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.2);color:#fff;width:38px;height:38px;border-radius:50%;font-size:1em;cursor:pointer;transition:all .2s;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;padding:0}
 #landing-topbar #landing-lang:hover{background:rgba(255,255,255,.18);border-color:rgba(0,212,255,.5);transform:scale(1.08)}
 
-#landing-content{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:11px;width:90%;max-width:360px;padding:24px}
+#landing-content{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:10px;width:90%;max-width:340px;padding:24px}
 #landing-hero{text-align:center;display:flex;flex-direction:column;align-items:center;gap:2px;margin-bottom:4px}
 #landing-brand{font-size:3em;filter:drop-shadow(0 0 18px rgba(255,238,0,.6)) drop-shadow(0 0 36px rgba(255,200,0,.3));animation:brandFloat 3s ease-in-out infinite;line-height:1}
 @keyframes brandFloat{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-6px) scale(1.04)}}
 #landing-title{font-size:2em;font-weight:900;letter-spacing:4px;text-align:center;white-space:nowrap;color:transparent;background:linear-gradient(135deg,#00d4ff 0%,#b44aff 40%,#ff6ec7 100%);-webkit-background-clip:text;background-clip:text;filter:drop-shadow(0 0 20px rgba(0,212,255,.55)) drop-shadow(0 0 40px rgba(180,74,255,.3));margin:4px 0 0;line-height:1.15;animation:titleGlow 3s ease-in-out infinite}
 @keyframes titleGlow{0%,100%{filter:drop-shadow(0 0 20px rgba(0,212,255,.55)) drop-shadow(0 0 40px rgba(180,74,255,.3))}50%{filter:drop-shadow(0 0 32px rgba(0,212,255,.85)) drop-shadow(0 0 60px rgba(180,74,255,.6))}}
-#landing-tagline{font-size:.7em;color:rgba(255,255,255,.5);letter-spacing:1.5px;margin-top:2px}
+#landing-tagline{font-size:.72em;color:rgba(255,255,255,.5);letter-spacing:1.5px;margin-top:2px}
 
-#landing-start{background:linear-gradient(135deg,#00d4ff,#b44aff);border:none;color:#fff;padding:14px 48px;border-radius:14px;font-size:1.05em;font-weight:900;cursor:pointer;letter-spacing:3px;box-shadow:0 0 22px rgba(0,212,255,.4),0 4px 12px rgba(0,0,0,.45);transition:all .25s;animation:startPulse 2s ease-in-out infinite;width:100%;max-width:280px;margin-top:4px}
+#landing-start{background:linear-gradient(135deg,#00d4ff,#b44aff);border:none;color:#fff;padding:14px 20px;border-radius:14px;font-size:1em;font-weight:800;cursor:pointer;letter-spacing:2px;box-shadow:0 0 22px rgba(0,212,255,.4),0 4px 12px rgba(0,0,0,.45);transition:all .25s;animation:startPulse 2s ease-in-out infinite;width:100%;max-width:320px;margin-top:4px}
 #landing-start:hover{transform:translateY(-2px) scale(1.03);box-shadow:0 0 42px rgba(0,212,255,.7),0 8px 22px rgba(0,0,0,.6)}
 #landing-start:active{transform:translateY(1px) scale(.98)}
 @keyframes startPulse{0%,100%{box-shadow:0 0 25px rgba(0,212,255,.4),0 4px 12px rgba(0,0,0,.5)}50%{box-shadow:0 0 40px rgba(180,74,255,.55),0 4px 12px rgba(0,0,0,.5)}}
 
 /* 영구 성장 카드 — RP 배지 포함 */
-#landing-meta-card{display:flex;align-items:center;gap:10px;width:100%;max-width:320px;background:linear-gradient(135deg,rgba(255,100,255,.15),rgba(120,60,200,.2));border:1px solid rgba(255,100,255,.45);color:#fff;padding:10px 14px;border-radius:12px;cursor:pointer;transition:all .2s;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);text-align:left;font-family:inherit}
+#landing-meta-card{display:flex;align-items:center;gap:10px;width:100%;max-width:320px;background:linear-gradient(135deg,rgba(255,100,255,.15),rgba(120,60,200,.2));border:1px solid rgba(255,100,255,.45);color:#fff;padding:11px 14px;border-radius:12px;cursor:pointer;transition:all .2s;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);text-align:left;font-family:inherit;box-sizing:border-box}
 #landing-meta-card:hover{background:linear-gradient(135deg,rgba(255,100,255,.25),rgba(140,70,220,.3));border-color:rgba(255,150,255,.7);transform:translateY(-1px);box-shadow:0 4px 16px rgba(255,100,255,.25)}
 #landing-meta-card:active{transform:translateY(1px)}
-.meta-card-ico{font-size:1.6em;filter:drop-shadow(0 0 8px rgba(255,200,100,.7))}
+.meta-card-ico{font-size:1.4em;filter:drop-shadow(0 0 8px rgba(255,200,100,.7))}
 .meta-card-body{flex:1;display:flex;flex-direction:column;gap:1px;min-width:0}
-.meta-card-title{font-size:.88em;font-weight:700;color:#ff99ff}
-.meta-card-sub{font-size:.66em;color:rgba(255,255,255,.6)}
-.meta-card-rp{font-size:.78em;font-weight:700;color:#ffee00;background:rgba(255,238,0,.1);padding:4px 10px;border-radius:8px;border:1px solid rgba(255,238,0,.35);white-space:nowrap}
+.meta-card-title{font-size:.85em;font-weight:700;color:#ff99ff;letter-spacing:.5px}
+.meta-card-sub{font-size:.68em;color:rgba(255,255,255,.6)}
+.meta-card-rp{font-size:.72em;font-weight:700;color:#ffee00;background:rgba(255,238,0,.1);padding:4px 10px;border-radius:8px;border:1px solid rgba(255,238,0,.35);white-space:nowrap}
 
 /* 마지막 런 기록 카드 */
-#landing-lastrun{display:flex;align-items:center;gap:8px;padding:6px 14px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:10px;font-size:.7em;max-width:320px;width:100%;justify-content:center}
+#landing-lastrun{display:flex;align-items:center;gap:8px;padding:9px 14px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:10px;font-size:.72em;max-width:320px;width:100%;justify-content:center;box-sizing:border-box}
 #landing-lastrun.hidden{display:none}
-.lastrun-label{color:rgba(255,255,255,.45);font-size:.92em}
+.lastrun-label{color:rgba(255,255,255,.45)}
 .lastrun-stats{color:rgba(255,255,255,.88);font-weight:600}
 
 /* 3버튼 네비 */
-#landing-nav{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;width:100%;max-width:320px}
-.landing-btn{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.18);color:rgba(255,255,255,.85);padding:9px 8px;border-radius:10px;font-size:.78em;font-weight:600;cursor:pointer;transition:all .18s;white-space:nowrap;text-align:center;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+#landing-nav{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;width:100%;max-width:320px}
+.landing-btn{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.18);color:rgba(255,255,255,.85);padding:10px 8px;border-radius:10px;font-size:.75em;font-weight:600;cursor:pointer;transition:all .18s;white-space:nowrap;text-align:center;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);box-sizing:border-box}
 .landing-btn:hover{background:rgba(255,255,255,.14);border-color:rgba(0,212,255,.45);transform:translateY(-1px);color:#fff}
 
-#landing-footer{display:flex;gap:10px;font-size:.6em;margin-top:6px;color:rgba(255,255,255,.3)}
+#landing-footer{display:flex;gap:10px;font-size:.62em;margin-top:6px;color:rgba(255,255,255,.3)}
 #landing-footer a{color:rgba(255,255,255,.4);text-decoration:none;transition:color .2s}
 #landing-footer a:hover{color:rgba(255,255,255,.7)}
 .footer-sep{color:rgba(255,255,255,.15)}
@@ -65,7 +94,7 @@ body{font-family:'Noto Sans KR','Malgun Gothic',sans-serif;background:#05051a;co
 .icon-btn{position:relative;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);color:#fff;border-radius:50%;width:34px;height:34px;font-size:1em;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .18s;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
 .icon-btn:hover{background:rgba(255,238,0,.15);border-color:rgba(255,238,0,.45);transform:scale(1.06)}
 .icon-btn-ico{font-size:1em;line-height:1}
-#tree-sp-badge{position:absolute;top:-4px;right:-4px;background:#ffee00;color:#1a1400;font-size:.58em;font-weight:900;padding:1px 5px;border-radius:10px;min-width:16px;text-align:center;animation:spPulse 1.2s ease-in-out infinite}
+#tree-sp-badge{position:absolute;top:-4px;right:-4px;background:#ffee00;color:#1a1400;font-size:.62em;font-weight:900;padding:1px 5px;border-radius:10px;min-width:16px;text-align:center;animation:spPulse 1.2s ease-in-out infinite}
 #tree-sp-badge.hidden{display:none}
 @keyframes spPulse{0%,100%{transform:scale(1);box-shadow:0 0 0 0 rgba(255,238,0,.6)}50%{transform:scale(1.15);box-shadow:0 0 0 8px rgba(255,238,0,0)}}
 #tree-btn.has-sp{background:rgba(255,238,0,.2);border-color:rgba(255,238,0,.7);animation:spPulse 1.5s ease-in-out infinite}
@@ -73,7 +102,7 @@ body{font-family:'Noto Sans KR','Malgun Gothic',sans-serif;background:#05051a;co
 /* 더보기 드롭다운 */
 #more-menu{position:fixed;top:44px;right:10px;display:flex;flex-direction:column;gap:4px;background:rgba(0,10,28,.96);border:1px solid rgba(255,255,255,.2);border-radius:10px;padding:6px;z-index:13;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);box-shadow:0 4px 14px rgba(0,0,0,.5)}
 #more-menu.hidden{display:none}
-.more-btn{background:transparent;border:none;color:#fff;padding:8px 14px;display:flex;align-items:center;gap:8px;font-size:.82em;cursor:pointer;border-radius:6px;text-align:left;white-space:nowrap}
+.more-btn{background:transparent;border:none;color:#fff;padding:8px 14px;display:flex;align-items:center;gap:8px;font-size:.85em;cursor:pointer;border-radius:6px;text-align:left;white-space:nowrap}
 .more-btn:hover{background:rgba(255,255,255,.1)}
 
 /* ═══════════════════════════════════════════
@@ -81,16 +110,16 @@ body{font-family:'Noto Sans KR','Malgun Gothic',sans-serif;background:#05051a;co
    ═══════════════════════════════════════════ */
 #hud-left{position:fixed;top:46px;left:10px;z-index:11;display:flex;flex-direction:column;gap:3px;min-width:140px;max-width:220px}
 #hud-right{position:fixed;top:46px;right:10px;z-index:11;display:flex;flex-direction:column;gap:4px;background:rgba(0,10,28,.55);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:6px 10px;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
-.hud-stat{display:flex;align-items:center;gap:6px;font-size:.8em;color:#fff}
-.hud-stat-ico{font-size:.95em;opacity:.8}
+.hud-stat{display:flex;align-items:center;gap:6px;font-size:.75em;color:#fff}
+.hud-stat-ico{font-size:1em;opacity:.8}
 .hud-stat-v{font-weight:700;color:#ffee00;min-width:32px;text-align:right;font-variant-numeric:tabular-nums}
 
 /* 웨이브 뱃지 (큰, 눈에 띄게) */
-#wave-badge{display:inline-block;padding:4px 14px;border-radius:14px;font-weight:900;font-size:.95em;background:linear-gradient(135deg,rgba(255,68,68,.25),rgba(255,136,68,.2));border:1px solid rgba(255,68,68,.55);color:#ff9966;letter-spacing:1px;box-shadow:0 2px 8px rgba(255,68,68,.2);text-align:center}
+#wave-badge{display:inline-block;padding:4px 14px;border-radius:14px;font-weight:900;font-size:1em;background:linear-gradient(135deg,rgba(255,68,68,.25),rgba(255,136,68,.2));border:1px solid rgba(255,68,68,.55);color:#ff9966;letter-spacing:1px;box-shadow:0 2px 8px rgba(255,68,68,.2);text-align:center}
 #enemy-count{color:rgba(255,255,255,.55);font-size:.72em;padding:0 4px}
 #xp-bar-container{width:100%;height:14px;background:rgba(255,255,255,.08);border-radius:7px;overflow:hidden;position:relative;border:1px solid rgba(255,238,0,.3);margin-top:2px}
 #xp-bar{height:100%;background:linear-gradient(90deg,#00d4ff,#ffee00);border-radius:7px;transition:width .25s;width:0%;box-shadow:0 0 8px rgba(255,238,0,.5)}
-#xp-text{position:absolute;top:0;left:0;width:100%;text-align:center;font-size:.66em;font-weight:700;line-height:14px;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.9);padding:0 6px;display:flex;justify-content:space-between}
+#xp-text{position:absolute;top:0;left:0;width:100%;text-align:center;font-size:.68em;font-weight:700;line-height:14px;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.9);padding:0 6px;display:flex;justify-content:space-between}
 #level-text{color:#ffee00}
 #xp-progress{color:rgba(255,255,255,.85)}
 
@@ -124,24 +153,24 @@ body{font-family:'Noto Sans KR','Malgun Gothic',sans-serif;background:#05051a;co
 .keystone-badge-name{font-size:.75em;font-weight:700;color:#ffccff;white-space:nowrap}
 .keystone-badge-desc{font-size:.62em;color:rgba(255,255,255,.75);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #active-skills{display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end}
-.active-skill-icon{width:28px;height:28px;display:flex;align-items:center;justify-content:center;background:rgba(0,212,255,.15);border:1px solid rgba(0,212,255,.5);border-radius:8px;font-size:.95em;box-shadow:0 0 6px rgba(0,212,255,.3)}
+.active-skill-icon{width:28px;height:28px;display:flex;align-items:center;justify-content:center;background:rgba(0,212,255,.15);border:1px solid rgba(0,212,255,.5);border-radius:8px;font-size:1em;box-shadow:0 0 6px rgba(0,212,255,.3)}
 #active-combo{padding:3px 10px;background:rgba(255,170,0,.2);border:1px solid rgba(255,170,0,.6);border-radius:10px;color:#ffbb33;font-weight:700;font-size:.85em;text-align:center;animation:comboBounce .3s ease-out}
 #active-combo.hidden{display:none}
 @keyframes comboBounce{0%{transform:scale(1.3)}100%{transform:scale(1)}}
 #hp-text{position:absolute;top:0;left:0;width:100%;text-align:center;font-size:.72em;font-weight:900;line-height:16px;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.8),0 0 6px rgba(0,0,0,.5)}
 #xp-bar-container{width:100%;max-width:320px;margin:0 auto 6px;height:12px;background:rgba(255,255,255,.08);border-radius:6px;overflow:hidden;position:relative;border:1px solid rgba(255,238,0,.25)}
 #xp-bar{height:100%;background:linear-gradient(90deg,#00d4ff,#ffee00);border-radius:6px;transition:width .25s;width:0%;box-shadow:0 0 8px rgba(255,238,0,.4)}
-#xp-text{position:absolute;top:0;left:0;width:100%;text-align:center;font-size:.66em;font-weight:700;line-height:12px;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.9)}
+#xp-text{position:absolute;top:0;left:0;width:100%;text-align:center;font-size:.68em;font-weight:700;line-height:12px;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.9)}
 #level-text{color:#ffee00;margin-right:6px}
-#xp-progress{color:rgba(255,255,255,.75);font-size:.92em}
+#xp-progress{color:rgba(255,255,255,.75);font-size:.85em}
 #levelup-popup{position:fixed;top:0;left:0;width:100%;height:100%;z-index:98;display:none;align-items:center;justify-content:center;background:rgba(0,10,30,.92);transition:opacity .35s}
 #levelup-popup.show{display:flex;animation:fadeIn .3s}
 #levelup-popup.closing{opacity:0;pointer-events:none}
 #levelup-content{text-align:center;max-width:360px;width:90%;transition:transform .35s ease-in,opacity .35s}
 #levelup-popup.closing #levelup-content{transform:translateY(-60px);opacity:0}
 #levelup-content.entering{animation:upgradeSlideIn .45s ease-out both}
-#levelup-content h2{font-size:1.3em;color:#ffee00;margin-bottom:4px;text-shadow:0 0 18px rgba(255,238,0,.6)}
-#levelup-content #levelup-subtitle{color:rgba(255,255,255,.7);font-size:.82em;margin-bottom:14px}
+#levelup-content h2{font-size:var(--fs-title);color:var(--accent-yellow);margin-bottom:4px;text-shadow:0 0 18px rgba(255,238,0,.6)}
+#levelup-content #levelup-subtitle{color:rgba(255,255,255,.7);font-size:.85em;margin-bottom:14px}
 #levelup-choices{display:flex;flex-direction:column;gap:8px}
 .levelup-choice{display:flex;align-items:center;gap:10px;padding:10px 12px;background:rgba(255,255,255,.06);border:1px solid rgba(255,238,0,.3);border-radius:10px;cursor:pointer;transition:all .2s;text-align:left}
 .levelup-choice:hover{background:rgba(255,238,0,.12);border-color:#ffee00;transform:translateX(4px)}
@@ -149,7 +178,7 @@ body{font-family:'Noto Sans KR','Malgun Gothic',sans-serif;background:#05051a;co
 .levelup-choice.not-selected{opacity:.25;transform:scale(.95)}
 .levelup-choice-icon{font-size:1.6em;width:38px;text-align:center;flex-shrink:0}
 .levelup-choice-info{flex:1;min-width:0}
-.levelup-choice-name{font-weight:700;font-size:.88em;color:#fff;display:flex;align-items:center;gap:6px}
+.levelup-choice-name{font-weight:700;font-size:.85em;color:#fff;display:flex;align-items:center;gap:6px}
 .levelup-choice-lv{font-size:.72em;color:#ffee00;background:rgba(255,238,0,.15);padding:1px 6px;border-radius:8px;border:1px solid rgba(255,238,0,.4)}
 .levelup-choice-desc{font-size:.72em;color:rgba(255,255,255,.65);margin-top:2px}
 #levelup-choices.no-interact{pointer-events:none}
@@ -160,10 +189,10 @@ body{font-family:'Noto Sans KR','Malgun Gothic',sans-serif;background:#05051a;co
 #tree-content{display:flex;flex-direction:column;width:100%;height:100%;max-width:1100px;margin:0 auto;padding:10px;align-items:center}
 #tree-content > *{width:100%}
 #tree-header{display:flex;align-items:center;justify-content:space-between;padding:6px 12px;border-bottom:1px solid rgba(255,238,0,.25);margin-bottom:10px;flex-shrink:0}
-#tree-header h2{font-size:1.15em;color:#ffee00;margin:0}
-#tree-sp-display{font-size:.88em;color:#fff;background:rgba(255,238,0,.15);padding:4px 12px;border-radius:10px;border:1px solid rgba(255,238,0,.4);font-weight:700}
-#tree-sp{color:#ffee00;font-size:1.1em}
-#tree-close{background:rgba(255,68,68,.2);border:1px solid rgba(255,68,68,.4);color:#ff6644;width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:.9em}
+#tree-header h2{font-size:1.2em;color:#ffee00;margin:0}
+#tree-sp-display{font-size:.85em;color:#fff;background:rgba(255,238,0,.15);padding:4px 12px;border-radius:10px;border:1px solid rgba(255,238,0,.4);font-weight:700}
+#tree-sp{color:#ffee00;font-size:1.2em}
+#tree-close{background:rgba(255,68,68,.2);border:1px solid rgba(255,68,68,.4);color:#ff6644;width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:.85em}
 #tree-close:hover{background:rgba(255,68,68,.35)}
 /* 창 넓이가 커져도 컬럼이 과하게 벌어지지 않도록 고정폭 근처 유지 */
 #tree-columns{display:flex;gap:10px;flex:1;overflow:hidden;min-height:0;justify-content:center;width:100%;max-width:1000px;margin:0 auto}
@@ -176,7 +205,7 @@ body{font-family:'Noto Sans KR','Malgun Gothic',sans-serif;background:#05051a;co
 .tree-col[data-tree="def"]{border-color:rgba(68,187,255,.25)}
 .tree-col[data-tree="util"]{border-color:rgba(255,204,0,.25)}
 .tree-col-title{font-size:.85em;font-weight:700;text-align:center;padding:4px;margin-bottom:6px;border-bottom:1px solid rgba(255,255,255,.1);display:flex;align-items:baseline;justify-content:center;gap:6px}
-.tree-col-sub{font-size:.7em;font-weight:500;color:rgba(255,255,255,.4);letter-spacing:0}
+.tree-col-sub{font-size:.72em;font-weight:500;color:rgba(255,255,255,.4);letter-spacing:0}
 .tree-col[data-tree="atk"] .tree-col-title{color:#ffcc44}
 .tree-col[data-tree="def"] .tree-col-title{color:#66bbff}
 .tree-col[data-tree="util"] .tree-col-title{color:#aaff66}
@@ -197,8 +226,8 @@ body{font-family:'Noto Sans KR','Malgun Gothic',sans-serif;background:#05051a;co
 .tree-tier{margin-bottom:8px;padding-bottom:8px;position:relative;z-index:1;border-bottom:1px dashed rgba(255,255,255,.08)}
 .tree-tier.gate-locked .tree-tier-grid{opacity:.35;filter:grayscale(.3)}
 .tree-tier:last-child{margin-bottom:6px;border-bottom:none;padding-bottom:0}
-.tree-tier-label{display:flex;justify-content:space-between;align-items:center;font-size:.6em;color:rgba(255,255,255,.4);letter-spacing:1.5px;margin-bottom:5px;padding:0 2px}
-.tree-gate-info{font-size:.95em;color:#ff6644;font-weight:700}
+.tree-tier-label{display:flex;justify-content:space-between;align-items:center;font-size:.62em;color:rgba(255,255,255,.4);letter-spacing:1.5px;margin-bottom:5px;padding:0 2px}
+.tree-gate-info{font-size:1em;color:#ff6644;font-weight:700}
 .tree-gate-info.ok{color:#00ffaa}
 /* 기본 5열 그리드, 유틸 트리는 4열로 압축 */
 /* 기본 4열; ATK는 5열 (bloodlust 등 row 4 노드 포함) */
@@ -226,15 +255,15 @@ body{font-family:'Noto Sans KR','Malgun Gothic',sans-serif;background:#05051a;co
 #tree-tooltip.show{opacity:1}
 #tree-tooltip .tt-header{display:flex;align-items:center;gap:6px;margin-bottom:4px}
 #tree-tooltip .tt-ico{font-size:1.2em}
-#tree-tooltip .tt-name{font-weight:700;color:#ffee00;font-size:1.05em}
+#tree-tooltip .tt-name{font-weight:700;color:#ffee00;font-size:1em}
 #tree-tooltip .tt-meta{color:rgba(255,255,255,.55);font-size:.85em;margin-bottom:6px;padding-bottom:6px;border-bottom:1px solid rgba(255,255,255,.1)}
 #tree-tooltip .tt-meta b{color:#fff}
 #tree-tooltip .tt-desc{color:rgba(255,255,255,.85);margin-bottom:6px}
 #tree-tooltip .tt-progress{margin-top:6px;padding:6px 8px;background:rgba(255,238,0,.1);border:1px solid rgba(255,238,0,.3);border-radius:6px}
 #tree-tooltip .tt-progress.tt-max{background:rgba(255,170,0,.15);border-color:rgba(255,170,0,.4);color:#ffcc44;text-align:center;font-weight:700}
-#tree-tooltip .tt-arrow-label{color:#ffee00;font-weight:700;font-size:.9em;margin-bottom:2px}
-#tree-tooltip .tt-change{color:#fff;font-family:monospace;font-size:.95em}
-#tree-tooltip .tt-locked{margin-top:6px;padding:6px 8px;background:rgba(255,68,68,.1);border:1px solid rgba(255,68,68,.3);border-radius:6px;color:#ff9988;font-size:.88em}
+#tree-tooltip .tt-arrow-label{color:#ffee00;font-weight:700;font-size:.85em;margin-bottom:2px}
+#tree-tooltip .tt-change{color:#fff;font-family:monospace;font-size:1em}
+#tree-tooltip .tt-locked{margin-top:6px;padding:6px 8px;background:rgba(255,68,68,.1);border:1px solid rgba(255,68,68,.3);border-radius:6px;color:#ff9988;font-size:.85em}
 #tree-tooltip .tt-warn{margin-top:6px;color:#ff88cc;font-size:.85em;font-style:italic}
 
 /* ─── R5: 메타 팝업 (영구 성장) ─── */
@@ -244,9 +273,9 @@ body{font-family:'Noto Sans KR','Malgun Gothic',sans-serif;background:#05051a;co
 #meta-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid rgba(255,100,255,.2)}
 #meta-header h2{color:#ff88ff;font-size:1.2em;margin:0}
 #meta-rp-display{font-size:.85em;color:#fff;background:rgba(255,100,255,.15);padding:3px 10px;border-radius:10px;border:1px solid rgba(255,100,255,.4);font-weight:700}
-#meta-rp{color:#ff99ff;font-size:1.1em}
+#meta-rp{color:#ff99ff;font-size:1.2em}
 #meta-close{background:rgba(255,68,68,.2);border:1px solid rgba(255,68,68,.4);color:#ff6644;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:.85em}
-#meta-subtitle{color:rgba(255,255,255,.65);font-size:.8em;margin-bottom:12px}
+#meta-subtitle{color:rgba(255,255,255,.65);font-size:.75em;margin-bottom:12px}
 #meta-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .meta-item{padding:10px;background:rgba(255,255,255,.04);border:1px solid rgba(255,100,255,.25);border-radius:10px;cursor:pointer;transition:all .15s}
 .meta-item:hover:not(.locked):not(.maxed){background:rgba(255,100,255,.1);border-color:rgba(255,100,255,.55);transform:translateY(-1px)}
@@ -274,47 +303,47 @@ body{font-family:'Noto Sans KR','Malgun Gothic',sans-serif;background:#05051a;co
    ═══════════════════════════════════════════ */
 @media (max-width:720px){
   #top-bar{height:36px;padding:4px 6px}
-  #top-brand{font-size:1.1em}
-  .icon-btn{width:30px;height:30px;font-size:.9em}
+  #top-brand{font-size:1.2em}
+  .icon-btn{width:30px;height:30px;font-size:.85em}
   #hud-left{top:40px;left:6px;min-width:110px;max-width:160px;gap:2px}
   #hud-right{top:40px;right:6px;padding:4px 8px;gap:2px}
-  .hud-stat{font-size:.7em}
-  #wave-badge{font-size:.8em;padding:2px 10px}
+  .hud-stat{font-size:.72em}
+  #wave-badge{font-size:.75em;padding:2px 10px}
   #enemy-count{font-size:.62em}
   #xp-bar-container{height:11px}
-  #xp-text{font-size:.58em;line-height:11px}
+  #xp-text{font-size:.62em;line-height:11px}
   #hp-ring-container{width:100px;height:100px}
   #hp-ring-text{font-size:.68em;bottom:-20px}
   #active-panel{bottom:30px;max-width:140px;right:6px}
   .keystone-badge{padding:3px 6px}
-  .keystone-badge-name{font-size:.65em}
-  .keystone-badge-desc{font-size:.55em}
-  .active-skill-icon{width:24px;height:24px;font-size:.82em}
+  .keystone-badge-name{font-size:.68em}
+  .keystone-badge-desc{font-size:.62em}
+  .active-skill-icon{width:24px;height:24px;font-size:.85em}
   #active-combo{font-size:.72em;padding:2px 6px}
   .level-up-banner .lub-main{font-size:2.1em;letter-spacing:2px}
   .level-up-banner .lub-sub{font-size:1em;letter-spacing:3px}
-  #evolution-badge{font-size:.6em;padding:2px 10px}
+  #evolution-badge{font-size:.62em;padding:2px 10px}
 }
 /* 모바일 트리 */
 @media (max-width:720px){
   #tree-content{padding:6px}
-  #tree-header h2{font-size:.95em}
+  #tree-header h2{font-size:1em}
   #tree-columns{gap:4px}
   .tree-col{padding:4px}
   .tree-col-title{font-size:.72em}
-  .tree-tier-label{font-size:.58em}
+  .tree-tier-label{font-size:.62em}
   .tree-tier-grid{gap:3px;min-height:40px}
   .tree-node{width:42px;height:42px}
   .tree-node.keystone{width:46px;height:46px}
-  .tree-node-icon{font-size:1.15em}
-  .tree-node.keystone .tree-node-icon{font-size:1.35em}
-  .tree-node-rank{font-size:.55em;padding:0px 3px;min-width:18px}
+  .tree-node-icon{font-size:1.2em}
+  .tree-node.keystone .tree-node-icon{font-size:1.4em}
+  .tree-node-rank{font-size:.62em;padding:0px 3px;min-width:18px}
   #meta-grid{grid-template-columns:1fr}
   #tree-tooltip{min-width:170px;max-width:220px;font-size:.72em}
 }
-#stats-row{display:flex;justify-content:center;gap:16px;font-size:.78em}
+#stats-row{display:flex;justify-content:center;gap:16px;font-size:.75em}
 .stat-item{display:flex;flex-direction:column;align-items:center}
-.stat-label{color:rgba(255,255,255,.45);font-size:.7em;margin-bottom:1px}
+.stat-label{color:rgba(255,255,255,.45);font-size:.72em;margin-bottom:1px}
 .stat-value{font-weight:700;color:#ffee00;font-size:1em}
 #evolution-badge{display:inline-block;padding:2px 12px;border-radius:10px;font-size:.72em;font-weight:700;margin-bottom:5px;background:rgba(0,212,255,.12);border:1px solid rgba(0,212,255,.35);color:#00d4ff;transition:all .5s}
 #game-area{position:fixed;top:0;left:0;width:100%;height:100%;z-index:5;cursor:none}
@@ -348,11 +377,11 @@ body{font-family:'Noto Sans KR','Malgun Gothic',sans-serif;background:#05051a;co
 @keyframes btnFlash{0%{box-shadow:0 0 20px rgba(0,212,255,.5)}100%{box-shadow:none}}
 .hotkey-badge{position:absolute;top:4px;right:4px;width:22px;height:22px;line-height:22px;text-align:center;font-size:.75em;font-weight:700;color:rgba(255,255,255,.7);background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);border-radius:4px;pointer-events:none}
 .upgrade-btn.hotkey-flash .hotkey-badge{color:#fff;background:rgba(0,212,255,.3);border-color:rgba(0,212,255,.6)}
-.upgrade-name{font-size:.78em;font-weight:700;margin-bottom:1px}
-.upgrade-desc{font-size:.6em;color:rgba(255,255,255,.45);margin-bottom:4px}
+.upgrade-name{font-size:.75em;font-weight:700;margin-bottom:1px}
+.upgrade-desc{font-size:.62em;color:rgba(255,255,255,.45);margin-bottom:4px}
 .upgrade-bottom{display:flex;justify-content:space-between;align-items:center}
-.upgrade-cost{font-size:.7em;color:#ffee00;font-weight:700}
-.upgrade-level{font-size:.6em;color:rgba(255,255,255,.35);background:rgba(255,255,255,.05);padding:1px 7px;border-radius:8px}
+.upgrade-cost{font-size:.72em;color:#ffee00;font-weight:700}
+.upgrade-level{font-size:.62em;color:rgba(255,255,255,.35);background:rgba(255,255,255,.05);padding:1px 7px;border-radius:8px}
 .screen-flash{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:50;animation:flash .1s ease-out forwards}
 .screen-flash.big{animation:bigFlash .25s ease-out forwards}
 .screen-flash.evo{animation:evoFlash .5s ease-out forwards}
@@ -382,16 +411,16 @@ body.state-gameover #evolution-badge-bottom,
 body.state-gameover #enemy-roster{display:none !important}
 #game-over.show{display:flex;animation:fadeIn .5s}
 #game-over h1{font-size:2.2em;color:#ff4444;text-shadow:0 0 24px #ff4444;margin:0 0 2px;letter-spacing:3px}
-#game-over button{background:linear-gradient(135deg,#00d4ff,#b44aff);border:none;color:#fff;padding:10px 28px;border-radius:12px;font-size:.95em;font-weight:700;cursor:pointer;transition:transform .15s,box-shadow .15s}
+#game-over button{background:linear-gradient(135deg,#00d4ff,#b44aff);border:none;color:#fff;padding:10px 28px;border-radius:12px;font-size:1em;font-weight:700;cursor:pointer;transition:transform .15s,box-shadow .15s}
 #game-over button:hover{transform:translateY(-2px);box-shadow:0 6px 18px rgba(180,74,255,.4)}
-#go-title-row{font-size:1.15em;font-weight:900;text-align:center;margin-bottom:4px}
+#go-title-row{font-size:1.2em;font-weight:900;text-align:center;margin-bottom:4px}
 #go-evo-name{text-shadow:0 0 15px currentColor}
 #go-stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;max-width:420px;width:100%}
 .go-stat{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:8px 6px;text-align:center;transition:border-color .2s}
 .go-stat:hover{border-color:rgba(255,238,0,.3)}
-.go-stat-label{font-size:.6em;color:rgba(255,255,255,.5);margin-bottom:3px;white-space:nowrap;letter-spacing:.5px}
-.go-stat-value{font-size:1.15em;font-weight:900;color:#ffee00;white-space:nowrap}
-.go-section-title{font-size:.7em;color:rgba(255,255,255,.4);text-align:center;margin-bottom:6px;letter-spacing:1px}
+.go-stat-label{font-size:.62em;color:rgba(255,255,255,.5);margin-bottom:3px;white-space:nowrap;letter-spacing:.5px}
+.go-stat-value{font-size:1.2em;font-weight:900;color:#ffee00;white-space:nowrap}
+.go-section-title{font-size:.72em;color:rgba(255,255,255,.4);text-align:center;margin-bottom:6px;letter-spacing:1px}
 /* legacy (구버전 정의는 위쪽에서 420px로 통합됨) */
 #go-upgrade-detail{display:grid;grid-template-columns:1fr 1fr;gap:5px}
 .go-upg-item{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:6px 8px;display:flex;justify-content:space-between;align-items:center;font-size:.72em}
@@ -406,15 +435,15 @@ body.state-gameover #enemy-roster{display:none !important}
 @keyframes evoToastIn{0%{opacity:0;transform:translateX(120%) scale(.8)}60%{transform:translateX(-8%) scale(1.03)}100%{opacity:1;transform:translateX(0) scale(1)}}
 @keyframes evoToastOut{0%{opacity:1;transform:translateX(0)}100%{opacity:0;transform:translateX(120%)}}
 #evolution-content{text-align:center;background:linear-gradient(135deg,rgba(20,10,40,.96),rgba(10,5,30,.98));border:1px solid rgba(255,238,0,.4);border-radius:14px;padding:14px 18px;min-width:200px;max-width:260px;box-shadow:0 8px 32px rgba(0,0,0,.6),0 0 20px rgba(255,238,0,.2);pointer-events:auto;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
-#evolution-content h2{font-size:.8em;color:rgba(255,255,255,.55);margin:0 0 4px;letter-spacing:1px}
-#evolution-content h1{font-size:1.35em;font-weight:900;margin:0 0 6px;line-height:1.2}
+#evolution-content h2{font-size:.75em;color:rgba(255,255,255,.55);margin:0 0 4px;letter-spacing:1px}
+#evolution-content h1{font-size:1.4em;font-weight:900;margin:0 0 6px;line-height:1.2}
 #evolution-content p{color:rgba(255,255,255,.6);margin:0;font-size:.72em}
 #evolution-content button{display:none}  /* 토스트는 자동 사라짐 — 버튼 불필요 */
 @keyframes popIn{from{opacity:0;transform:scale(.5)}to{opacity:1;transform:scale(1)}}
 #skill-popup{position:fixed;top:0;left:0;width:100%;height:100%;z-index:96;display:none;align-items:center;justify-content:center;background:rgba(0,0,20,.9)}
 #skill-popup.show{display:flex;animation:fadeIn .3s}
 #skill-content{text-align:center;max-width:360px;width:90%}
-#skill-content h2{font-size:1.2em;color:#ffee00;margin-bottom:4px}
+#skill-content h2{font-size:var(--fs-title);color:var(--accent-yellow);margin-bottom:4px}
 #skill-subtitle{font-size:.75em;color:rgba(255,255,255,.5);margin-bottom:14px}
 #skill-choices{display:flex;flex-direction:column;gap:8px}
 .skill-card{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:12px 14px;cursor:pointer;text-align:left;transition:all .2s;display:flex;align-items:center;gap:10px}
@@ -433,7 +462,7 @@ body.state-gameover #enemy-roster{display:none !important}
 #upgrade-popup.closing #upgrade-content{transform:translateY(-60px);opacity:0}
 #upgrade-content.entering{animation:upgradeSlideIn .45s ease-out both}
 @keyframes upgradeSlideIn{0%{opacity:0;transform:translateY(40px)}100%{opacity:1;transform:translateY(0)}}
-#upgrade-content h2{font-size:1.2em;color:#ffee00;margin-bottom:4px}
+#upgrade-content h2{font-size:var(--fs-title);color:var(--accent-yellow);margin-bottom:4px}
 #upgrade-subtitle{font-size:.75em;color:rgba(255,255,255,.5);margin-bottom:14px}
 #upgrade-choices{display:flex;flex-direction:column;gap:8px}
 #upgrade-choices.no-interact{pointer-events:none}
@@ -453,37 +482,37 @@ body.state-gameover #enemy-roster{display:none !important}
 .upgrade-choice-info{flex:1}
 .upgrade-choice-name{font-weight:700;font-size:.85em;margin-bottom:2px}
 .upgrade-choice-desc{font-size:.68em;color:rgba(255,255,255,.5)}
-.upgrade-choice-cat{font-size:.55em;color:rgba(0,212,255,.6);margin-top:2px}
+.upgrade-choice-cat{font-size:.62em;color:rgba(0,212,255,.6);margin-top:2px}
 /* legacy #active-skills 정의는 U3 구간의 #active-panel > #active-skills로 대체됨 */
-.mini-skill{font-size:.65em;padding:1px 6px;border-radius:8px;background:rgba(0,212,255,.1);border:1px solid rgba(0,212,255,.25);color:#00d4ff}
+.mini-skill{font-size:.68em;padding:1px 6px;border-radius:8px;background:rgba(0,212,255,.1);border:1px solid rgba(0,212,255,.25);color:#00d4ff}
 #enemy-roster{position:fixed;left:0;top:50%;transform:translateY(-50%);z-index:12;display:flex;flex-direction:column;gap:3px;padding:8px 6px;max-height:60vh;overflow-y:auto;overflow-x:hidden;background:linear-gradient(90deg,rgba(10,10,40,.85) 0%,rgba(10,10,40,.6) 80%,transparent 100%);border-radius:0 10px 10px 0;pointer-events:none;scrollbar-width:none}
 #enemy-roster::-webkit-scrollbar{display:none}
 .roster-title{font-size:.5em;color:rgba(255,255,255,.35);text-align:center;letter-spacing:1px;margin-bottom:2px;white-space:nowrap}
-.roster-item{display:flex;align-items:center;gap:3px;font-size:.55em;padding:2px 8px 2px 4px;border-radius:10px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);transition:border-color .3s;white-space:nowrap}
+.roster-item{display:flex;align-items:center;gap:3px;font-size:.62em;padding:2px 8px 2px 4px;border-radius:10px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);transition:border-color .3s;white-space:nowrap}
 .roster-item canvas{flex-shrink:0;display:block}
 .roster-name{font-weight:700;white-space:nowrap}
 .roster-trait{font-size:.85em;color:rgba(255,255,255,.3);white-space:nowrap}
 #pause-popup{position:fixed;top:0;left:0;width:100%;height:100%;z-index:110;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.8);flex-direction:column;gap:20px;backdrop-filter:blur(4px)}
 #pause-popup.show{display:flex;animation:fadeIn .3s}
-#pause-popup h1{font-size:2.2em;color:#fff;text-shadow:0 0 20px rgba(0,212,255,.5);letter-spacing:4px}
+#pause-popup h1{font-size:2em;color:var(--text-primary);text-shadow:0 0 20px rgba(0,212,255,.5);letter-spacing:4px}
 #pause-buttons{display:flex;flex-direction:column;gap:10px;width:200px}
-#pause-resume{background:linear-gradient(135deg,#00d4ff,#b44aff);border:none;color:#fff;padding:14px 35px;border-radius:12px;font-size:1.1em;font-weight:700;cursor:pointer}
-#pause-reset{background:rgba(255,255,255,.08);border:1px solid rgba(255,68,68,.4);color:#ff6666;padding:12px 35px;border-radius:12px;font-size:.9em;font-weight:700;cursor:pointer}
+#pause-resume{background:linear-gradient(135deg,#00d4ff,#b44aff);border:none;color:#fff;padding:14px 35px;border-radius:12px;font-size:1.2em;font-weight:700;cursor:pointer}
+#pause-reset{background:rgba(255,255,255,.08);border:1px solid rgba(255,68,68,.4);color:#ff6666;padding:12px 35px;border-radius:12px;font-size:.85em;font-weight:700;cursor:pointer}
 #pause-reset:hover{background:rgba(255,68,68,.15)}
 #pause-extra{display:none;gap:8px;justify-content:center;margin-top:12px}
-.pause-menu-btn{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.2);color:#fff;padding:8px 16px;border-radius:10px;font-size:.78em;font-weight:600;cursor:pointer;transition:all .2s;white-space:nowrap}
+.pause-menu-btn{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.2);color:#fff;padding:8px 16px;border-radius:10px;font-size:.75em;font-weight:600;cursor:pointer;transition:all .2s;white-space:nowrap}
 .pause-menu-btn:hover{background:rgba(255,255,255,.15)}
 .pause-menu-btn.muted{opacity:.5}
 /* ── 랭킹 시스템 ── */
 #go-nickname-section{max-width:420px;width:100%;text-align:center;padding-top:8px;margin-top:4px;border-top:1px solid rgba(255,255,255,.08)}
 #go-nickname-row{display:flex;gap:8px;justify-content:center;align-items:center;margin-top:4px}
-#go-nickname{flex:1;min-width:140px;max-width:220px;background:rgba(255,255,255,.08);border:1px solid rgba(255,238,0,.4);color:#fff;padding:10px 14px;border-radius:12px;font-size:.9em;font-weight:600;text-align:center;outline:none;transition:border-color .2s}
+#go-nickname{flex:1;min-width:140px;max-width:220px;background:rgba(255,255,255,.08);border:1px solid rgba(255,238,0,.4);color:#fff;padding:10px 14px;border-radius:12px;font-size:.85em;font-weight:600;text-align:center;outline:none;transition:border-color .2s}
 #go-nickname:focus{border-color:rgba(255,238,0,.8);box-shadow:0 0 12px rgba(255,238,0,.2)}
 #go-nickname::placeholder{color:rgba(255,255,255,.3);font-weight:400}
 #go-save-rank{background:linear-gradient(135deg,#ffcc00,#ff8800)!important;border:none;color:#111!important;padding:10px 20px;border-radius:12px;font-size:.85em;font-weight:700;cursor:pointer;white-space:nowrap;transition:all .2s;flex-shrink:0}
 #go-save-rank:hover{transform:translateY(-1px);box-shadow:0 0 15px rgba(255,200,0,.4)}
 #go-save-rank:disabled{opacity:.4;cursor:not-allowed;transform:none!important;box-shadow:none!important}
-#go-rank-saved{color:#00ffaa;font-size:.78em;margin-top:6px;animation:fadeIn .3s}
+#go-rank-saved{color:#00ffaa;font-size:.75em;margin-top:6px;animation:fadeIn .3s}
 #go-buttons-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;justify-content:center;margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,.08);width:100%;max-width:420px}
 #go-retry{grid-column:1/-1}
 #go-meta{background:linear-gradient(135deg,rgba(255,100,255,.2),rgba(120,60,200,.3))!important;border:1px solid rgba(255,100,255,.5)!important;color:#ff99ff!important;padding:10px 16px!important;font-size:.85em!important}
@@ -499,7 +528,7 @@ body.state-gameover #enemy-roster{display:none !important}
 #ranking-popup{position:fixed;top:0;left:0;width:100%;height:100%;z-index:210;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.92);backdrop-filter:blur(6px)}
 #ranking-popup.show{display:flex;animation:fadeIn .3s}
 #ranking-content{text-align:center;max-width:420px;width:92%;max-height:85vh;display:flex;flex-direction:column}
-#ranking-content h2{font-size:1.5em;color:#ffcc00;text-shadow:0 0 20px rgba(255,204,0,.4);margin-bottom:12px;letter-spacing:2px}
+#ranking-content h2{font-size:var(--fs-display);color:#ffcc00;text-shadow:0 0 20px rgba(255,204,0,.4);margin-bottom:12px;letter-spacing:2px}
 #ranking-tabs{display:flex;gap:6px;justify-content:center;margin-bottom:12px}
 .rank-tab{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.5);padding:6px 16px;border-radius:10px;font-size:.75em;font-weight:600;cursor:pointer;transition:all .2s}
 .rank-tab:hover{background:rgba(255,255,255,.1)}
@@ -510,23 +539,23 @@ body.state-gameover #enemy-roster{display:none !important}
 .rank-entry.top1{background:rgba(255,215,0,.1);border-color:rgba(255,215,0,.3)}
 .rank-entry.top2{background:rgba(192,192,192,.08);border-color:rgba(192,192,192,.2)}
 .rank-entry.top3{background:rgba(205,127,50,.08);border-color:rgba(205,127,50,.2)}
-.rank-pos{font-size:1.1em;font-weight:900;min-width:28px;text-align:center}
+.rank-pos{font-size:1.2em;font-weight:900;min-width:28px;text-align:center}
 .rank-pos.gold{color:#ffd700}
 .rank-pos.silver{color:#c0c0c0}
 .rank-pos.bronze{color:#cd7f32}
 .rank-info{flex:1;min-width:0}
 .rank-name{font-weight:700;font-size:.85em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.rank-detail{font-size:.65em;color:rgba(255,255,255,.4);margin-top:2px}
+.rank-detail{font-size:.68em;color:rgba(255,255,255,.4);margin-top:2px}
 .rank-score{text-align:right;min-width:60px}
 .rank-score-value{font-size:1em;font-weight:900;color:#ffee00}
-.rank-score-label{font-size:.55em;color:rgba(255,255,255,.35)}
+.rank-score-label{font-size:.62em;color:rgba(255,255,255,.35)}
 .rank-empty{color:rgba(255,255,255,.25);font-size:.85em;padding:40px 0}
 .rank-loading{animation:pulse 1s ease-in-out infinite}
 @keyframes pulse{0%,100%{opacity:.4}50%{opacity:.8}}
 #ranking-buttons{display:flex;gap:8px;justify-content:center;margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,.08)}
-#ranking-close{background:linear-gradient(135deg,#00d4ff,#b44aff);border:none;color:#fff;padding:10px 30px;border-radius:12px;font-size:.9em;font-weight:700;cursor:pointer}
+#ranking-close{background:linear-gradient(135deg,#00d4ff,#b44aff);border:none;color:#fff;padding:10px 30px;border-radius:12px;font-size:.85em;font-weight:700;cursor:pointer}
 /* ── 게임 푸터 ── */
-#game-footer{position:fixed;bottom:0;left:0;width:100%;z-index:2;display:flex;justify-content:center;gap:14px;padding:6px 10px;font-size:.65em;pointer-events:auto}
+#game-footer{position:fixed;bottom:0;left:0;width:100%;z-index:2;display:flex;justify-content:center;gap:14px;padding:6px 10px;font-size:.68em;pointer-events:auto}
 #game-footer a{color:rgba(255,255,255,.25);text-decoration:none;transition:color .2s}
 #game-footer a:hover{color:rgba(255,255,255,.5)}
 #game-footer.hidden{display:none}
@@ -539,18 +568,18 @@ body.state-gameover #enemy-roster{display:none !important}
   #game-title{font-size:.85em;letter-spacing:1px;margin-bottom:2px}
   #lang-btn,#ranking-btn,#sound-btn{display:none!important}
   #top-buttons{position:absolute;top:4px;right:6px;display:flex;gap:0;margin-bottom:0}
-  #pause-btn{padding:4px 8px;font-size:.7em;border-radius:14px}
+  #pause-btn{padding:4px 8px;font-size:.72em;border-radius:14px}
   #pause-btn .top-btn-label{display:none}
   #pause-btn .top-btn-icon{font-size:1.2em}
   #evolution-badge{font-size:.62em;padding:1px 8px;margin-bottom:3px}
-  #wave-info{gap:8px;margin-bottom:4px;font-size:.7em}
-  #wave-badge{padding:1px 8px;font-size:.9em}
+  #wave-info{gap:8px;margin-bottom:4px;font-size:.72em}
+  #wave-badge{padding:1px 8px;font-size:.85em}
   #hp-bar-container{max-width:50%;height:14px;margin-bottom:4px}
   #hp-text{font-size:.62em;line-height:14px}
   #stats-row{gap:10px;font-size:.68em}
-  .stat-label{font-size:.65em}
+  .stat-label{font-size:.68em}
   #active-skills{margin-top:2px;gap:2px}
-  .mini-skill{font-size:.55em;padding:0px 4px}
+  .mini-skill{font-size:.62em;padding:0px 4px}
   /* 적 로스터 — 좌측 상단 */
   #enemy-roster{padding:4px 4px;gap:2px;max-height:30vh;top:80px;transform:none}
   .roster-item{font-size:.48em;padding:1px 5px 1px 3px;gap:2px}
@@ -559,13 +588,13 @@ body.state-gameover #enemy-roster{display:none !important}
   #bottom-panel{padding:2px 4px 4px}
   #energy-display{margin-bottom:2px}
   #energy-value{font-size:1em}
-  #energy-unit{font-size:.6em}
+  #energy-unit{font-size:.62em}
   #upgrades-grid{gap:3px;max-height:25vh}
   .upgrade-btn{padding:4px 5px;border-radius:6px}
   .upgrade-name{font-size:.62em;margin-bottom:0}
   .upgrade-desc{font-size:.46em;margin-bottom:1px;line-height:1.2}
   .upgrade-bottom{margin-top:1px}
-  .upgrade-cost{font-size:.55em}
+  .upgrade-cost{font-size:.62em}
   .upgrade-level{font-size:.46em;padding:0px 4px}
   .hotkey-badge{display:none}
   /* 팝업 컴팩트 */
@@ -575,37 +604,37 @@ body.state-gameover #enemy-roster{display:none !important}
   #go-stats-grid{gap:4px;max-width:280px}
   .go-stat{padding:5px 6px;border-radius:8px}
   .go-stat-label{font-size:.52em}
-  .go-stat-value{font-size:.88em}
-  #go-nickname{width:140px;padding:8px 10px;font-size:.8em}
-  #go-save-rank{padding:8px 14px;font-size:.78em}
+  .go-stat-value{font-size:.85em}
+  #go-nickname{width:140px;padding:8px 10px;font-size:.75em}
+  #go-save-rank{padding:8px 14px;font-size:.75em}
   #wave-popup-text{font-size:1.8em}
   #evolution-popup{top:78px;right:8px}
   #evolution-content{min-width:160px;max-width:200px;padding:10px 14px}
-  #evolution-content h1{font-size:1.05em}
-  #evolution-content p{font-size:.65em}
+  #evolution-content h1{font-size:1em}
+  #evolution-content p{font-size:.68em}
   #skill-content h2{font-size:1em}
   .skill-card{padding:9px 10px;gap:7px}
-  .skill-icon{font-size:1.3em;min-width:28px}
-  .skill-name{font-size:.78em}
-  .skill-desc{font-size:.6em}
+  .skill-icon{font-size:1.4em;min-width:28px}
+  .skill-name{font-size:.75em}
+  .skill-desc{font-size:.62em}
   #upgrade-content h2{font-size:1em}
   .upgrade-choice{padding:9px 10px;gap:7px}
-  .upgrade-choice-icon{font-size:1.3em;min-width:28px}
-  .upgrade-choice-name{font-size:.78em}
-  .upgrade-choice-desc{font-size:.6em}
+  .upgrade-choice-icon{font-size:1.4em;min-width:28px}
+  .upgrade-choice-name{font-size:.75em}
+  .upgrade-choice-desc{font-size:.62em}
   .upgrade-choice-cat{font-size:.48em}
   /* 랭킹 팝업 */
   #ranking-content{width:95%}
   #ranking-content h2{font-size:1.2em}
   .rank-tab{padding:4px 12px;font-size:.68em}
   .rank-entry{padding:7px 8px;gap:6px}
-  .rank-name{font-size:.78em}
-  .rank-detail{font-size:.58em}
-  .rank-score-value{font-size:.88em}
+  .rank-name{font-size:.75em}
+  .rank-detail{font-size:.62em}
+  .rank-score-value{font-size:.85em}
   /* 일시정지 */
   #pause-popup h1{font-size:1.6em}
   #pause-buttons{width:170px;gap:8px}
-  #pause-resume{padding:11px 25px;font-size:.95em}
-  #pause-reset{padding:9px 25px;font-size:.8em}
+  #pause-resume{padding:11px 25px;font-size:1em}
+  #pause-reset{padding:9px 25px;font-size:.75em}
   #pause-extra{display:flex}
 }
