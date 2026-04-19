@@ -217,7 +217,7 @@ async function addRankEntry(nickname){
   return entry;
 }
 
-// Firestore에서 랭킹 로드
+// Firestore에서 랭킹 로드 — 로컬 캐시와 병합해 이름+시간 기준 dedup
 async function fetchRanking(sortBy){
   if(!isFirebaseReady()) return _localLoad();
   try{
@@ -226,10 +226,20 @@ async function fetchRanking(sortBy){
       .orderBy(field,'desc')
       .limit(RANKING_MAX)
       .get();
-    const list=[];
-    snap.forEach(doc=>list.push(doc.data()));
-    _localSave(list);
-    return list;
+    const remote=[];
+    snap.forEach(doc=>remote.push(doc.data()));
+    // 로컬 + 원격 병합 (키: name+date) — Firestore 쓰기 실패한 로컬 엔트리 보존
+    const local=_localLoad();
+    const seen=new Map();
+    [...remote, ...local].forEach(e=>{
+      if(!e||typeof e.wave!=='number') return;
+      const key=(e.name||'?')+'_'+(e.date||0);
+      if(!seen.has(key)) seen.set(key,e);
+    });
+    const merged=Array.from(seen.values());
+    if(merged.length>RANKING_MAX) merged.length=RANKING_MAX;
+    _localSave(merged);
+    return merged;
   }catch(e){
     console.warn('Firestore read failed:',e.message);
     return _localLoad();
