@@ -570,7 +570,7 @@ function openTreePopup(isLevelUp){
   renderTreeBossSkills();
   // 컬럼 헤더/서브타이틀 재생성
   const colTitles=document.querySelectorAll('.tree-col-title');
-  const colMap=[['atk','🗡️','ui.col_atk','ui.col_atk_sub'],['def','🌩️','ui.col_def','ui.col_def_sub'],['util','🔋','ui.col_util','ui.col_util_sub']];
+  const colMap=[['atk','🗡️','ui.col_atk','ui.col_atk_sub'],['def','🌩️','ui.col_def','ui.col_def_sub'],['shard','🌀','ui.col_shard','ui.col_shard_sub']];
   colTitles.forEach(el=>{
     const tree=el.parentElement.dataset.tree;
     const m=colMap.find(x=>x[0]===tree);
@@ -591,7 +591,7 @@ function closeTreePopup(){
 }
 function renderTree(){
   document.getElementById('tree-sp').textContent=G.skillPoints;
-  ['atk','def','util'].forEach(treeId=>{
+  ['atk','def','shard'].forEach(treeId=>{
     const container=document.getElementById('tree-col-'+treeId);
     if(!container) return;
     container.innerHTML='';
@@ -643,7 +643,7 @@ function renderTree(){
 
 // SVG 연결선 그리기 — Manhattan 라우팅 (직각 ㄱ자)
 function drawTreeConnections(){
-  ['atk','def','util'].forEach(treeId=>{
+  ['atk','def','shard'].forEach(treeId=>{
     const container=document.getElementById('tree-col-'+treeId);
     if(!container) return;
     const svg=container.querySelector('.tree-svg');

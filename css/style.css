@@ -244,12 +244,12 @@ body{font-family:'Noto Sans KR','Malgun Gothic',sans-serif;background:#05051a;co
 .tree-col[data-tree="atk"] .tree-tier-grid{max-width:360px}
 .tree-col[data-tree="atk"]{border-color:rgba(255,102,68,.25)}
 .tree-col[data-tree="def"]{border-color:rgba(68,187,255,.25)}
-.tree-col[data-tree="util"]{border-color:rgba(255,204,0,.25)}
+.tree-col[data-tree="shard"]{border-color:rgba(255,136,255,.3)}
 .tree-col-title{font-size:.85em;font-weight:700;text-align:center;padding:4px;margin-bottom:6px;border-bottom:1px solid rgba(255,255,255,.1);display:flex;align-items:baseline;justify-content:center;gap:6px}
 .tree-col-sub{font-size:.72em;font-weight:500;color:rgba(255,255,255,.4);letter-spacing:0}
 .tree-col[data-tree="atk"] .tree-col-title{color:#ffcc44}
 .tree-col[data-tree="def"] .tree-col-title{color:#66bbff}
-.tree-col[data-tree="util"] .tree-col-title{color:#aaff66}
+.tree-col[data-tree="shard"] .tree-col-title{color:#ff88ee}
 .tree-col-body{flex:1;overflow-y:auto;padding:4px;position:relative}
 .tree-col-body::-webkit-scrollbar{width:6px}
 .tree-col-body::-webkit-scrollbar-thumb{background:rgba(255,255,255,.2);border-radius:3px}

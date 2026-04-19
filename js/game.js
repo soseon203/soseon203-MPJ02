@@ -32,7 +32,10 @@ const G={
   comboCount:0, comboTimer:0,
   upgradeShieldActive:false, upgradeShieldTimer:0,
   empTimer:0,
-  rebirthUsed:false
+  rebirthUsed:false,
+  // V4: 파편 시스템 상태
+  shards:[], _shardIdCounter:0,
+  stormHeartTimer:0
 };
 
 // ================================================================
@@ -380,6 +383,18 @@ function recalcStats(){
     if(G.keystones['ks_collector']){ G.maxHp=Math.floor(G.maxHp*0.5); }
     // ⏳ 시간의 주인 (Timelord): 적 속도 -50% (spawnEnemy), 자신 쿨다운 -40% (getClickCd)
     if(G.keystones['ks_timelord']){ /* spawnEnemy + click에서 처리 */ }
+    // ⚡ V4: 뇌전의 화신 — 자동 비활성, 클릭 CD +50% (handleClick), 5연속 낙뢰
+    if(G.keystones['ks_thunder_avatar']){ G.autoRate=0; }
+    // 🌩️ V4: 폭풍의 심장 — 자동 비활성, 3초마다 전체 낙뢰 (main.js에서 처리)
+    if(G.keystones['ks_storm_heart']){ G.autoRate=0; }
+    // 💠 V4: 코어 분할 — 최대 HP ×1/3, 파편 생성 ×3 (shards.js에서 처리)
+    if(G.keystones['ks_core_split']){ G.maxHp=Math.max(1,Math.floor(G.maxHp/3)); }
+    // ⚡ V4: 번개 해체 — 본체 공격 제거, 모든 공격이 파편 (damage 파이프라인)
+    if(G.keystones['ks_lightning_deconstruct']){ G.damage=Math.max(1,Math.floor(G.damage*0.3)); G.autoRate*=0.3; }
+    // 🎆 V4: 파편 폭발 — 본체 클릭 dmg -30% (런타임 페널티)
+    if(G.keystones['ks_shard_burst']){ G.damage=Math.ceil(G.damage*0.7); }
+    // 🌩️ V4: 천벌의 지배자 — 클릭 CD 0초 (getClickCdMult에서 처리)
+    if(G.keystones['ks_clickmaster']){ G.autoRate=0; }
   }
   if(G.hp>G.maxHp) G.hp=G.maxHp;
 }
@@ -415,6 +430,8 @@ function getStormLordChainBonus(){
 // 수집가 XP 배수 (이미 xpFromEnemy에서 ks_collector 체크)
 // 시간의 주인 쿨다운 배수 (click cd에서 체크)
 function getClickCdMult(){
+  if(hasKeystone('ks_clickmaster')) return 0;        // V4: 천벌의 지배자 — CD 0
+  if(hasKeystone('ks_thunder_avatar')) return 1.5;    // V4: 화신 — CD +50%
   if(hasKeystone('ks_timelord')) return 0.6; // -40%
   return 1;
 }
@@ -873,6 +890,8 @@ function killEnemy(enemy){
   // R1: XP 획득 & 레벨업 체크
   const xpGain=xpFromEnemy(enemy);
   gainXP(xpGain);
+  // V4: 파편 트리 — 처치 시 파편 스폰
+  if(typeof spawnShardsOnKill==='function') spawnShardsOnKill(enemy);
   // rage: 광전사 스택
   if(upLv('rage')>0){
     const maxStacks=upLv('rage')*3;

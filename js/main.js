@@ -95,6 +95,38 @@ function update(dt){
     }
   }
 
+  // V4: 파편 트리 — 프레임별 업데이트
+  if(typeof updateShards==='function') updateShards(dt);
+
+  // V4: 폭풍의 심장 키스톤 — 3초마다 전체 적에게 낙뢰 (dmg ×5)
+  if(hasKeystone('ks_storm_heart')){
+    G.stormHeartTimer=(G.stormHeartTimer||0)+dt;
+    if(G.stormHeartTimer>=3){
+      G.stormHeartTimer=0;
+      const shDmg=Math.max(1,Math.floor(G.damage*5));
+      G.enemies.forEach(e2=>{if(e2.hp>0)damageEnemy(e2,shDmg)});
+      const shw=gameCanvas.width/dpr,shh=gameCanvas.height/dpr;
+      addShockwave(shw/2,shh/2,'#8844ff',250);
+      screenFlash('big');
+      sfx.zap(1);
+    }
+  }
+
+  // V4: 폭풍의 눈 Breakpoint — 코어 반경 지속 피해 존
+  if((upLv('storm_eye')||0)>0){
+    const sew=gameCanvas.width/dpr,seh=gameCanvas.height/dpr;
+    const secx=sew/2,secy=seh/2;
+    const seLv=upLv('storm_eye');
+    const seRadius=80+seLv*20;
+    const seDps=seLv*3+G.damage*0.15*seLv;
+    G.enemies.forEach(e2=>{
+      if(e2.hp<=0)return;
+      if(Math.hypot(e2.x-secx,e2.y-secy)<=seRadius){
+        damageEnemy(e2,Math.max(1,Math.floor(seDps*dt)));
+      }
+    });
+  }
+
   // 자동 공격
   if(G.autoRate>0){
     G.autoTimer+=dt;
@@ -905,6 +937,13 @@ function loadGame(){
       G.upgradeShieldActive=false;G.upgradeShieldTimer=0;
       G.empTimer=G.empTimer||0;
       G.rebirthUsed=G.rebirthUsed||false;
+      // V4: 파편 시스템 상태 초기화 (런타임 전용, 저장 안 함)
+      G.shards=[];G._shardIdCounter=0;G.stormHeartTimer=0;
+      // V4: 폐기된 키스톤 정리 (이전 브랜치 세이브와의 충돌 방지)
+      if(G.keystones){
+        const removed=['ks_click_master','ks_storm_lord','ks_glass_cannon','ks_void','ks_collector'];
+        removed.forEach(k=>{ if(G.keystones[k]){ delete G.keystones[k]; } });
+      }
       recalcStats();
     }
   }catch(e){}
