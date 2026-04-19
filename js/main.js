@@ -1048,7 +1048,13 @@ function initEvents(){
       // 기본: 일시정지 토글 (웨이브 진행 중에만)
       if(G.hp>0&&!G.skillSelecting&&!G.upgradeSelecting) togglePause();
     }
-    if(e.key==='t'||e.key==='T'){ if(!G.treeOpen&&G.hp>0&&!G.skillSelecting&&!G.upgradeSelecting) openTreePopup(false); }
+    // T 또는 1: 스킬 트리 토글 (우상단까지 마우스 이동 불필요)
+    if(e.key==='t'||e.key==='T'||e.key==='1'){
+      if(G.treeOpen){ closeTreePopup(); }
+      else if(G.hp>0&&!G.skillSelecting&&!G.upgradeSelecting&&!G.levelUpSelecting&&!document.body.classList.contains('state-gameover')){
+        openTreePopup(false);
+      }
+    }
   });
 
   document.getElementById('pause-resume').addEventListener('click',()=>togglePause());
