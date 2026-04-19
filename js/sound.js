@@ -2,13 +2,50 @@
 //  사운드 엔진 (Web Audio API - 고품질)
 // ================================================================
 class SFX {
-  constructor(){this.ctx=null;this.muted=false;this.ready=false;this.master=null;this._mp3Buffers={};this._mp3Audio={}}
+  constructor(){
+    this.ctx=null;this.muted=false;this.ready=false;this.master=null;
+    this._mp3Buffers={};this._mp3Audio={};
+    // 볼륨 시스템 — 0~5 단계 (0=음소거, 5=최대)
+    this.sfxVolume=3;  // 기본 60% (너무 시끄럽지 않게)
+    this.bgmVolume=2;  // 기본 40% (배경음은 더 조용히)
+    // BGM 상태
+    this.bgmTracks=['sounds/Meteor cascade_1.mp3','sounds/Meteor cascade_2.mp3'];
+    this.bgmAudio=null;this.bgmCurrentIdx=-1;this._bgmFadeTimer=null;this._bgmStarted=false;
+    this._loadVolumes();
+  }
+  _loadVolumes(){
+    try{
+      const sv=localStorage.getItem('lightningSfxVol');
+      const bv=localStorage.getItem('lightningBgmVol');
+      if(sv!==null) this.sfxVolume=Math.max(0,Math.min(5,parseInt(sv,10)||0));
+      if(bv!==null) this.bgmVolume=Math.max(0,Math.min(5,parseInt(bv,10)||0));
+    }catch(e){}
+  }
+  _saveVolumes(){
+    try{
+      localStorage.setItem('lightningSfxVol',this.sfxVolume);
+      localStorage.setItem('lightningBgmVol',this.bgmVolume);
+    }catch(e){}
+  }
+  // SFX 마스터 게인 = (level/5) * 0.4 (최대 0.4로 제한해서 과도 방지)
+  _sfxTarget(){return this.muted?0:(this.sfxVolume/5)*0.4}
+  _bgmTarget(){return this.muted?0:(this.bgmVolume/5)*0.5}
+  setSfxVolume(lv){
+    this.sfxVolume=Math.max(0,Math.min(5,lv|0));
+    if(this.master) this.master.gain.value=this._sfxTarget();
+    this._saveVolumes();
+  }
+  setBgmVolume(lv){
+    this.bgmVolume=Math.max(0,Math.min(5,lv|0));
+    if(this.bgmAudio&&!this._bgmFadeTimer) this.bgmAudio.volume=this._bgmTarget();
+    this._saveVolumes();
+  }
   init(){
     if(this.ready)return;
     try{
       this.ctx=new(window.AudioContext||window.webkitAudioContext)();
       this.master=this.ctx.createGain();
-      this.master.gain.value=0.4;
+      this.master.gain.value=this._sfxTarget();
       this.comp=this.ctx.createDynamicsCompressor();
       this.comp.threshold.value=-20;this.comp.ratio.value=4;
       this.master.connect(this.comp);
@@ -16,6 +53,58 @@ class SFX {
       this.ready=true;
       this._loadZap();
     }catch(e){}
+  }
+  // ─────── BGM 시스템 ───────
+  startBgm(){
+    if(this._bgmStarted) return;
+    this._bgmStarted=true;
+    if(!this.bgmAudio){
+      this.bgmAudio=new Audio();
+      this.bgmAudio.loop=false;
+      this.bgmAudio.volume=0;
+      this.bgmAudio.addEventListener('ended',()=>{ if(this._bgmStarted) this._playNextBgm(); });
+    }
+    this._playNextBgm();
+  }
+  stopBgm(fadeMs=1500){
+    if(!this._bgmStarted) return;
+    this._bgmStarted=false;
+    if(!this.bgmAudio) return;
+    this._fadeBgm(0, fadeMs, ()=>{
+      try{ this.bgmAudio.pause(); this.bgmAudio.currentTime=0; }catch(e){}
+    });
+  }
+  _playNextBgm(){
+    if(!this.bgmAudio||!this._bgmStarted) return;
+    // 이전 트랙과 다른 것 선택 (번갈아 랜덤)
+    let idx=0;
+    if(this.bgmTracks.length>1){
+      do{ idx=Math.floor(Math.random()*this.bgmTracks.length); }
+      while(idx===this.bgmCurrentIdx);
+    }
+    this.bgmCurrentIdx=idx;
+    this.bgmAudio.src=this.bgmTracks[idx];
+    this.bgmAudio.volume=0;
+    const playPromise=this.bgmAudio.play();
+    if(playPromise) playPromise.then(()=>this._fadeBgm(this._bgmTarget(),2000)).catch(()=>{});
+  }
+  _fadeBgm(target, ms, done){
+    if(!this.bgmAudio) return;
+    if(this._bgmFadeTimer){ clearInterval(this._bgmFadeTimer); this._bgmFadeTimer=null; }
+    const start=this.bgmAudio.volume;
+    const steps=Math.max(1, ms/50);
+    const stepSize=(target-start)/steps;
+    let count=0;
+    this._bgmFadeTimer=setInterval(()=>{
+      count++;
+      let v=this.bgmAudio.volume+stepSize;
+      if((stepSize>0&&v>=target)||(stepSize<0&&v<=target)||count>=steps){
+        v=target;
+        clearInterval(this._bgmFadeTimer); this._bgmFadeTimer=null;
+        if(done) done();
+      }
+      this.bgmAudio.volume=Math.max(0,Math.min(1,v));
+    },50);
   }
   _loadZap(){
     if(this.zapBuffer)return;
@@ -77,7 +166,12 @@ class SFX {
     return false;
   }
   resume(){if(this.ctx&&this.ctx.state==='suspended')this.ctx.resume()}
-  toggle(){this.muted=!this.muted;if(this.master)this.master.gain.value=this.muted?0:0.4;return!this.muted}
+  toggle(){
+    this.muted=!this.muted;
+    if(this.master) this.master.gain.value=this._sfxTarget();
+    if(this.bgmAudio&&!this._bgmFadeTimer) this.bgmAudio.volume=this._bgmTarget();
+    return !this.muted;
+  }
 
   _noise(dur, decay=2){
     const n=this.ctx.sampleRate*dur;

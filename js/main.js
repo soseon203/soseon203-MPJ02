@@ -586,6 +586,7 @@ function gameOver(){
     return;
   }
   sfx.gameOver();
+  sfx.stopBgm(1500);  // 게임오버 → BGM 페이드아웃
   screenFlash('big');
 
   // R5: 런 종료 — RP 계산 & 업적 체크 (런 최종 결과 기준)
@@ -689,6 +690,9 @@ function resetGame(){
     if(el)el.classList.remove('show');
   });
   document.body.classList.remove('state-gameover');
+  // BGM 재시작 (새 런) — 단, 게임 컨테이너가 활성일 때만 (메인으로 돌아간 경우 제외)
+  const inGame=document.getElementById('game-container').classList.contains('active');
+  if(inGame&&sfx.bgmVolume>0&&!sfx._bgmStarted) sfx.startBgm();
   // 모든 블로킹 상태 해제
   G.paused=false;
   G.skillSelecting=false;
@@ -950,13 +954,58 @@ function initEvents(){
   document.getElementById('sound-btn').addEventListener('click',e=>{
     e.stopPropagation();
     sfx.init();
-    const on=sfx.toggle();
-    // more-menu 내부 버튼 구조: <span>🔊</span><span>사운드</span> — 첫 span이 아이콘
-    const btn=document.getElementById('sound-btn');
-    const icon=btn&&btn.querySelector('span:first-child');
-    if(icon) icon.textContent=on?'🔊':'🔇';
-    if(btn) btn.classList.toggle('muted',!on);
+    // 이전: mute 토글 → 이제: 사운드 설정 팝오버 오픈
+    openSoundSettings();
     closeMoreMenu();
+  });
+
+  // ─────── 사운드 설정 팝오버 ───────
+  function openSoundSettings(){
+    const pop=document.getElementById('sound-settings');
+    if(!pop) return;
+    pop.classList.remove('hidden');
+    refreshSoundBars();
+  }
+  function closeSoundSettings(){
+    const pop=document.getElementById('sound-settings');
+    if(pop) pop.classList.add('hidden');
+  }
+  function refreshSoundBars(){
+    document.querySelectorAll('.sound-bars').forEach(row=>{
+      const type=row.dataset.type;
+      const cur=type==='sfx'?sfx.sfxVolume:sfx.bgmVolume;
+      row.querySelectorAll('.sound-bar').forEach(btn=>{
+        const lv=parseInt(btn.dataset.level,10);
+        btn.classList.toggle('active', lv===cur);
+      });
+    });
+  }
+  document.getElementById('sound-settings-close').addEventListener('click',closeSoundSettings);
+  // 바 클릭으로 볼륨 변경
+  document.querySelectorAll('.sound-bars .sound-bar').forEach(btn=>{
+    btn.addEventListener('click',e=>{
+      e.stopPropagation();
+      sfx.init();
+      const lv=parseInt(btn.dataset.level,10);
+      const type=btn.parentElement.dataset.type;
+      if(type==='sfx'){ sfx.setSfxVolume(lv); sfx.zap(0.5); }
+      else{
+        sfx.setBgmVolume(lv);
+        if(lv>0){
+          if(!sfx._bgmStarted) sfx.startBgm();
+        }else{
+          sfx.stopBgm(300);
+        }
+      }
+      refreshSoundBars();
+    });
+  });
+  // 바깥 클릭 시 닫기
+  document.addEventListener('click',e=>{
+    const pop=document.getElementById('sound-settings');
+    if(pop&&!pop.classList.contains('hidden')&&!pop.contains(e.target)&&e.target.id!=='sound-btn'){
+      closeSoundSettings();
+    }
   });
 
   // 진화 토스트: 클릭 시 즉시 닫기 (자동 사라짐 타이머가 있어도 수동 dismiss 가능)
@@ -974,6 +1023,7 @@ function initEvents(){
   const goHome=document.getElementById('go-home');
   if(goHome) goHome.addEventListener('click',()=>{
     // 런 상태 정리 후 랜딩으로 복귀
+    sfx.stopBgm(800);  // 메인으로 → BGM 페이드아웃
     document.body.classList.remove('state-gameover');
     document.getElementById('game-over').classList.remove('show');
     document.getElementById('game-container').classList.remove('active');
@@ -1250,6 +1300,9 @@ function startGame(){
   document.getElementById('game-container').classList.add('active');
   const footer=document.getElementById('game-footer');
   if(footer)footer.classList.add('hidden');
+  // BGM 시작 (사용자 클릭 직후 → autoplay 제한 통과). 볼륨 0이면 생략
+  sfx.init();
+  if(sfx.bgmVolume>0) sfx.startBgm();
   loadGame();
   if(typeof loadMeta==='function') loadMeta();
   // R5: 메타 시작 보너스 적용 (새 런 시작 시)

@@ -11,7 +11,7 @@
   <meta property="og:type" content="website">
   <meta name="description" content="번개를 진화시키며 끝없는 웨이브에 도전하는 HTML5 캐주얼 게임">
   <link rel="icon" type="image/png" href="img/favicon.png">
-  <link rel="stylesheet" href="css/style.css?v=63">
+  <link rel="stylesheet" href="css/style.css?v=64">
 </head>
 
 <body>
@@ -104,6 +104,35 @@
       <button class="more-btn" id="lang-btn"><span>🌐</span><span id="lang-label">EN</span></button>
       <button class="more-btn" id="ranking-btn"><span>🏆</span><span>랭킹</span></button>
       <button class="more-btn" id="sound-btn"><span>🔊</span><span>사운드</span></button>
+    </div>
+    <!-- 사운드 설정 팝오버 (SFX / BGM 볼륨) -->
+    <div id="sound-settings" class="hidden">
+      <div class="sound-settings-header">
+        <span>🔊 사운드</span>
+        <button id="sound-settings-close" title="닫기">✕</button>
+      </div>
+      <div class="sound-row">
+        <span class="sound-row-label">효과음</span>
+        <div class="sound-bars" data-type="sfx">
+          <button class="sound-bar" data-level="0" title="음소거">✕</button>
+          <button class="sound-bar" data-level="1"></button>
+          <button class="sound-bar" data-level="2"></button>
+          <button class="sound-bar" data-level="3"></button>
+          <button class="sound-bar" data-level="4"></button>
+          <button class="sound-bar" data-level="5"></button>
+        </div>
+      </div>
+      <div class="sound-row">
+        <span class="sound-row-label">배경음</span>
+        <div class="sound-bars" data-type="bgm">
+          <button class="sound-bar" data-level="0" title="음소거">✕</button>
+          <button class="sound-bar" data-level="1"></button>
+          <button class="sound-bar" data-level="2"></button>
+          <button class="sound-bar" data-level="3"></button>
+          <button class="sound-bar" data-level="4"></button>
+          <button class="sound-bar" data-level="5"></button>
+        </div>
+      </div>
     </div>
     <!-- legacy hidden — for compat with existing code paths -->
     <div id="top-panel" style="display:none">
@@ -284,16 +313,16 @@
 
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
-  <script src="js/firebase-config.js?v=63"></script>
-  <script src="js/locales.js?v=63"></script>
-  <script src="js/sound.js?v=63"></script>
-  <script src="js/config.js?v=63"></script>
-  <script src="js/game.js?v=63"></script>
-  <script src="js/tree.js?v=63"></script>
-  <script src="js/render.js?v=63"></script>
-  <script src="js/ui.js?v=63"></script>
-  <script src="js/landing-anim.js?v=63"></script>
-  <script src="js/main.js?v=63"></script>
+  <script src="js/firebase-config.js?v=64"></script>
+  <script src="js/locales.js?v=64"></script>
+  <script src="js/sound.js?v=64"></script>
+  <script src="js/config.js?v=64"></script>
+  <script src="js/game.js?v=64"></script>
+  <script src="js/tree.js?v=64"></script>
+  <script src="js/render.js?v=64"></script>
+  <script src="js/ui.js?v=64"></script>
+  <script src="js/landing-anim.js?v=64"></script>
+  <script src="js/main.js?v=64"></script>
 </body>
 
 </html>
