@@ -742,8 +742,11 @@ function showTreeTooltip(node,anchor){
       if(inv<req){
         html+=`<div class="tt-locked">🔒 ${tf('ui.locked_tier',{tier:node.tier,inv,req})}</div>`;
       }else if(node.prereqs&&node.prereqs.length>0){
-        const missing=getMissingPrereqs(node).map(pid=>{const p=getTreeNode(pid);return p?getNodeName(p):pid;}).join(' + ');
-        html+=`<div class="tt-locked">🔒 ${tf('ui.locked_prereq',{name:missing||'—'})}</div>`;
+        const missing=getMissingPrereqs(node);
+        if(missing.length>0){
+          const detail=missing.map(m=>`${m.name} (${m.cur}/${m.req})`).join(' + ');
+          html+=`<div class="tt-locked">🔒 ${tf('ui.locked_prereq',{name:detail})}</div>`;
+        }
       }
     }else if(G.skillPoints<=0){
       html+=`<div class="tt-locked">⚠️ ${t('ui.no_sp')}</div>`;

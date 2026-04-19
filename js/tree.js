@@ -170,20 +170,26 @@ function getNodeRank(node){
   return G.upgrades&&G.upgrades[node.id]?G.upgrades[node.id].level:0;
 }
 
-// 특정 트리의 "tier 미만"에서 랭크≥1인 서로 다른 노드 개수
-//  — 한 노드에 랭크 몰아찍는 편법 방지, WoW/PoE 스타일 트리 다이빙 강제
+// WoW 스타일: 하위 티어 "포인트 합계"로 다음 티어 해금
+//  (개별 노드 prereq는 별도로 랭크 요구)
 function getTreeInvestedBelow(treeId, tier){
-  let count=0;
+  let sum=0;
   TREE_NODES.forEach(n=>{
-    if(n.tree===treeId && n.tier<tier && getNodeRank(n)>0) count++;
+    if(n.tree===treeId && n.tier<tier) sum+=getNodeRank(n);
   });
-  return count;
+  return sum;
 }
-// 티어 T 진입에 필요한 "서로 다른 노드 수"
 function tierGateRequired(tier){
   if(tier<=1) return 0;
-  if(tier===7) return 12;          // 키스톤: 12개 노드 해금 필요
-  return (tier-1)*2;                // T2=2, T3=4, T4=6, T5=8, T6=10
+  if(tier===7) return 20;           // 키스톤: 20포인트 누적
+  return (tier-1)*3;                 // T2=3, T3=6, T4=9, T5=12, T6=15
+}
+// 선행 노드에 요구되는 최소 랭크 — 기본은 절반, 노드별 prereqRank로 오버라이드 가능
+function getPrereqRankReq(childNode, parentNode){
+  if(!parentNode) return 1;
+  if(childNode && typeof childNode.prereqRank==='number') return childNode.prereqRank;
+  // maxRank 절반 (올림): 10→5, 5→3, 3→2, 1→1
+  return Math.max(1, Math.ceil(parentNode.maxRank/2));
 }
 
 function isTierGateOpen(treeId, tier){
@@ -194,22 +200,29 @@ function isNodeUnlocked(node){
   if(!node) return false;
   if(!isTierGateOpen(node.tree, node.tier)) return false;
   if(node.prereqs&&node.prereqs.length>0){
-    // AND: 나열된 모든 prereq가 1랭크 이상이어야 해금
+    // WoW식: 모든 선행 노드가 요구 랭크(기본 maxRank의 절반) 이상
     const ok=node.prereqs.every(pid=>{
       const p=getTreeNode(pid);
-      return p && getNodeRank(p)>0;
+      if(!p) return false;
+      const req=getPrereqRankReq(node,p);
+      return getNodeRank(p)>=req;
     });
     if(!ok) return false;
   }
   return true;
 }
-// prereq 중 아직 충족되지 않은 것만 반환 (툴팁용)
+// prereq 중 아직 충족되지 않은 것들 {id, name, cur, req} 반환 (툴팁용)
 function getMissingPrereqs(node){
   if(!node||!node.prereqs) return [];
-  return node.prereqs.filter(pid=>{
+  const out=[];
+  node.prereqs.forEach(pid=>{
     const p=getTreeNode(pid);
-    return !(p&&getNodeRank(p)>0);
+    if(!p) return;
+    const cur=getNodeRank(p);
+    const req=getPrereqRankReq(node,p);
+    if(cur<req) out.push({id:pid,name:getNodeName(p),cur,req});
   });
+  return out;
 }
 
 function isKeystoneBlocked(node){
