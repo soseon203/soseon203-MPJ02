@@ -129,8 +129,8 @@ body{font-family:'Noto Sans KR','Malgun Gothic',sans-serif;background:#05051a;co
 /* ═══════════════════════════════════════════
    U2: HP 링 (코어 주변 floating)
    ═══════════════════════════════════════════ */
-#hp-ring-container{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:130px;height:130px;z-index:4;pointer-events:none}
-#hp-ring{width:100%;height:100%;transform:rotate(-90deg)}
+#hp-ring-container{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:130px;height:130px;z-index:4;pointer-events:none;overflow:visible}
+#hp-ring{width:100%;height:100%;transform:rotate(-90deg);overflow:visible}
 #hp-ring .hp-ring-bg{fill:none;stroke:rgba(255,255,255,.06);stroke-width:3}
 #hp-ring .hp-ring-fg{fill:none;stroke:#44ff66;stroke-width:4;stroke-linecap:round;stroke-dasharray:276.46;stroke-dashoffset:0;transition:stroke-dashoffset .3s,stroke .3s;filter:drop-shadow(0 0 4px currentColor)}
 #hp-ring.low .hp-ring-fg{stroke:#ffaa00}
@@ -189,7 +189,7 @@ body{font-family:'Noto Sans KR','Malgun Gothic',sans-serif;background:#05051a;co
 /* ─── R3: 스킬 트리 팝업 ─── */
 #tree-popup{position:fixed;top:0;left:0;width:100%;height:100%;z-index:99;display:none;background:rgba(0,5,20,.96)}
 #tree-popup.show{display:flex;flex-direction:column;animation:fadeIn .3s}
-#tree-content{display:flex;flex-direction:column;width:100%;height:100%;max-width:1100px;margin:0 auto;padding:10px;align-items:center}
+#tree-content{display:flex;flex-direction:column;width:100%;height:100%;max-width:1100px;margin:0 auto;padding:10px;align-items:center;overflow:hidden}
 #tree-content > *{width:100%}
 #tree-header{display:flex;align-items:center;justify-content:space-between;padding:6px 12px;border-bottom:1px solid rgba(255,238,0,.25);margin-bottom:10px;flex-shrink:0}
 #tree-header h2{font-size:1.2em;color:#ffee00;margin:0}
@@ -226,7 +226,7 @@ body{font-family:'Noto Sans KR','Malgun Gothic',sans-serif;background:#05051a;co
 .tree-svg path.tree-line-available{stroke:rgba(255,238,0,.3);stroke-width:2}
 .tree-svg path.tree-line-active{stroke:#ffdd44;stroke-width:3;opacity:.85}
 /* 티어 블록 — T7(키스톤)이 위, T1(시작)이 아래 (WoW/PoE 스타일) */
-.tree-tier{margin-bottom:8px;padding-bottom:8px;position:relative;z-index:1;border-bottom:1px dashed rgba(255,255,255,.08)}
+.tree-tier{margin-bottom:clamp(4px,1vh,10px);padding-bottom:clamp(4px,1vh,8px);position:relative;z-index:1;border-bottom:1px dashed rgba(255,255,255,.08)}
 .tree-tier.gate-locked .tree-tier-grid{opacity:.35;filter:grayscale(.3)}
 .tree-tier:last-child{margin-bottom:6px;border-bottom:none;padding-bottom:0}
 .tree-tier-label{display:flex;justify-content:space-between;align-items:center;font-size:.62em;color:rgba(255,255,255,.4);letter-spacing:1.5px;margin-bottom:5px;padding:0 2px}
@@ -234,10 +234,10 @@ body{font-family:'Noto Sans KR','Malgun Gothic',sans-serif;background:#05051a;co
 .tree-gate-info.ok{color:#00ffaa}
 /* 기본 5열 그리드, 유틸 트리는 4열로 압축 */
 /* 기본 4열; ATK는 5열 (bloodlust 등 row 4 노드 포함) */
-.tree-tier-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;min-height:46px;justify-items:center;align-items:center}
+.tree-tier-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;min-height:clamp(40px,6vh,54px);justify-items:center;align-items:center}
 .tree-col[data-tree="atk"] .tree-tier-grid{grid-template-columns:repeat(5,1fr)}
 /* 노드 (아이콘 원형) — WoW 테크트리 스타일 */
-.tree-node{display:flex;align-items:center;justify-content:center;width:54px;height:54px;background:linear-gradient(145deg,rgba(40,40,60,.6),rgba(10,10,25,.8));border:2px solid rgba(255,255,255,.12);border-radius:50%;cursor:pointer;transition:all .18s;position:relative;box-shadow:inset 0 2px 4px rgba(255,255,255,.05)}
+.tree-node{display:flex;align-items:center;justify-content:center;width:clamp(40px,6vh,54px);height:clamp(40px,6vh,54px);background:linear-gradient(145deg,rgba(40,40,60,.6),rgba(10,10,25,.8));border:2px solid rgba(255,255,255,.12);border-radius:50%;cursor:pointer;transition:all .18s;position:relative;box-shadow:inset 0 2px 4px rgba(255,255,255,.05)}
 .tree-node:hover{transform:scale(1.1);z-index:3}
 .tree-node.locked{opacity:.35;cursor:not-allowed;filter:grayscale(.7)}
 .tree-node.locked:hover{transform:none}
