@@ -633,7 +633,8 @@ function getWaveConfig(wave){
     case'nightmare':
       count=Math.floor(18+wave*4); extraHp=2.0; extraSpeed=1.4; break;
     case'boss':
-      count=Math.floor(20+wave*4); break;
+      // 보스 웨이브: 잡몹은 일반보다 적고 살짝 약함 — 보스 본체에 집중
+      count=Math.floor(12+wave*3); extraHp=0.7; break;
     default:
       // 웨이브 1: 8마리, 2: 12, 3: 16, 10: 40 — 초반 완만, 후반 유지
       count=Math.floor(6+wave*4); break;
@@ -743,7 +744,8 @@ function spawnEnemy(){
 
   let baseHp,speed,size,reward;
   if(isBossEnemy){
-    baseHp=60*G.wave+G.wave*G.wave*2;
+    // 보스 HP: 웨이브 5에서 ~130, 10에서 ~350, 20에서 ~1000 (전보다 완만)
+    baseHp=Math.floor(25*G.wave+G.wave*G.wave*0.8);
     speed=0.1;
     size=Math.min(60+G.wave*2.5,120);
     reward=wc.reward*10;
