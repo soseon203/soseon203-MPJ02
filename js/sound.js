@@ -62,7 +62,17 @@ class SFX {
       this.bgmAudio=new Audio();
       this.bgmAudio.loop=false;
       this.bgmAudio.volume=0;
+      // 트랙이 끝나면 다음 트랙 (강제 번갈아)
       this.bgmAudio.addEventListener('ended',()=>{ if(this._bgmStarted) this._playNextBgm(); });
+      // 에러 시에도 다음 트랙 (파일 로드 실패 방어)
+      this.bgmAudio.addEventListener('error',()=>{
+        if(this._bgmStarted){
+          // 에러 루프 방지: 200ms 디바운스
+          if(this._bgmErrorAt && Date.now()-this._bgmErrorAt<500) return;
+          this._bgmErrorAt=Date.now();
+          this._playNextBgm();
+        }
+      });
     }
     this._playNextBgm();
   }
@@ -76,11 +86,15 @@ class SFX {
   }
   _playNextBgm(){
     if(!this.bgmAudio||!this._bgmStarted) return;
-    // 이전 트랙과 다른 것 선택 (번갈아 랜덤)
-    let idx=0;
-    if(this.bgmTracks.length>1){
-      do{ idx=Math.floor(Math.random()*this.bgmTracks.length); }
-      while(idx===this.bgmCurrentIdx);
+    // 🔧 "강제 번갈아" — 이전 트랙 이후 인덱스를 확정적으로 회전 (0→1→0→1…)
+    // 기존 랜덤 do-while은 2트랙에서도 처음 로드 실패 시 같은 idx 반복 가능성 있었음
+    let idx;
+    if(this.bgmCurrentIdx<0){
+      // 최초 재생: 랜덤으로 시작
+      idx=Math.floor(Math.random()*this.bgmTracks.length);
+    }else{
+      // 이후: 다음 인덱스 (rotate)
+      idx=(this.bgmCurrentIdx+1)%this.bgmTracks.length;
     }
     this.bgmCurrentIdx=idx;
     this.bgmAudio.src=this.bgmTracks[idx];

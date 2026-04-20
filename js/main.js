@@ -1145,20 +1145,7 @@ function initEvents(){
   document.getElementById('ranking-close').addEventListener('click',()=>hideRankingPopup());
 
   document.getElementById('pause-btn').addEventListener('click',()=>togglePause());
-  // U1: 더보기 드롭다운
-  const moreBtn=document.getElementById('more-btn');
-  const moreMenu=document.getElementById('more-menu');
-  if(moreBtn&&moreMenu){
-    moreBtn.addEventListener('click',e=>{
-      e.stopPropagation();
-      moreMenu.classList.toggle('hidden');
-    });
-    document.addEventListener('click',e=>{
-      if(!moreMenu.classList.contains('hidden')&&!moreMenu.contains(e.target)&&e.target!==moreBtn){
-        moreMenu.classList.add('hidden');
-      }
-    });
-  }
+  // (V4 UI 정리: 우상단 '⋮ 더보기' 메뉴 제거 — 언어/랭킹/사운드는 일시정지 팝업으로 통합됨)
   // R3: 스킬 트리 버튼 / 메타 팝업 / 닫기
   const treeBtn=document.getElementById('tree-btn');
   if(treeBtn) treeBtn.addEventListener('click',()=>{ if(G.treeOpen) closeTreePopup(); else openTreePopup(false); });
@@ -1171,8 +1158,6 @@ function initEvents(){
     const tag=(e.target&&e.target.tagName||'').toLowerCase();
     if(tag==='input'||tag==='textarea') return;
     if(e.key==='Escape'){
-      const mm=document.getElementById('more-menu');
-      if(mm&&!mm.classList.contains('hidden')){ mm.classList.add('hidden'); return; }
       if(G.treeOpen){ closeTreePopup(); return; }
       const metaShow=document.getElementById('meta-popup')?.classList?.contains('show');
       if(metaShow){ hideMetaPopup(); return; }
@@ -1196,6 +1181,17 @@ function initEvents(){
   document.getElementById('pause-reset').addEventListener('click',()=>{
     togglePause();
     resetGame();
+  });
+  // V4: 메인화면으로 돌아가기 (현재 진행 세이브됨)
+  const pauseHome=document.getElementById('pause-home');
+  if(pauseHome) pauseHome.addEventListener('click',()=>{
+    try{ saveGame(); }catch(e){}
+    try{ if(typeof sfx!=='undefined' && sfx.stopBgm) sfx.stopBgm(500); }catch(e){}
+    G.paused=false;
+    document.getElementById('pause-popup').classList.remove('show');
+    const ls=document.getElementById('landing-screen');
+    if(ls) ls.classList.remove('hidden');
+    if(typeof showLandingLastRun==='function') showLandingLastRun();
   });
 
   // 일시정지 메뉴 내 추가 버튼 (모바일)
