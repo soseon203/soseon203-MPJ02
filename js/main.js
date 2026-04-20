@@ -1270,20 +1270,43 @@ function toggleLandingLang(){
   document.title=t('ui.title');
   // Storm Eye 타이틀만 KO/EN 교체 — 나머지 영문 라벨(CHAPTER, ENTER THE EYE 등)은 고정
   const titleEl=document.getElementById('landing-title');
-  if(titleEl) titleEl.textContent=newLang==='ko'?'라이트닝 키우기':'Lightning Raising';
-  const langBtn=document.getElementById('landing-lang');
-  if(langBtn){ langBtn.textContent='🌐'; langBtn.title=newLang==='ko'?'Language: English':'언어: 한국어'; }
-  // 마지막 런 갱신
+  if(titleEl){
+    if(newLang==='ko'){
+      titleEl.innerHTML=`<span class="se-title-main">라이트닝</span> <span class="se-title-accent">키우기<svg class="se-title-bolt" viewBox="0 0 120 280" aria-hidden="true"><path d="M62 8 L18 150 L58 150 L34 272 L102 112 L62 112 Z" fill="url(#seBoltGrad)" stroke="#e6f1ff" stroke-width="1.4"/><defs><linearGradient id="seBoltGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#ffffff"/><stop offset="40%" stop-color="#bfe3ff"/><stop offset="100%" stop-color="#6ba8ff"/></linearGradient></defs></svg></span>`;
+    }else{
+      titleEl.innerHTML=`<span class="se-title-main">Lightning</span> <span class="se-title-accent">Raising<svg class="se-title-bolt" viewBox="0 0 120 280" aria-hidden="true"><path d="M62 8 L18 150 L58 150 L34 272 L102 112 L62 112 Z" fill="url(#seBoltGrad2)" stroke="#e6f1ff" stroke-width="1.4"/><defs><linearGradient id="seBoltGrad2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#ffffff"/><stop offset="40%" stop-color="#bfe3ff"/><stop offset="100%" stop-color="#6ba8ff"/></linearGradient></defs></svg></span>`;
+    }
+  }
+  // KO/EN 토글 UI 동기화
+  document.querySelectorAll('.se-lang-opt').forEach(el=>{
+    el.classList.toggle('active', el.dataset.lang===newLang);
+  });
   if(typeof showLandingLastRun==='function') showLandingLastRun();
   if(typeof updateThreatPill==='function') updateThreatPill();
+  if(typeof updateLandingRpDisplay==='function') updateLandingRpDisplay();
 }
 
-// 랜딩 RP 표시 갱신 (Storm Eye 메타 카드)
+// 랜딩 RP 표시 갱신 (Storm Eye 메타 카드) + 진행바 + 하단 ENTER 요약
 function updateLandingRpDisplay(){
   const el=document.getElementById('landing-rp-display');
-  if(el) el.textContent=formatNum(G.rp||0);
+  const rp=G.rp||0;
+  if(el) el.textContent=formatNum(rp);
+  const enterRp=document.getElementById('se-enter-rp');
+  if(enterRp) enterRp.textContent=formatNum(rp);
+  // 다음 티어까지 진행률 — 첫 티어 5 RP 기준 (메타 시스템 존재할 때만 정밀)
+  const nextTier=5;
+  const bar=document.getElementById('se-meta-bar');
+  if(bar){
+    const pct=Math.max(0,Math.min(100,(rp%nextTier)/nextTier*100));
+    bar.style.width=(rp>=nextTier?100:pct)+'%';
+  }
+  const hint=document.getElementById('se-meta-hint');
+  if(hint){
+    const rem=Math.max(0,nextTier-(rp%nextTier));
+    hint.textContent=`NEXT TIER · ${rem} RP · ${rp} / ${nextTier*3} UNLOCKED`;
+  }
 }
-// Storm Eye LAST RUN 카드 채우기
+// Storm Eye LAST RUN 카드 + 하단 ENTER 메타 채우기
 function showLandingLastRun(){
   const setTxt=(id,v)=>{ const el=document.getElementById(id); if(el) el.textContent=v; };
   try{
@@ -1293,10 +1316,10 @@ function showLandingLastRun(){
       setTxt('se-last-wave', s.wave||'—');
       setTxt('se-last-kills', s.kills!=null?s.kills:'—');
       setTxt('se-last-level', s.level||'—');
-      setTxt('se-last-rp', (s.rp!=null?('+'+s.rp):'—'));
-      // 하단 ENTER 영역 요약
-      setTxt('se-best-wave', s.bestWave||s.wave||0);
-      setTxt('se-total-runs', s.runs||1);
+      setTxt('se-last-evo', s.evo||s.evoName||'—');
+      setTxt('se-best-wave', s.bestWave||s.wave||'—');
+      // EVO 이름 (하단 ENTER 메타용)
+      if(s.evoName||s.evo){ setTxt('se-evo-name', s.evoName||s.evo); }
     }
   }catch(e){}
 }
