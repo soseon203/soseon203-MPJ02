@@ -980,11 +980,13 @@ function initEvents(){
     if(mm) mm.classList.add('hidden');
   };
 
-  document.getElementById('lang-btn').addEventListener('click',e=>{
+  // (구 상단바 더보기 메뉴용 버튼 — 현재 UI에서 제거되었지만 과거 세이브/캐시 대응)
+  const langBtn=document.getElementById('lang-btn');
+  if(langBtn) langBtn.addEventListener('click',e=>{
     e.stopPropagation();
     const newLang=LANG==='ko'?'en':'ko';
     setLang(newLang);
-    document.getElementById('lang-label').textContent=newLang==='ko'?'EN':'KO';
+    const ll=document.getElementById('lang-label'); if(ll) ll.textContent=newLang==='ko'?'EN':'KO';
     applyI18nHTML();
     rebuildUpgradeGrid();
     updateSkillDisplay();
@@ -993,7 +995,8 @@ function initEvents(){
     closeMoreMenu();
   });
 
-  document.getElementById('sound-btn').addEventListener('click',e=>{
+  const soundBtn=document.getElementById('sound-btn');
+  if(soundBtn) soundBtn.addEventListener('click',e=>{
     e.stopPropagation();
     sfx.init();
     // 이전: mute 토글 → 이제: 사운드 설정 팝오버 오픈
@@ -1046,7 +1049,8 @@ function initEvents(){
       labelEl.textContent=`${name} ${sfx.sfxVolume}/${sfx.bgmVolume}`;
     }
   }
-  document.getElementById('sound-settings-close').addEventListener('click',closeSoundSettings);
+  const ssClose=document.getElementById('sound-settings-close');
+  if(ssClose) ssClose.addEventListener('click',closeSoundSettings);
   // 바 클릭으로 볼륨 변경
   document.querySelectorAll('.sound-bars .sound-bar').forEach(btn=>{
     btn.addEventListener('click',e=>{
@@ -1124,8 +1128,9 @@ function initEvents(){
   // 랭킹: 게임오버에서 랭킹 보기
   document.getElementById('go-view-rank').addEventListener('click',()=>showRankingPopup());
 
-  // 랭킹: 더보기 메뉴 버튼
-  document.getElementById('ranking-btn').addEventListener('click',e=>{
+  // 랭킹: 더보기 메뉴 버튼 (구 상단바용 — 현재 UI에서 제거)
+  const rankBtn=document.getElementById('ranking-btn');
+  if(rankBtn) rankBtn.addEventListener('click',e=>{
     e.stopPropagation();
     if(!G.paused&&G.hp>0&&G.waveState!=='ready'){togglePause()}
     showRankingPopup();
@@ -1195,24 +1200,27 @@ function initEvents(){
   });
 
   // 일시정지 메뉴 내 추가 버튼 (모바일)
-  document.getElementById('pause-lang').addEventListener('click',()=>{
+  const pauseLang=document.getElementById('pause-lang');
+  if(pauseLang) pauseLang.addEventListener('click',()=>{
     const newLang=LANG==='ko'?'en':'ko';
     setLang(newLang);
-    document.getElementById('lang-label').textContent=newLang==='ko'?'EN':'KO';
-    document.getElementById('pause-lang').textContent='🌐 '+(newLang==='ko'?'EN':'KO');
+    const ll=document.getElementById('lang-label'); if(ll) ll.textContent=newLang==='ko'?'EN':'KO';
+    const pl=document.getElementById('pause-lang'); if(pl) pl.textContent='🌐 '+(newLang==='ko'?'EN':'KO');
     applyI18nHTML();
     rebuildUpgradeGrid();
     updateSkillDisplay();
     updateUI();
     updateEnemyRoster();
   });
-  document.getElementById('pause-ranking').addEventListener('click',()=>showRankingPopup());
-  document.getElementById('pause-sound').addEventListener('click',()=>{
+  const pauseRanking=document.getElementById('pause-ranking');
+  if(pauseRanking) pauseRanking.addEventListener('click',()=>showRankingPopup());
+  const pauseSound=document.getElementById('pause-sound');
+  if(pauseSound) pauseSound.addEventListener('click',()=>{
     sfx.init();
     const on=sfx.toggle();
     syncSoundBtnIcon();
-    document.getElementById('pause-sound').textContent=(on?'🔊 ':'🔇 ')+t('ui.sound');
-    document.getElementById('pause-sound').classList.toggle('muted',!on);
+    pauseSound.textContent=(on?'🔊 ':'🔇 ')+t('ui.sound');
+    pauseSound.classList.toggle('muted',!on);
   });
 
   window.addEventListener('keydown',(e)=>{
