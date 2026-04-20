@@ -39,13 +39,19 @@ body{font-family:'Noto Sans KR','Malgun Gothic',sans-serif;background:#05051a;co
 #landing-topbar #landing-lang{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.2);color:#fff;width:38px;height:38px;border-radius:50%;font-size:1em;cursor:pointer;transition:all .2s;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;padding:0}
 #landing-topbar #landing-lang:hover{background:rgba(255,255,255,.18);border-color:rgba(0,212,255,.5);transform:scale(1.08)}
 
-#landing-content{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:10px;width:90%;max-width:340px;padding:24px}
-#landing-hero{text-align:center;display:flex;flex-direction:column;align-items:center;gap:2px;margin-bottom:4px}
-#landing-brand{font-size:3em;filter:drop-shadow(0 0 18px rgba(255,238,0,.6)) drop-shadow(0 0 36px rgba(255,200,0,.3));animation:brandFloat 3s ease-in-out infinite;line-height:1}
-@keyframes brandFloat{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-6px) scale(1.04)}}
-#landing-title{font-size:2em;font-weight:900;letter-spacing:4px;text-align:center;white-space:nowrap;color:transparent;background:linear-gradient(135deg,#00d4ff 0%,#b44aff 40%,#ff6ec7 100%);-webkit-background-clip:text;background-clip:text;filter:drop-shadow(0 0 20px rgba(0,212,255,.55)) drop-shadow(0 0 40px rgba(180,74,255,.3));margin:4px 0 0;line-height:1.15;animation:titleGlow 3s ease-in-out infinite}
-@keyframes titleGlow{0%,100%{filter:drop-shadow(0 0 20px rgba(0,212,255,.55)) drop-shadow(0 0 40px rgba(180,74,255,.3))}50%{filter:drop-shadow(0 0 32px rgba(0,212,255,.85)) drop-shadow(0 0 60px rgba(180,74,255,.6))}}
-#landing-tagline{font-size:.72em;color:rgba(255,255,255,.5);letter-spacing:1.5px;margin-top:2px}
+#landing-content{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:14px;width:90%;max-width:360px;padding:24px}
+/* ─── Storm Eye: 히어로 블록 ─── */
+#landing-hero{text-align:center;display:flex;flex-direction:column;align-items:center;gap:0;margin-bottom:8px}
+#landing-brand-wrap{position:relative;width:96px;height:96px;display:flex;align-items:center;justify-content:center;margin-bottom:6px}
+.landing-ring{position:absolute;inset:0;border-radius:50%;background:conic-gradient(from 0deg, rgba(0,212,255,0) 0deg, rgba(0,212,255,.55) 90deg, rgba(180,74,255,.35) 180deg, rgba(255,110,199,.5) 270deg, rgba(0,212,255,0) 360deg);-webkit-mask:radial-gradient(circle,transparent 36px,#000 38px,#000 46px,transparent 48px);mask:radial-gradient(circle,transparent 36px,#000 38px,#000 46px,transparent 48px);animation:stormEyeSpin 7s linear infinite;filter:drop-shadow(0 0 10px rgba(0,212,255,.35))}
+@keyframes stormEyeSpin{to{transform:rotate(360deg)}}
+#landing-brand{font-size:3em;filter:drop-shadow(0 0 18px rgba(255,238,0,.75)) drop-shadow(0 0 36px rgba(255,200,0,.35));animation:brandFloat 3s ease-in-out infinite;line-height:1;position:relative;z-index:1}
+@keyframes brandFloat{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-5px) scale(1.04)}}
+#landing-title{font-family:'Black Han Sans','Noto Sans KR',sans-serif;font-size:2.4em;font-weight:400;letter-spacing:2px;text-align:center;white-space:nowrap;color:transparent;background:linear-gradient(135deg,#00d4ff 0%,#b44aff 45%,#ff6ec7 100%);-webkit-background-clip:text;background-clip:text;filter:drop-shadow(0 0 18px rgba(0,212,255,.5)) drop-shadow(0 0 34px rgba(180,74,255,.25));margin:4px 0 0;line-height:1.05;animation:titleGlow 3.2s ease-in-out infinite}
+@keyframes titleGlow{0%,100%{filter:drop-shadow(0 0 18px rgba(0,212,255,.5)) drop-shadow(0 0 34px rgba(180,74,255,.25))}50%{filter:drop-shadow(0 0 30px rgba(0,212,255,.8)) drop-shadow(0 0 54px rgba(180,74,255,.55))}}
+#landing-subtitle{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:.78em;letter-spacing:6px;color:rgba(200,220,255,.55);margin-top:6px;line-height:1}
+#landing-subtitle::before,#landing-subtitle::after{content:"";display:inline-block;width:22px;height:1px;background:linear-gradient(90deg,transparent,rgba(200,220,255,.5),transparent);vertical-align:middle;margin:0 8px}
+#landing-tagline{font-family:'Noto Sans KR',sans-serif;font-weight:300;font-size:.74em;color:rgba(255,255,255,.55);letter-spacing:1px;margin-top:10px;line-height:1.5}
 
 /* 난이도 선택 */
 #landing-difficulty{width:100%;max-width:320px;display:flex;flex-direction:column;gap:4px;align-items:center}
@@ -58,7 +64,7 @@ body{font-family:'Noto Sans KR','Malgun Gothic',sans-serif;background:#05051a;co
 .diff-btn.active[data-diff="hard"]{background:rgba(255,136,68,.2);border-color:#ff8844;color:#ff8844}
 .diff-btn.active[data-diff="nightmare"]{background:rgba(255,68,136,.2);border-color:#ff4488;color:#ff4488}
 
-#landing-start{background:linear-gradient(135deg,#00d4ff,#b44aff);border:none;color:#fff;padding:14px 20px;border-radius:14px;font-size:1em;font-weight:800;cursor:pointer;letter-spacing:2px;box-shadow:0 0 22px rgba(0,212,255,.4),0 4px 12px rgba(0,0,0,.45);transition:all .25s;animation:startPulse 2s ease-in-out infinite;width:100%;max-width:320px;margin-top:4px}
+#landing-start{font-family:'Noto Sans KR',sans-serif;background:linear-gradient(135deg,#00d4ff,#b44aff);border:none;color:#fff;padding:14px 20px;border-radius:14px;font-size:1em;font-weight:700;cursor:pointer;letter-spacing:3px;box-shadow:0 0 22px rgba(0,212,255,.4),0 4px 12px rgba(0,0,0,.45);transition:all .25s;animation:startPulse 2s ease-in-out infinite;width:100%;max-width:320px;margin-top:6px}
 #landing-start:hover{transform:translateY(-2px) scale(1.03);box-shadow:0 0 42px rgba(0,212,255,.7),0 8px 22px rgba(0,0,0,.6)}
 #landing-start:active{transform:translateY(1px) scale(.98)}
 @keyframes startPulse{0%,100%{box-shadow:0 0 25px rgba(0,212,255,.4),0 4px 12px rgba(0,0,0,.5)}50%{box-shadow:0 0 40px rgba(180,74,255,.55),0 4px 12px rgba(0,0,0,.5)}}
@@ -68,9 +74,9 @@ body{font-family:'Noto Sans KR','Malgun Gothic',sans-serif;background:#05051a;co
 #landing-meta-card:hover{background:linear-gradient(135deg,rgba(255,100,255,.25),rgba(140,70,220,.3));border-color:rgba(255,150,255,.7);transform:translateY(-1px);box-shadow:0 4px 16px rgba(255,100,255,.25)}
 #landing-meta-card:active{transform:translateY(1px)}
 .meta-card-ico{font-size:1.4em;filter:drop-shadow(0 0 8px rgba(255,200,100,.7))}
-.meta-card-body{flex:1;display:flex;flex-direction:column;gap:1px;min-width:0}
-.meta-card-title{font-size:.85em;font-weight:700;color:#ff99ff;letter-spacing:.5px}
-.meta-card-sub{font-size:.68em;color:rgba(255,255,255,.6)}
+.meta-card-body{flex:1;display:flex;flex-direction:column;gap:0;min-width:0}
+.meta-card-title{font-size:.85em;font-weight:700;color:#ff99ff;letter-spacing:.5px;line-height:1.35}
+.meta-card-sub{font-size:.68em;color:rgba(255,255,255,.6);line-height:1.45;margin-top:2px}
 .meta-card-rp{font-size:.72em;font-weight:700;color:#ffee00;background:rgba(255,238,0,.1);padding:4px 10px;border-radius:8px;border:1px solid rgba(255,238,0,.35);white-space:nowrap}
 
 /* 마지막 런 기록 카드 */
@@ -636,7 +642,14 @@ body.state-gameover #enemy-roster{display:none !important}
 #game-footer.hidden{display:none}
 /* ── 모바일 반응형 ── */
 @media(max-width:600px){
-  #landing-title{font-size:clamp(1.1em,5.5vw,1.8em);letter-spacing:2px;margin-bottom:6px}
+  #landing-content{gap:10px;padding:20px}
+  #landing-brand-wrap{width:82px;height:82px;margin-bottom:4px}
+  .landing-ring{-webkit-mask:radial-gradient(circle,transparent 30px,#000 32px,#000 40px,transparent 42px);mask:radial-gradient(circle,transparent 30px,#000 32px,#000 40px,transparent 42px)}
+  #landing-brand{font-size:2.4em}
+  #landing-title{font-size:clamp(1.6em,7vw,2.2em);letter-spacing:1.5px;margin:2px 0 0}
+  #landing-subtitle{font-size:.66em;letter-spacing:4px;margin-top:4px}
+  #landing-subtitle::before,#landing-subtitle::after{width:16px;margin:0 6px}
+  #landing-tagline{font-size:.68em;letter-spacing:.5px;margin-top:6px}
   #landing-start{padding:10px 36px;font-size:.85em;border-radius:12px}
   /* 상단 패널 컴팩트 — 일시정지만 우측 상단 */
   #top-panel{padding:6px 6px 4px}
