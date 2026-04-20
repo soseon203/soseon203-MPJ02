@@ -29,33 +29,37 @@
     stars.push({x:Math.random()*2000,y:Math.random()*2000,r:Math.random()*1.5+0.3,a:Math.random(),sp:Math.random()*0.005+0.002});
   }
 
-  // ── 운석 생성 ──
+  // ── 운석 생성 (Storm Eye 시네마틱 크기) ──
   function makeMeteor(){
-    const size=Math.random()*28+16;
+    const size=Math.random()*60+42;   // 42~102 (기존 16~44 대비 2~3배)
     const edge=Math.random()*4|0;
     let x,y;
-    if(edge===0){x=Math.random()*W;y=-size;}
-    else if(edge===1){x=W+size;y=Math.random()*H;}
-    else if(edge===2){x=Math.random()*W;y=H+size;}
-    else{x=-size;y=Math.random()*H;}
-    const tx=W*0.3+Math.random()*W*0.4;
-    const ty=H*0.3+Math.random()*H*0.4;
+    if(edge===0){x=Math.random()*W;y=-size*2;}
+    else if(edge===1){x=W+size*2;y=Math.random()*H;}
+    else if(edge===2){x=Math.random()*W;y=H+size*2;}
+    else{x=-size*2;y=Math.random()*H;}
+    const tx=W*0.35+Math.random()*W*0.3;
+    const ty=H*0.35+Math.random()*H*0.3;
     const dx=tx-x,dy=ty-y;
     const dist=Math.sqrt(dx*dx+dy*dy);
-    const speed=Math.random()*0.4+0.25;
+    const speed=Math.random()*0.35+0.18;
     const vx=(dx/dist)*speed;
     const vy=(dy/dist)*speed;
     const vertices=[];
-    const pts=Math.floor(Math.random()*4)+6;
+    const pts=Math.floor(Math.random()*4)+7;
     for(let i=0;i<pts;i++){
       const a=(Math.PI*2/pts)*i;
-      const r=size*(0.7+Math.random()*0.3);
+      const r=size*(0.72+Math.random()*0.32);
       vertices.push({a,r});
     }
-    return{x,y,vx,vy,size,rot:Math.random()*Math.PI*2,rotV:(Math.random()-0.5)*0.01,
-      vertices,life:350+Math.random()*300,age:0,
-      color:`hsl(${20+Math.random()*30},${40+Math.random()*20}%,${35+Math.random()*20}%)`,
-      bright:`hsl(${15+Math.random()*25},${60+Math.random()*20}%,${55+Math.random()*15}%)`};
+    // 조명 각도: 화면 좌상단(태양/폭풍의 눈 글로우) 방향에서 옴
+    const litAngle=Math.atan2(y-H*0.15, x-W*0.12);
+    return{x,y,vx,vy,size,rot:Math.random()*Math.PI*2,rotV:(Math.random()-0.5)*0.006,
+      vertices,life:400+Math.random()*300,age:0, litAngle,
+      trail:[], // 이전 위치 히스토리
+      color:`hsl(${16+Math.random()*24},${38+Math.random()*18}%,${24+Math.random()*10}%)`,
+      bright:`hsl(${20+Math.random()*22},${62+Math.random()*18}%,${52+Math.random()*12}%)`,
+      rim:`hsl(${14+Math.random()*16},${78+Math.random()*12}%,${62+Math.random()*10}%)`};
   }
 
   function initMeteors(){
@@ -156,42 +160,102 @@
     });
   }
 
-  // ── 그리기: 운석 ──
+  // ── 그리기: 운석 (3D 시네마틱 셰이딩) ──
   function drawMeteor(m){
+    // 1. 후광 (뜨거운 코로나 — 더 넓게)
+    const corona=ctx.createRadialGradient(m.x,m.y,m.size*0.8,m.x,m.y,m.size*2.3);
+    corona.addColorStop(0,'rgba(255,140,60,0.14)');
+    corona.addColorStop(0.5,'rgba(255,100,40,0.06)');
+    corona.addColorStop(1,'transparent');
+    ctx.fillStyle=corona;
+    ctx.beginPath();
+    ctx.arc(m.x,m.y,m.size*2.3,0,Math.PI*2);
+    ctx.fill();
+
+    // 2. 트레일 (잔상 — 이전 위치에 희미한 점)
+    for(let i=0;i<m.trail.length;i++){
+      const t=m.trail[i];
+      const age=(m.trail.length-i)/m.trail.length;
+      const a=age*0.35;
+      ctx.fillStyle=`rgba(255,140,60,${a})`;
+      ctx.beginPath();
+      ctx.arc(t.x,t.y,m.size*age*0.4,0,Math.PI*2);
+      ctx.fill();
+    }
+
     ctx.save();
     ctx.translate(m.x,m.y);
     ctx.rotate(m.rot);
+
+    // 3. 운석 본체 실루엣 (다각형 shape)
     ctx.beginPath();
     m.vertices.forEach((v,i)=>{
       const px=Math.cos(v.a)*v.r,py=Math.sin(v.a)*v.r;
       if(i===0)ctx.moveTo(px,py);else ctx.lineTo(px,py);
     });
     ctx.closePath();
-    const g=ctx.createRadialGradient(0,0,0,0,0,m.size);
-    g.addColorStop(0,m.bright);
-    g.addColorStop(1,m.color);
-    ctx.fillStyle=g;
+
+    // 4. 어두운 베이스 (그림자측 먼저)
+    ctx.fillStyle=m.color;
     ctx.fill();
-    ctx.strokeStyle='rgba(255,200,150,0.3)';
-    ctx.lineWidth=1;
+
+    // 5. 조명측 그라디언트 (좌상단 태양 방향에서 빛)
+    const lightOff=m.size*0.55;
+    const lightX=Math.cos(m.litAngle-m.rot)*lightOff;
+    const lightY=Math.sin(m.litAngle-m.rot)*lightOff;
+    const lit=ctx.createRadialGradient(lightX,lightY,0,lightX,lightY,m.size*1.3);
+    lit.addColorStop(0,m.bright);
+    lit.addColorStop(0.45,m.color);
+    lit.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.fillStyle=lit;
+    ctx.fill();
+
+    // 6. 뜨거운 림 라이트 (빛 받는 외곽선)
+    ctx.save();
+    ctx.clip();
+    ctx.strokeStyle=m.rim;
+    ctx.lineWidth=2.5;
+    ctx.shadowColor=m.rim;
+    ctx.shadowBlur=12;
+    // 림을 조명쪽으로만 그리기 위해 클리핑 후 라인 반복 offset
+    ctx.beginPath();
+    m.vertices.forEach((v,i)=>{
+      const px=Math.cos(v.a)*v.r+lightX*0.35,py=Math.sin(v.a)*v.r+lightY*0.35;
+      if(i===0)ctx.moveTo(px,py);else ctx.lineTo(px,py);
+    });
+    ctx.closePath();
     ctx.stroke();
-    // 크레이터
+    ctx.restore();
+
+    // 7. 기본 외곽선 (부드럽게)
+    ctx.strokeStyle='rgba(20,8,4,0.55)';
+    ctx.lineWidth=1.2;
+    ctx.stroke();
+
+    // 8. 크레이터 (2-3개) — 조명 반대쪽에 그림자
+    for(let c=0;c<3;c++){
+      const ca=(c/3)*Math.PI*2+m.rot*0.3;
+      const cr=m.size*(0.3+c*0.08);
+      const cx=Math.cos(ca)*cr;
+      const cy=Math.sin(ca)*cr;
+      const cs=m.size*(0.12+(c%2)*0.05);
+      ctx.beginPath();
+      ctx.arc(cx,cy,cs,0,Math.PI*2);
+      ctx.fillStyle='rgba(0,0,0,0.32)';
+      ctx.fill();
+      // 크레이터 내부 반사광
+      ctx.beginPath();
+      ctx.arc(cx+cs*0.2,cy+cs*0.2,cs*0.5,0,Math.PI*2);
+      ctx.fillStyle='rgba(255,180,120,0.12)';
+      ctx.fill();
+    }
+
+    // 9. 하이라이트 스페큘러 (조명쪽 작은 밝은 점)
     ctx.beginPath();
-    ctx.arc(m.size*0.2,-m.size*0.15,m.size*0.18,0,Math.PI*2);
-    ctx.fillStyle='rgba(0,0,0,0.25)';
+    ctx.arc(lightX*0.9,lightY*0.9,m.size*0.1,0,Math.PI*2);
+    ctx.fillStyle='rgba(255,230,180,0.7)';
     ctx.fill();
-    ctx.beginPath();
-    ctx.arc(-m.size*0.25,m.size*0.2,m.size*0.12,0,Math.PI*2);
-    ctx.fillStyle='rgba(0,0,0,0.2)';
-    ctx.fill();
-    // 글로우
-    ctx.beginPath();
-    ctx.arc(0,0,m.size*1.2,0,Math.PI*2);
-    const glow=ctx.createRadialGradient(0,0,m.size*0.5,0,0,m.size*1.2);
-    glow.addColorStop(0,'rgba(255,180,100,0.08)');
-    glow.addColorStop(1,'transparent');
-    ctx.fillStyle=glow;
-    ctx.fill();
+
     ctx.restore();
   }
 
@@ -262,17 +326,40 @@
     });
   }
 
-  // ── 성운 배경 ──
+  // ── 성운 배경 (시네마틱 딥 네뷸러) ──
   function drawNebula(){
-    const g1=ctx.createRadialGradient(W*0.3,H*0.4,0,W*0.3,H*0.4,W*0.5);
-    g1.addColorStop(0,'rgba(60,20,80,0.12)');
-    g1.addColorStop(1,'transparent');
-    ctx.fillStyle=g1;
+    // 좌상단 폭풍의 눈 태양 — 주황/붉은 거대 글로우
+    const sun=ctx.createRadialGradient(W*0.14,H*0.18,0,W*0.14,H*0.18,W*0.55);
+    sun.addColorStop(0,'rgba(255,160,80,0.38)');
+    sun.addColorStop(0.18,'rgba(255,110,60,0.22)');
+    sun.addColorStop(0.42,'rgba(220,60,100,0.12)');
+    sun.addColorStop(0.7,'rgba(120,40,140,0.06)');
+    sun.addColorStop(1,'transparent');
+    ctx.fillStyle=sun;
     ctx.fillRect(0,0,W,H);
-    const g2=ctx.createRadialGradient(W*0.7,H*0.6,0,W*0.7,H*0.6,W*0.4);
-    g2.addColorStop(0,'rgba(20,40,100,0.1)');
-    g2.addColorStop(1,'transparent');
-    ctx.fillStyle=g2;
+
+    // 보라 네뷸러 (좌측 중앙~우측)
+    const neb1=ctx.createRadialGradient(W*0.45,H*0.45,0,W*0.45,H*0.45,W*0.65);
+    neb1.addColorStop(0,'rgba(70,30,120,0.24)');
+    neb1.addColorStop(0.4,'rgba(50,25,100,0.12)');
+    neb1.addColorStop(1,'transparent');
+    ctx.fillStyle=neb1;
+    ctx.fillRect(0,0,W,H);
+
+    // 파란 네뷸러 (우하단)
+    const neb2=ctx.createRadialGradient(W*0.78,H*0.72,0,W*0.78,H*0.72,W*0.55);
+    neb2.addColorStop(0,'rgba(30,70,140,0.22)');
+    neb2.addColorStop(0.5,'rgba(20,50,110,0.1)');
+    neb2.addColorStop(1,'transparent');
+    ctx.fillStyle=neb2;
+    ctx.fillRect(0,0,W,H);
+
+    // 가운데 어두운 심연 (폭풍의 눈 중심)
+    const core=ctx.createRadialGradient(W*0.5,H*0.5,0,W*0.5,H*0.5,W*0.35);
+    core.addColorStop(0,'rgba(5,8,25,0.55)');
+    core.addColorStop(0.5,'rgba(5,8,25,0.25)');
+    core.addColorStop(1,'transparent');
+    ctx.fillStyle=core;
     ctx.fillRect(0,0,W,H);
   }
 
@@ -286,8 +373,15 @@
 
     // 운석 업데이트 & 그리기
     meteors.forEach(m=>{
+      // 이전 위치를 트레일로 기록 (매 3프레임마다)
+      if(m.age%3===0){
+        m.trail.push({x:m.x,y:m.y});
+        if(m.trail.length>8) m.trail.shift();
+      }
       m.x+=m.vx;m.y+=m.vy;
       m.rot+=m.rotV;m.age++;
+      // 조명 각도 업데이트 (위치 변할 때마다 태양 쪽으로 재계산)
+      m.litAngle=Math.atan2(m.y-H*0.18, m.x-W*0.14);
       const inView=m.x>-50&&m.x<W+50&&m.y>-50&&m.y<H+50;
       if(m.age>m.life){
         if(inView){
