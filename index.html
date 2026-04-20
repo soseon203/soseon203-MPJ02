@@ -14,64 +14,146 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Sans+KR:wght@300;400;500;700;900&family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=71">
+  <link rel="stylesheet" href="css/style.css?v=72">
 </head>
 
 <body>
-  <div id="landing-screen">
+  <div id="landing-screen" class="storm-eye">
     <canvas id="landing-canvas"></canvas>
     <div id="landing-overlay"></div>
-    <!-- 우상단: 언어 + RP 통계 -->
-    <div id="landing-topbar">
-      <button id="landing-lang" onclick="toggleLandingLang()" title="Language">🌐</button>
-    </div>
-    <div id="landing-content">
-      <div id="landing-hero">
-        <div id="landing-brand-wrap">
-          <div class="landing-ring"></div>
-          <div id="landing-brand">⚡</div>
-        </div>
-        <h1 id="landing-title">라이트닝 키우기</h1>
-        <div id="landing-subtitle">STORM&nbsp;&nbsp;EYE</div>
-        <div id="landing-tagline">번개를 진화시키며 끝없는 웨이브에 도전</div>
-      </div>
-      <!-- 난이도 선택 -->
-      <div id="landing-difficulty">
-        <span id="landing-diff-label">난이도</span>
-        <div id="landing-diff-row">
-          <button class="diff-btn" data-diff="easy">쉬움</button>
-          <button class="diff-btn active" data-diff="normal">보통</button>
-          <button class="diff-btn" data-diff="hard">어려움</button>
-          <button class="diff-btn" data-diff="nightmare">악몽</button>
+
+    <!-- 상단 헤더: 좌 브랜드 / 우 챕터 -->
+    <header class="se-header">
+      <div class="se-header-left">
+        <div class="se-brand-mark">⚡</div>
+        <div class="se-brand-text">
+          <div class="se-brand-name">LR &middot; LIGHTNING RISING</div>
+          <div class="se-brand-tag">AN INFINITE WAVE GAME</div>
         </div>
       </div>
-      <button id="landing-start">⚡ 게임 시작</button>
-      <!-- 메타 성장 카드 (RP 표시 포함) -->
-      <button id="landing-meta-card" onclick="showMetaPopup()">
-        <span class="meta-card-ico">🌟</span>
-        <span class="meta-card-body">
-          <span class="meta-card-title">영구 성장</span>
-          <span class="meta-card-sub">RP로 시작 보너스 해금</span>
-        </span>
-        <span class="meta-card-rp" id="landing-rp-display">RP 0</span>
-      </button>
-      <!-- 마지막 런 요약 -->
-      <div id="landing-lastrun" class="hidden">
-        <span class="lastrun-label">마지막 기록</span>
-        <span class="lastrun-stats" id="landing-lastrun-stats"></span>
+      <div class="se-header-right">
+        <div class="se-chapter-head">
+          <span class="se-chapter-no">CHAPTER&nbsp;I</span>
+          <span class="se-chapter-sep">·</span>
+          <span class="se-chapter-name">THE EYE</span>
+        </div>
+        <div class="se-threat-pill" data-threat="normal">
+          <span class="se-dot"></span>
+          <span class="se-threat-label">STEADY</span>
+          <span class="se-threat-sep">·</span>
+          <span class="se-threat-level">THREAT 02</span>
+        </div>
       </div>
-      <!-- 3버튼 네비 -->
-      <div id="landing-nav">
-        <button class="landing-btn" onclick="showRankingPopup()">🏆 랭킹</button>
-        <button class="landing-btn" onclick="location.href='help.html'">❓ 도움말</button>
-        <button class="landing-btn" onclick="location.href='about.html'">📖 소개</button>
+      <button class="se-lang-btn" id="landing-lang" onclick="toggleLandingLang()" title="Language">🌐</button>
+    </header>
+
+    <!-- 본문 그리드: 좌 LAST RUN / 중앙 HERO / 우 META GROWTH -->
+    <main class="se-main">
+      <aside class="se-card se-card-left" id="landing-lastrun">
+        <div class="se-card-label">── LAST RUN</div>
+        <div class="se-card-stats">
+          <div class="se-stat">
+            <div class="se-stat-val" id="se-last-wave">—</div>
+            <div class="se-stat-key">WAVE</div>
+          </div>
+          <div class="se-stat">
+            <div class="se-stat-val" id="se-last-kills">—</div>
+            <div class="se-stat-key">KILLS</div>
+          </div>
+          <div class="se-stat">
+            <div class="se-stat-val" id="se-last-level">—</div>
+            <div class="se-stat-key">LEVEL</div>
+          </div>
+          <div class="se-stat">
+            <div class="se-stat-val" id="se-last-rp">—</div>
+            <div class="se-stat-key">RP</div>
+          </div>
+        </div>
+      </aside>
+
+      <section class="se-hero">
+        <div class="se-hero-eye">
+          <div class="se-eye-ring se-eye-ring-outer"></div>
+          <div class="se-eye-ring se-eye-ring-inner"></div>
+          <div class="se-eye-pupil"></div>
+        </div>
+        <div class="se-hero-chapter">CHAPTER&nbsp;I &nbsp;·&nbsp; THE EYE OF THE STORM</div>
+        <h1 class="se-hero-title" id="landing-title">라이트닝 키우기</h1>
+        <div class="se-hero-motto">RISE &nbsp;·&nbsp; EVOLVE &nbsp;·&nbsp; DEFY THE STORM</div>
+      </section>
+
+      <aside class="se-card se-card-right" onclick="showMetaPopup()">
+        <div class="se-card-label">META GROWTH ──</div>
+        <div class="se-meta-value">
+          <span class="se-meta-num" id="landing-rp-display">0</span>
+          <span class="se-meta-unit">RP</span>
+        </div>
+        <div class="se-meta-sub">
+          <span class="se-meta-tier">BEST TIER · —</span>
+          <span class="se-meta-hint">1 RP · 0 / 3 UNLOCKED</span>
+        </div>
+      </aside>
+    </main>
+
+    <!-- 하단 컨트롤: 난이도 / ENTER / 기록+네비 -->
+    <section class="se-bottom">
+      <div class="se-intensity">
+        <div class="se-section-label">── STORM INTENSITY</div>
+        <div class="se-intensity-grid">
+          <button class="se-diff diff-btn" data-diff="easy">
+            <div class="se-diff-ko">평온</div>
+            <div class="se-diff-en">CALM</div>
+            <div class="se-diff-no">01</div>
+          </button>
+          <button class="se-diff diff-btn active" data-diff="normal">
+            <div class="se-diff-ko">스테디</div>
+            <div class="se-diff-en">STEADY</div>
+            <div class="se-diff-no">02</div>
+          </button>
+          <button class="se-diff diff-btn" data-diff="hard">
+            <div class="se-diff-ko">격동</div>
+            <div class="se-diff-en">SEVERE</div>
+            <div class="se-diff-no">03</div>
+          </button>
+          <button class="se-diff diff-btn" data-diff="nightmare">
+            <div class="se-diff-ko">광란</div>
+            <div class="se-diff-en">TEMPEST</div>
+            <div class="se-diff-no">04</div>
+          </button>
+        </div>
       </div>
-      <div id="landing-footer">
-        <a href="privacy.html">개인정보처리방침</a>
+
+      <div class="se-enter-col">
+        <button class="se-enter" id="landing-start">
+          <span class="se-enter-ico">⚡</span>
+          <span class="se-enter-text">ENTER<br>THE EYE</span>
+        </button>
+        <div class="se-enter-meta">
+          <div class="se-enter-meta-item"><span class="se-enter-meta-val" id="se-best-wave">0</span><span class="se-enter-meta-key">BEST WAVE</span></div>
+          <div class="se-enter-meta-item"><span class="se-enter-meta-val" id="se-total-runs">0</span><span class="se-enter-meta-key">런 기록</span></div>
+        </div>
+      </div>
+
+      <nav class="se-archives">
+        <div class="se-section-label se-label-right">ARCHIVES ──</div>
+        <div class="se-archives-list">
+          <button class="se-arch-btn" onclick="showRankingPopup()">RANKING</button>
+          <button class="se-arch-btn" onclick="location.href='help.html'">CHRONICLE</button>
+          <button class="se-arch-btn" onclick="location.href='about.html'">ABOUT</button>
+        </div>
+      </nav>
+    </section>
+
+    <!-- 푸터: 챕터 / 잠긴 게이트 / 약관 -->
+    <footer class="se-footer">
+      <div class="se-footer-l">CHAPTER I &nbsp;·&nbsp; THE EYE</div>
+      <div class="se-footer-c">
+        <a href="privacy.html">PRIVACY</a>
         <span class="footer-sep">·</span>
-        <a href="terms.html">이용약관</a>
+        <a href="terms.html">TERMS</a>
       </div>
-    </div>
+      <div class="se-footer-r">II &nbsp;·&nbsp; THE GALE &nbsp;·&nbsp; LOCKED</div>
+    </footer>
   </div>
   <div id="game-container">
     <canvas id="bg-canvas"></canvas>
@@ -330,17 +412,17 @@
 
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
-  <script src="js/firebase-config.js?v=71"></script>
-  <script src="js/locales.js?v=71"></script>
-  <script src="js/sound.js?v=71"></script>
-  <script src="js/config.js?v=71"></script>
-  <script src="js/game.js?v=71"></script>
-  <script src="js/tree.js?v=71"></script>
-  <script src="js/shards.js?v=71"></script>
-  <script src="js/render.js?v=71"></script>
-  <script src="js/ui.js?v=71"></script>
-  <script src="js/landing-anim.js?v=71"></script>
-  <script src="js/main.js?v=71"></script>
+  <script src="js/firebase-config.js?v=72"></script>
+  <script src="js/locales.js?v=72"></script>
+  <script src="js/sound.js?v=72"></script>
+  <script src="js/config.js?v=72"></script>
+  <script src="js/game.js?v=72"></script>
+  <script src="js/tree.js?v=72"></script>
+  <script src="js/shards.js?v=72"></script>
+  <script src="js/render.js?v=72"></script>
+  <script src="js/ui.js?v=72"></script>
+  <script src="js/landing-anim.js?v=72"></script>
+  <script src="js/main.js?v=72"></script>
 </body>
 
 </html>
