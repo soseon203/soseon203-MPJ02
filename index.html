@@ -11,60 +11,143 @@
   <meta property="og:type" content="website">
   <meta name="description" content="번개를 진화시키며 끝없는 웨이브에 도전하는 HTML5 캐주얼 게임">
   <link rel="icon" type="image/png" href="img/favicon.png">
-  <link rel="stylesheet" href="css/style.css?v=18">
+  <link rel="stylesheet" href="css/style.css?v=67">
 </head>
 
 <body>
   <div id="landing-screen">
     <canvas id="landing-canvas"></canvas>
     <div id="landing-overlay"></div>
+    <!-- 우상단: 언어 + RP 통계 -->
+    <div id="landing-topbar">
+      <button id="landing-lang" onclick="toggleLandingLang()" title="Language">🌐</button>
+    </div>
     <div id="landing-content">
-      <h1 id="landing-title">⚡ 라이트닝 키우기</h1>
+      <div id="landing-hero">
+        <div id="landing-brand">⚡</div>
+        <h1 id="landing-title">라이트닝 키우기</h1>
+        <div id="landing-tagline">번개를 진화시키며 끝없는 웨이브에 도전</div>
+      </div>
+      <!-- 난이도 선택 -->
+      <div id="landing-difficulty">
+        <span id="landing-diff-label">난이도</span>
+        <div id="landing-diff-row">
+          <button class="diff-btn" data-diff="easy">쉬움</button>
+          <button class="diff-btn active" data-diff="normal">보통</button>
+          <button class="diff-btn" data-diff="hard">어려움</button>
+          <button class="diff-btn" data-diff="nightmare">악몽</button>
+        </div>
+      </div>
       <button id="landing-start">⚡ 게임 시작</button>
+      <!-- 메타 성장 카드 (RP 표시 포함) -->
+      <button id="landing-meta-card" onclick="showMetaPopup()">
+        <span class="meta-card-ico">🌟</span>
+        <span class="meta-card-body">
+          <span class="meta-card-title">영구 성장</span>
+          <span class="meta-card-sub">RP로 시작 보너스 해금</span>
+        </span>
+        <span class="meta-card-rp" id="landing-rp-display">RP 0</span>
+      </button>
+      <!-- 마지막 런 요약 -->
+      <div id="landing-lastrun" class="hidden">
+        <span class="lastrun-label">마지막 기록</span>
+        <span class="lastrun-stats" id="landing-lastrun-stats"></span>
+      </div>
+      <!-- 3버튼 네비 -->
       <div id="landing-nav">
         <button class="landing-btn" onclick="showRankingPopup()">🏆 랭킹</button>
         <button class="landing-btn" onclick="location.href='help.html'">❓ 도움말</button>
         <button class="landing-btn" onclick="location.href='about.html'">📖 소개</button>
       </div>
-      <div id="landing-bottom">
-        <button id="landing-lang" onclick="toggleLandingLang()">🌐 English</button>
-        <div id="landing-links">
-          <a href="privacy.html">개인정보처리방침</a>
-          <a href="terms.html">이용약관</a>
-        </div>
+      <div id="landing-footer">
+        <a href="privacy.html">개인정보처리방침</a>
+        <span class="footer-sep">·</span>
+        <a href="terms.html">이용약관</a>
       </div>
     </div>
   </div>
   <div id="game-container">
     <canvas id="bg-canvas"></canvas>
-    <div id="top-panel">
-      <div id="game-title">⚡ LIGHTNING RAISING</div>
-      <div id="top-buttons">
-        <button class="top-btn" id="lang-btn" title="Language"><span class="top-btn-icon">🌐</span><span
-            class="top-btn-label" id="lang-label">EN</span></button>
-        <button class="top-btn" id="ranking-btn" title="랭킹"><span class="top-btn-icon">🏆</span><span
-            class="top-btn-label">랭킹</span></button>
-        <button class="top-btn" id="sound-btn" title="사운드"><span class="top-btn-icon">🔊</span><span
-            class="top-btn-label">사운드</span></button>
-        <button class="top-btn" id="pause-btn" title="일시정지"><span class="top-btn-icon">⏸</span><span
-            class="top-btn-label">일시정지</span></button>
+    <!-- U1: 슬림 상단바 (아이콘만) -->
+    <div id="top-bar">
+      <div id="top-bar-left">
+        <span id="top-brand">⚡</span>
       </div>
-      <div id="evolution-badge">Lv.1 전기 불꽃</div>
-      <div id="wave-info">
-        <span id="wave-badge">WAVE 1</span>
-        <span id="enemy-count">적: 0/0</span>
+      <div id="top-bar-right">
+        <button class="icon-btn" id="tree-btn" title="스킬 트리 (1 / T)"><span class="icon-btn-ico">🧬</span><span class="icon-btn-key">1</span><span id="tree-sp-badge" class="hidden">0</span></button>
+        <button class="icon-btn" id="pause-btn" title="일시정지 (Esc)"><span class="icon-btn-ico">⏸</span><span class="icon-btn-key">Esc</span></button>
+        <button class="icon-btn" id="more-btn" title="더보기">⋮</button>
       </div>
-      <div id="hp-bar-container">
-        <div id="hp-bar"></div>
-        <div id="hp-text">100 / 100</div>
+    </div>
+    <!-- U2: 좌상단 웨이브·XP 모듈 -->
+    <div id="hud-left">
+      <div id="wave-badge">WAVE 1</div>
+      <div id="enemy-count">적: 0/0</div>
+      <div id="xp-bar-container">
+        <div id="xp-bar"></div>
+        <div id="xp-text"><span id="level-text">Lv.1</span> <span id="xp-progress">0 / 12</span></div>
       </div>
-      <div id="stats-row">
-        <div class="stat-item"><span class="stat-label">데미지</span><span class="stat-value" id="stat-dmg">1</span></div>
-        <div class="stat-item"><span class="stat-label">자동/초</span><span class="stat-value" id="stat-auto">0</span>
-        </div>
-        <div class="stat-item"><span class="stat-label">처치</span><span class="stat-value" id="stat-kills">0</span></div>
-      </div>
+    </div>
+    <!-- U2: 우상단 스탯 모듈 -->
+    <div id="hud-right">
+      <div class="hud-stat" title="데미지"><span class="hud-stat-ico">⚔️</span><span class="hud-stat-v" id="stat-dmg">1</span></div>
+      <div class="hud-stat" title="자동 공격/초"><span class="hud-stat-ico">🔋</span><span class="hud-stat-v" id="stat-auto">0</span></div>
+      <div class="hud-stat" title="처치"><span class="hud-stat-ico">💀</span><span class="hud-stat-v" id="stat-kills">0</span></div>
+    </div>
+    <!-- U2: HP 링 (코어 주변) - 상단 막대는 제거, 백업용 hidden 유지 -->
+    <div id="hp-ring-container">
+      <svg id="hp-ring" viewBox="0 0 100 100"><circle class="hp-ring-bg" cx="50" cy="50" r="44"/><circle class="hp-ring-fg" cx="50" cy="50" r="44"/></svg>
+      <div id="hp-ring-text">100</div>
+    </div>
+    <!-- 진화 배지 (최하단으로 이동) -->
+    <div id="evolution-badge-bottom">
+      <span id="evolution-badge">⚡ 전기 불꽃</span>
+    </div>
+    <!-- U3: 우하단 활성 효과 패널 -->
+    <div id="active-panel">
+      <div id="active-keystones"></div>
       <div id="active-skills"></div>
+      <div id="active-combo" class="hidden"></div>
+    </div>
+    <!-- 더보기 메뉴 (언어/랭킹/사운드 통합) -->
+    <div id="more-menu" class="hidden">
+      <button class="more-btn" id="lang-btn"><span>🌐</span><span id="lang-label">EN</span></button>
+      <button class="more-btn" id="ranking-btn"><span>🏆</span><span>랭킹</span></button>
+      <button class="more-btn" id="sound-btn"><span>🔊</span><span>사운드</span></button>
+    </div>
+    <!-- 사운드 설정 팝오버 (SFX / BGM 볼륨) -->
+    <div id="sound-settings" class="hidden">
+      <div class="sound-settings-header">
+        <span>🔊 사운드</span>
+        <button id="sound-settings-close" title="닫기">✕</button>
+      </div>
+      <div class="sound-row">
+        <span class="sound-row-label">효과음</span>
+        <div class="sound-bars" data-type="sfx">
+          <button class="sound-bar" data-level="0" title="음소거">✕</button>
+          <button class="sound-bar" data-level="1"></button>
+          <button class="sound-bar" data-level="2"></button>
+          <button class="sound-bar" data-level="3"></button>
+          <button class="sound-bar" data-level="4"></button>
+          <button class="sound-bar" data-level="5"></button>
+        </div>
+      </div>
+      <div class="sound-row">
+        <span class="sound-row-label">배경음</span>
+        <div class="sound-bars" data-type="bgm">
+          <button class="sound-bar" data-level="0" title="음소거">✕</button>
+          <button class="sound-bar" data-level="1"></button>
+          <button class="sound-bar" data-level="2"></button>
+          <button class="sound-bar" data-level="3"></button>
+          <button class="sound-bar" data-level="4"></button>
+          <button class="sound-bar" data-level="5"></button>
+        </div>
+      </div>
+    </div>
+    <!-- legacy hidden — for compat with existing code paths -->
+    <div id="top-panel" style="display:none">
+      <div id="hp-bar-container"><div id="hp-bar"></div><div id="hp-text">100 / 100</div></div>
+      <div id="wave-info"></div>
     </div>
     <div id="enemy-roster"></div>
     <div id="game-area">
@@ -97,8 +180,8 @@
         <div class="go-stat-value" id="go-kills">-</div>
       </div>
       <div class="go-stat">
-        <div class="go-stat-label">에너지</div>
-        <div class="go-stat-value" id="go-energy">-</div>
+        <div class="go-stat-label">레벨</div>
+        <div class="go-stat-value" id="go-level">-</div>
       </div>
       <div class="go-stat">
         <div class="go-stat-label">진화</div>
@@ -132,6 +215,8 @@
     </div>
     <div id="go-buttons-row">
       <button id="go-retry">다시 시작</button>
+      <button id="go-meta" onclick="showMetaPopup()">🌟 영구 성장</button>
+      <button id="go-home">🏠 메인으로</button>
       <button id="go-view-rank">🏆 랭킹 보기</button>
     </div>
   </div>
@@ -156,13 +241,66 @@
       <div id="upgrade-choices"></div>
     </div>
   </div>
+  <div id="levelup-popup">
+    <div id="levelup-content">
+      <h2 id="levelup-title">⚡ 레벨 업!</h2>
+      <p id="levelup-subtitle">업그레이드 1개를 강화하세요</p>
+      <div id="levelup-choices"></div>
+    </div>
+  </div>
+  <div id="tree-popup">
+    <div id="tree-content">
+      <div id="tree-header">
+        <h2 id="tree-title">⚡ 스킬 트리</h2>
+        <div id="tree-sp-display">SP: <span id="tree-sp">0</span></div>
+        <button id="tree-close" title="닫기">✕</button>
+      </div>
+      <!-- 보스 드롭 스킬 목록 (획득한 경우만 표시) -->
+      <div id="tree-boss-skills" class="hidden">
+        <span id="tree-boss-skills-label">보스 스킬</span>
+        <div id="tree-boss-skills-list"></div>
+      </div>
+      <div id="tree-columns">
+        <div class="tree-col" data-tree="atk">
+          <div class="tree-col-title">🗡️ 낙뢰 <span class="tree-col-sub">단일 극딜</span></div>
+          <div class="tree-col-body" id="tree-col-atk"></div>
+        </div>
+        <div class="tree-col" data-tree="def">
+          <div class="tree-col-title">🌩️ 폭풍 <span class="tree-col-sub">자동·지속</span></div>
+          <div class="tree-col-body" id="tree-col-def"></div>
+        </div>
+        <div class="tree-col" data-tree="shard">
+          <div class="tree-col-title">🌀 파편 <span class="tree-col-sub">분리체·자율</span></div>
+          <div class="tree-col-body" id="tree-col-shard"></div>
+        </div>
+      </div>
+      <div id="tree-tooltip"></div>
+    </div>
+  </div>
+  <div id="meta-popup" onclick="if(event.target.id==='meta-popup')hideMetaPopup()">
+    <div id="meta-content">
+      <div id="meta-header">
+        <h2>🌟 영구 성장</h2>
+        <div id="meta-rp-display">RP: <span id="meta-rp">0</span></div>
+        <button id="meta-close" title="닫기" onclick="hideMetaPopup()">✕</button>
+      </div>
+      <p id="meta-subtitle">로그라이크 포인트로 시작 보너스를 해금하세요</p>
+      <div id="meta-grid"></div>
+    </div>
+  </div>
   <div id="ranking-popup">
     <div id="ranking-content">
       <h2>🏆 RANKING</h2>
+      <div id="ranking-diff-tabs">
+        <button class="rank-diff-tab" data-diff="easy">쉬움</button>
+        <button class="rank-diff-tab active" data-diff="normal">보통</button>
+        <button class="rank-diff-tab" data-diff="hard">어려움</button>
+        <button class="rank-diff-tab" data-diff="nightmare">악몽</button>
+      </div>
       <div id="ranking-tabs">
         <button class="rank-tab active" data-sort="wave">웨이브</button>
         <button class="rank-tab" data-sort="kills">처치수</button>
-        <button class="rank-tab" data-sort="energy">에너지</button>
+        <button class="rank-tab" data-sort="level">레벨</button>
       </div>
       <div id="ranking-list"></div>
       <div id="ranking-buttons">
@@ -191,15 +329,17 @@
 
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
-  <script src="js/firebase-config.js?v=18"></script>
-  <script src="js/locales.js?v=18"></script>
-  <script src="js/sound.js?v=18"></script>
-  <script src="js/config.js?v=18"></script>
-  <script src="js/game.js?v=18"></script>
-  <script src="js/render.js?v=18"></script>
-  <script src="js/ui.js?v=18"></script>
-  <script src="js/landing-anim.js?v=18"></script>
-  <script src="js/main.js?v=18"></script>
+  <script src="js/firebase-config.js?v=68"></script>
+  <script src="js/locales.js?v=68"></script>
+  <script src="js/sound.js?v=68"></script>
+  <script src="js/config.js?v=68"></script>
+  <script src="js/game.js?v=68"></script>
+  <script src="js/tree.js?v=68"></script>
+  <script src="js/shards.js?v=68"></script>
+  <script src="js/render.js?v=68"></script>
+  <script src="js/ui.js?v=68"></script>
+  <script src="js/landing-anim.js?v=68"></script>
+  <script src="js/main.js?v=68"></script>
 </body>
 
 </html>

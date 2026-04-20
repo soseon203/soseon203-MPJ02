@@ -696,6 +696,9 @@ function render(){
     document.getElementById('game-area').style.transform='';
   }
 
+  // V4: 파편 렌더링 (적·번개 위에 오버레이)
+  if(typeof renderShards==='function') renderShards(ctx);
+
   frameCount++;
 }
 

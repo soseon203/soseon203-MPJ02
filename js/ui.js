@@ -40,18 +40,93 @@ function selectSkill(id){
 }
 
 function updateSkillDisplay(){
+  // U3: 활성 스킬 아이콘 표시 (우하단 패널)
   const el=document.getElementById('active-skills');
+  if(!el) return;
   el.innerHTML='';
   G.specialSkills.forEach(id=>{
     const skill=SKILL_POOL.find(s=>s.id===id);
     if(skill){
-      const badge=document.createElement('span');
-      badge.className='mini-skill';
-      badge.textContent=skill.icon+' '+t('sk.'+skill.id);
-      badge.title=t('sk.'+skill.id+'_d');
-      el.appendChild(badge);
+      const icon=document.createElement('span');
+      icon.className='active-skill-icon';
+      icon.textContent=skill.icon;
+      icon.title=t('sk.'+skill.id)+'\n'+t('sk.'+skill.id+'_d');
+      el.appendChild(icon);
     }
   });
+  updateActiveKeystones();
+}
+
+// 트리 팝업 상단 — 획득한 보스 드롭 스킬 목록
+function renderTreeBossSkills(){
+  const wrap=document.getElementById('tree-boss-skills');
+  const list=document.getElementById('tree-boss-skills-list');
+  const label=document.getElementById('tree-boss-skills-label');
+  if(!wrap||!list) return;
+  if(!G.specialSkills||G.specialSkills.length===0){
+    wrap.classList.add('hidden');
+    return;
+  }
+  wrap.classList.remove('hidden');
+  if(label) label.textContent=LANG==='en'?'BOSS SKILLS':'보스 스킬';
+  list.innerHTML='';
+  G.specialSkills.forEach(id=>{
+    const skill=SKILL_POOL.find(s=>s.id===id);
+    if(!skill) return;
+    const item=document.createElement('div');
+    item.className='tree-boss-skill';
+    item.innerHTML=`<span class="tree-boss-skill-ico">${skill.icon}</span>
+      <span class="tree-boss-skill-name">${t('sk.'+skill.id)}</span>
+      <span class="tree-boss-skill-desc">${t('sk.'+skill.id+'_d')}</span>`;
+    list.appendChild(item);
+  });
+}
+
+// U3: 키스톤 활성 표시
+function updateActiveKeystones(){
+  const el=document.getElementById('active-keystones');
+  if(!el) return;
+  el.innerHTML='';
+  if(!G.keystones) return;
+  Object.keys(G.keystones).forEach(kid=>{
+    if(!G.keystones[kid]) return;
+    const node=TREE_NODES.find(n=>n.id===kid);
+    if(!node) return;
+    const badge=document.createElement('div');
+    badge.className='keystone-badge';
+    badge.title=node.ksDesc;
+    badge.innerHTML=`
+      <span class="keystone-badge-ico">${node.ksIcon}</span>
+      <div class="keystone-badge-info">
+        <div class="keystone-badge-name">${node.ksName}</div>
+        <div class="keystone-badge-desc">${node.ksDesc}</div>
+      </div>`;
+    el.appendChild(badge);
+  });
+}
+
+// U4: 콤보 표시 (processKill에서 호출)
+function updateComboDisplay(){
+  const el=document.getElementById('active-combo');
+  if(!el) return;
+  if(G.comboCount&&G.comboCount>=3){
+    el.textContent='🔥 '+G.comboCount+' '+t('ui.combo');
+    el.classList.remove('hidden');
+  }else{
+    el.classList.add('hidden');
+  }
+}
+
+// U4: 레벨업 대형 텍스트 연출
+function showLevelUpBanner(level){
+  const area=document.getElementById('game-area');
+  if(!area) return;
+  const el=document.createElement('div');
+  el.className='level-up-banner';
+  const hint=LANG==='en'?'Skill Point acquired — check 🧬':'🧬 스킬 포인트 획득';
+  el.innerHTML=`<div class="lub-main">${t('ui.level_up')}</div><div class="lub-sub">Lv.${level}</div><div class="lub-hint">${hint}</div>`;
+  area.appendChild(el);
+  setTimeout(()=>el.remove(),1600);
 }
 
 // ================================================================
@@ -395,7 +470,7 @@ function updateEnemyRoster(){
 //  UI 업데이트
 // ================================================================
 function updateUI(){
-  document.getElementById('energy-value').textContent=formatNum(G.energy);
+  // energy-value DOM 업데이트 생략 — 하단 패널 제거됨 (legacy hidden)
   document.getElementById('stat-dmg').textContent=G.damage;
   document.getElementById('stat-auto').textContent=G.autoRate.toFixed(1);
   document.getElementById('stat-kills').textContent=G.totalKills;
@@ -406,42 +481,379 @@ function updateUI(){
   updateEnemyRoster();
 
   const hpPct=Math.max(0,G.hp/G.maxHp*100);
-  document.getElementById('hp-bar').style.width=hpPct+'%';
-  document.getElementById('hp-bar').style.background=hpPct>50?'linear-gradient(90deg,#44ff44,#88ff44)':hpPct>25?'linear-gradient(90deg,#ffaa00,#ff6600)':'linear-gradient(90deg,#ff4444,#ff0000)';
-  document.getElementById('hp-text').textContent=Math.ceil(G.hp)+' / '+G.maxHp;
+  const _hpBar=document.getElementById('hp-bar');
+  if(_hpBar){
+    _hpBar.style.width=hpPct+'%';
+    _hpBar.style.background=hpPct>50?'linear-gradient(90deg,#44ff44,#88ff44)':hpPct>25?'linear-gradient(90deg,#ffaa00,#ff6600)':'linear-gradient(90deg,#ff4444,#ff0000)';
+  }
+  const _hpTx=document.getElementById('hp-text'); if(_hpTx) _hpTx.textContent=Math.ceil(G.hp)+' / '+G.maxHp;
+  // U2: HP 링 갱신
+  const ring=document.getElementById('hp-ring');
+  const ringFg=ring&&ring.querySelector('.hp-ring-fg');
+  if(ringFg){
+    const circ=2*Math.PI*44; // ≈ 276.46
+    ringFg.setAttribute('stroke-dashoffset',circ*(1-hpPct/100));
+    ring.classList.toggle('low',hpPct<=50&&hpPct>25);
+    ring.classList.toggle('critical',hpPct<=25);
+    const ringTx=document.getElementById('hp-ring-text');
+    if(ringTx) ringTx.textContent=Math.ceil(G.hp)+' / '+G.maxHp;
+  }
+  // U4: 트리 버튼 SP 뱃지 펄스
+  const spBadge=document.getElementById('tree-sp-badge');
+  const treeBtn=document.getElementById('tree-btn');
+  if(spBadge){
+    if(G.skillPoints>0){
+      spBadge.textContent=G.skillPoints;
+      spBadge.classList.remove('hidden');
+      if(treeBtn) treeBtn.classList.add('has-sp');
+    }else{
+      spBadge.classList.add('hidden');
+      if(treeBtn) treeBtn.classList.remove('has-sp');
+    }
+  }
+
+  // R1: XP 바 갱신
+  const xpNeed=xpNeeded();
+  const xpPct=Math.min(100,(G.xp/xpNeed)*100);
+  const xpBar=document.getElementById('xp-bar');
+  if(xpBar){
+    xpBar.style.width=xpPct+'%';
+    // SP 개수는 우상단 🧬 버튼 뱃지에서 표시되므로 XP 바에는 레벨만
+    document.getElementById('level-text').textContent='Lv.'+G.level;
+    document.getElementById('xp-progress').textContent=G.xp+' / '+xpNeed;
+  }
 
   const evo=EVOLUTIONS[G.evolutionStage];
-  document.getElementById('evolution-badge').textContent=`Lv.${G.evolutionStage+1} ${t('evo.'+G.evolutionStage)}`;
+  // 진화 배지: XP 바의 Lv.N과 중복되므로 진화 이름만 표시
+  document.getElementById('evolution-badge').textContent=`⚡ ${t('evo.'+G.evolutionStage)}`;
   document.getElementById('evolution-badge').style.color=evo.color;
 
-  // 업그레이드 버튼 갱신 (동적)
+  // 업그레이드 버튼 갱신 — 하단 패널은 숨김 상태이지만 DOM이 남아있을 수 있어 방어적 처리
   document.querySelectorAll('.upgrade-btn').forEach(btn=>{
     const uid=btn.dataset.upgrade;
     if(!uid||!G.upgrades[uid])return;
-    const cost=getCost(uid);
     const lv=upLv(uid);
-    const ok=G.energy>=cost;
-    btn.classList.toggle('affordable',ok);
-    btn.disabled=!ok;
-    btn.querySelector('.upgrade-cost').textContent=formatNum(cost);
+    // 에너지 구매 비활성화 — 항상 disabled로 (트리에서만 투자)
+    btn.classList.remove('affordable');
+    btn.disabled=true;
     btn.querySelector('.upgrade-level').textContent='Lv.'+lv;
     btn.querySelector('.upgrade-desc').textContent=getUpgradeDesc(uid);
   });
 }
 
 function buyUpgrade(type){
-  sfx.init();sfx.resume();
-  if(!G.upgrades[type])return;
-  const cost=getCost(type);
-  if(G.energy<cost)return;
-  G.energy-=cost;
-  G.upgrades[type].level++;
-  if(type==='hp') G.hp=Math.min(G.hp+20,100+upLv('hp')*20);
-  recalcStats();
-  sfx.upgrade();
-  const btn=document.querySelector(`[data-upgrade="${type}"]`);
-  if(btn){btn.classList.remove('just-bought');void btn.offsetWidth;btn.classList.add('just-bought')}
-  updateUI();saveGame();
+  // R1: 에너지 구매 비활성화 — 업그레이드는 레벨업 시 선택으로만 획득
+  // (R4에서 에너지/구매 시스템 완전 제거 예정)
+  return;
+}
+
+// ================================================================
+//  R4: 레벨업 → 트리 팝업 자동 오픈 (하이브리드 — 선택 or 닫기)
+// ================================================================
+function openTreeOnLevelUp(){
+  if(G.levelUpQueue>0){
+    G.levelUpQueue=0; // 트리를 열면 큐는 소진 (포인트는 누적되어 있음)
+  }
+  openTreePopup(true); // levelUp 모드: 안내 메시지 바꿈
+}
+
+// ================================================================
+//  R3/R4: 스킬 트리 팝업 렌더링
+// ================================================================
+function openTreePopup(isLevelUp){
+  const popup=document.getElementById('tree-popup');
+  if(!popup) return;
+  G.treeOpen=true;
+  if(typeof G.paused!=='undefined') G.paused=true; // 트리 열면 게임 일시정지
+  document.getElementById('tree-title').textContent=isLevelUp?('⚡ '+t('ui.tree_lvup')):('🧬 '+t('ui.tree'));
+  // 보스 스킬 섹션 렌더
+  renderTreeBossSkills();
+  // 컬럼 헤더/서브타이틀 재생성
+  const colTitles=document.querySelectorAll('.tree-col-title');
+  const colMap=[['atk','🗡️','ui.col_atk','ui.col_atk_sub'],['def','🌩️','ui.col_def','ui.col_def_sub'],['shard','🌀','ui.col_shard','ui.col_shard_sub']];
+  colTitles.forEach(el=>{
+    const tree=el.parentElement.dataset.tree;
+    const m=colMap.find(x=>x[0]===tree);
+    if(m) el.innerHTML=`${m[1]} ${t(m[2])} <span class="tree-col-sub">${t(m[3])}</span>`;
+  });
+  renderTree();
+  popup.classList.add('show');
+}
+function closeTreePopup(){
+  const popup=document.getElementById('tree-popup');
+  if(!popup) return;
+  popup.classList.remove('show');
+  hideTreeTooltip();
+  G.treeOpen=false;
+  G.paused=false;
+  saveGame();
+  updateUI();
+}
+function renderTree(){
+  document.getElementById('tree-sp').textContent=G.skillPoints;
+  ['atk','def','shard'].forEach(treeId=>{
+    const container=document.getElementById('tree-col-'+treeId);
+    if(!container) return;
+    container.innerHTML='';
+    // SVG 연결선 오버레이 (노드 위에 그리지 않도록 맨 아래 배치)
+    const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
+    svg.setAttribute('class','tree-svg');
+    container.appendChild(svg);
+
+    const nodes=nodesByTree(treeId);
+    const byTier={};
+    nodes.forEach(n=>{ (byTier[n.tier]=byTier[n.tier]||[]).push(n); });
+    // 테크트리 스타일: T7(키스톤)이 위, T1(시작)이 아래 — 내림차순 렌더링
+    Object.keys(byTier).sort((a,b)=>+b-+a).forEach(tier=>{
+      const tierBlock=document.createElement('div');
+      tierBlock.className='tree-tier';
+      const gateOpen=isTierGateOpen(treeId,+tier);
+      if(!gateOpen) tierBlock.classList.add('gate-locked');
+      // 티어 라벨 + 게이트 상태
+      const label=document.createElement('div');
+      label.className='tree-tier-label';
+      const req=tierGateRequired(+tier);
+      const inv=getTreeInvestedBelow(treeId,+tier);
+      const labelText=(+tier===7)?('◆ '+t('ui.tier_keystone').toUpperCase()):((t('ui.tier')+' '+tier).toUpperCase());
+      if(req>0){
+        label.innerHTML=`<span>${labelText}</span><span class="tree-gate-info ${gateOpen?'ok':''}">${gateOpen?'✓':'🔒'} ${Math.min(inv,req)}/${req}</span>`;
+      }else{
+        label.textContent=labelText;
+      }
+      tierBlock.appendChild(label);
+      // 노드 그리드 (최대 5 col)
+      const grid=document.createElement('div');
+      grid.className='tree-tier-grid';
+      byTier[tier].sort((a,b)=>a.row-b.row).forEach(node=>{
+        const el=buildTreeNodeEl(node);
+        el.style.gridColumn=(node.row+1)+'/ span 1';
+        grid.appendChild(el);
+      });
+      tierBlock.appendChild(grid);
+      container.appendChild(tierBlock);
+    });
+  });
+  // 레이아웃 완료 후 연결선 그리기 (rAF + setTimeout 2중 안전망)
+  requestAnimationFrame(()=>{
+    drawTreeConnections();
+    // 스크롤/이미지 로딩 후 최종 위치 보정
+    setTimeout(drawTreeConnections,60);
+  });
+}
+
+// SVG 연결선 그리기 — Manhattan 라우팅 (직각 ㄱ자)
+function drawTreeConnections(){
+  ['atk','def','shard'].forEach(treeId=>{
+    const container=document.getElementById('tree-col-'+treeId);
+    if(!container) return;
+    const svg=container.querySelector('.tree-svg');
+    if(!svg) return;
+    svg.innerHTML='';
+    const cRect=container.getBoundingClientRect();
+    svg.setAttribute('width',cRect.width);
+    svg.setAttribute('height',container.scrollHeight);
+    svg.style.height=container.scrollHeight+'px';
+    const nodes=nodesByTree(treeId);
+    nodes.forEach(node=>{
+      if(!node.prereqs||node.prereqs.length===0) return;
+      const childEl=container.querySelector('[data-node-id="'+node.id+'"]');
+      if(!childEl) return;
+      const cr=childEl.getBoundingClientRect();
+      const cx=cr.left-cRect.left+cr.width/2;
+      const ctop=cr.top-cRect.top+container.scrollTop;    // 자식 상단
+      const cy=ctop+cr.height/2;
+      node.prereqs.forEach(pid=>{
+        const pEl=container.querySelector('[data-node-id="'+pid+'"]');
+        if(!pEl) return;
+        const pr=pEl.getBoundingClientRect();
+        const px=pr.left-cRect.left+pr.width/2;
+        const ptop=pr.top-cRect.top+container.scrollTop;  // 부모 상단
+        const py=ptop+pr.height/2;
+        const parent=getTreeNode(pid);
+        const parentInvested=getNodeRank(parent)>0;
+        const childInvested=getNodeRank(node)>0;
+        let cls='tree-line-locked';
+        if(childInvested) cls='tree-line-active';
+        else if(parentInvested) cls='tree-line-available';
+        // 같은 col이면 직선, 다른 col이면 ㄱ자 경로
+        if(Math.abs(px-cx)<2){
+          // 수직 직선
+          const ln=document.createElementNS('http://www.w3.org/2000/svg','line');
+          ln.setAttribute('x1',px);ln.setAttribute('y1',py);
+          ln.setAttribute('x2',cx);ln.setAttribute('y2',cy);
+          ln.setAttribute('class',cls);
+          svg.appendChild(ln);
+        }else{
+          // ㄱ자: 자식 중심에서 위로 나와 중간 Y에서 가로, 부모 중심으로 수직 연결
+          const midY=(ptop+cr.bottom-cRect.top+container.scrollTop)/2;
+          const path=document.createElementNS('http://www.w3.org/2000/svg','path');
+          const d=`M ${cx} ${cy} L ${cx} ${midY} L ${px} ${midY} L ${px} ${py}`;
+          path.setAttribute('d',d);
+          path.setAttribute('class',cls);
+          path.setAttribute('fill','none');
+          svg.appendChild(path);
+        }
+      });
+    });
+  });
+}
+function buildTreeNodeEl(node){
+  const rank=getNodeRank(node);
+  const unlocked=isNodeUnlocked(node);
+  const maxed=rank>=node.maxRank;
+  const ksBlocked=node.type==='keystone'&&isKeystoneBlocked(node);
+  const canInvest=canInvestNode(node);
+
+  const el=document.createElement('div');
+  el.className='tree-node';
+  el.dataset.nodeId=node.id;
+  if(node.type==='keystone') el.classList.add('keystone');
+  if(rank>0) el.classList.add('invested');
+  if(maxed) el.classList.add('maxed');
+  else if(canInvest) el.classList.add('available');
+  else if(!unlocked||ksBlocked) el.classList.add('locked');
+
+  el.innerHTML=`
+    <div class="tree-node-icon">${getNodeIcon(node)}</div>
+    <div class="tree-node-rank">${rank}/${node.maxRank}</div>
+  `;
+  el.addEventListener('click',()=>{
+    if(investNode(node)){
+      sfx.upgrade();
+      recalcStats();
+      renderTree();
+      saveGame();
+    }
+  });
+  // 호버 툴팁
+  el.addEventListener('mouseenter',e=>showTreeTooltip(node,e.currentTarget));
+  el.addEventListener('mouseleave',hideTreeTooltip);
+  el.addEventListener('touchstart',e=>{ showTreeTooltip(node,e.currentTarget); });
+  return el;
+}
+
+// ================================================================
+//  트리 노드 호버 툴팁
+// ================================================================
+function showTreeTooltip(node,anchor){
+  const tip=document.getElementById('tree-tooltip');
+  if(!tip) return;
+  const rank=getNodeRank(node);
+  const maxed=rank>=node.maxRank;
+  const unlocked=isNodeUnlocked(node);
+  const ksBlocked=node.type==='keystone'&&isKeystoneBlocked(node);
+  const icon=getNodeIcon(node);
+  const name=getNodeName(node);
+
+  let html='';
+  html+=`<div class="tt-header"><span class="tt-ico">${icon}</span><span class="tt-name">${name}</span></div>`;
+  const tierLabel=(node.tier===7)?('◆ '+t('ui.tier_keystone')):(t('ui.tier')+' '+node.tier);
+  html+=`<div class="tt-meta">${tierLabel} · ${t('ui.rank')} <b>${rank}/${node.maxRank}</b></div>`;
+  html+=`<div class="tt-desc">${getNodeDesc(node)}</div>`;
+
+  if(node.type!=='keystone'){
+    if(maxed){
+      html+=`<div class="tt-progress tt-max">✦ ${t('ui.max_rank')}</div>`;
+    }else if(G.skillPoints>0 && canInvestNode(node)){
+      const progDesc=getUpgradeDesc(node.id);
+      if(progDesc){
+        html+=`<div class="tt-progress">
+          <div class="tt-arrow-label">⚡ ${t('ui.sp_invest')}</div>
+          <div class="tt-change">${progDesc}</div>
+        </div>`;
+      }
+    }else if(!unlocked){
+      const req=tierGateRequired(node.tier);
+      const inv=getTreeInvestedBelow(node.tree,node.tier);
+      if(inv<req){
+        html+=`<div class="tt-locked">🔒 ${tf('ui.locked_tier',{tier:node.tier,inv,req})}</div>`;
+      }else if(node.prereqs&&node.prereqs.length>0){
+        const missing=getMissingPrereqs(node);
+        if(missing.length>0){
+          const detail=missing.map(m=>`${m.name} (${m.cur}/${m.req})`).join(' + ');
+          html+=`<div class="tt-locked">🔒 ${tf('ui.locked_prereq',{name:detail})}</div>`;
+        }
+      }
+    }else if(G.skillPoints<=0){
+      html+=`<div class="tt-locked">⚠️ ${t('ui.no_sp')}</div>`;
+    }
+  }else{
+    if(rank>0){
+      html+=`<div class="tt-progress tt-max">✦ ${t('ui.ks_active')}</div>`;
+    }else if(ksBlocked){
+      html+=`<div class="tt-locked">🔒 ${t('ui.ks_blocked')}</div>`;
+    }else if(!unlocked){
+      const req=tierGateRequired(7);
+      const inv=getTreeInvestedBelow(node.tree,7);
+      if(inv<req){
+        html+=`<div class="tt-locked">🔒 ${inv}/${req}</div>`;
+      }
+    }
+    html+=`<div class="tt-warn">⚠ ${t('ui.ks_warn')}</div>`;
+  }
+
+  tip.innerHTML=html;
+  tip.classList.add('show');
+  // 위치 계산 — 노드 오른쪽 or 왼쪽
+  const rect=anchor.getBoundingClientRect();
+  const tipW=260;
+  const tipH=tip.offsetHeight||140;
+  let left=rect.right+8;
+  if(left+tipW>window.innerWidth-8) left=rect.left-tipW-8;
+  if(left<8) left=8;
+  let top=rect.top+rect.height/2-tipH/2;
+  if(top<8) top=8;
+  if(top+tipH>window.innerHeight-8) top=window.innerHeight-tipH-8;
+  tip.style.left=left+'px';
+  tip.style.top=top+'px';
+}
+function hideTreeTooltip(){
+  const tip=document.getElementById('tree-tooltip');
+  if(tip) tip.classList.remove('show');
+}
+
+// ================================================================
+//  R5: 메타 팝업 (영구 성장)
+// ================================================================
+function showMetaPopup(){
+  const popup=document.getElementById('meta-popup');
+  if(!popup) return;
+  // 팝업 헤더 i18n
+  const h2=popup.querySelector('h2');
+  if(h2) h2.textContent='🌟 '+t('ui.meta_growth');
+  const sub=document.getElementById('meta-subtitle');
+  if(sub) sub.textContent=t('ui.meta_prompt');
+  renderMeta();
+  popup.classList.add('show');
+}
+function hideMetaPopup(){
+  document.getElementById('meta-popup').classList.remove('show');
+}
+function renderMeta(){
+  document.getElementById('meta-rp').textContent=G.rp||0;
+  const grid=document.getElementById('meta-grid');
+  grid.innerHTML='';
+  META_UPGRADES.forEach(mu=>{
+    const r=metaRank(mu.id);
+    const maxed=r>=mu.maxRank;
+    const cost=metaCost(mu);
+    const canBuy=!maxed&&G.rp>=cost;
+    const item=document.createElement('div');
+    item.className='meta-item';
+    if(maxed) item.classList.add('maxed');
+    else if(!canBuy) item.classList.add('locked');
+    item.innerHTML=`
+      <div class="meta-item-name">${mu.icon} ${metaName(mu)}</div>
+      <div class="meta-item-desc">${metaDesc(mu)}</div>
+      <div class="meta-item-footer">
+        <span class="meta-item-rank">${r}/${mu.maxRank}</span>
+        <span class="meta-item-cost">${maxed?'MAX':('💠 '+cost)}</span>
+      </div>`;
+    item.addEventListener('click',()=>{
+      if(buyMetaUpgrade(mu.id)){ sfx.upgrade(); renderMeta(); }
+    });
+    grid.appendChild(item);
+  });
 }
 
 // ================================================================
@@ -483,5 +895,18 @@ function showEvolution(evo){
   document.getElementById('evo-name').style.color=evo.color;
   document.getElementById('evo-name').style.textShadow=`0 0 30px ${evo.color}`;
   document.getElementById('evo-desc').textContent=tf('pop.evo_desc',{count:EVOLUTIONS[G.evolutionStage].threshold});
-  document.getElementById('evolution-popup').classList.add('show');
+  const popup=document.getElementById('evolution-popup');
+  // 여러 번 빠르게 진화 시 이전 타이머/class 정리
+  popup.classList.remove('closing');
+  popup.classList.remove('show');
+  void popup.offsetWidth;
+  popup.classList.add('show');
+  if(G._evoToastTimer) clearTimeout(G._evoToastTimer);
+  G._evoToastTimer=setTimeout(()=>{
+    popup.classList.add('closing');
+    setTimeout(()=>{
+      popup.classList.remove('show','closing');
+      if(typeof saveGame==='function') saveGame();
+    },500);
+  },3200);
 }

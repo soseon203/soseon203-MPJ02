@@ -17,12 +17,12 @@ function gameLoop(ts){
 }
 
 function update(dt){
-  if(G.hp<=0||G.skillSelecting||G.upgradeSelecting||G.paused)return;
+  if(G.hp<=0||G.skillSelecting||G.upgradeSelecting||G.levelUpSelecting||G.paused)return;
 
   // rage: 광전사 스택 감소
   if(G.rageTimer>0){G.rageTimer-=dt;if(G.rageTimer<=0){G.rageStacks=0;G.rageTimer=0}}
   // combo: 콤보 타이머 감소
-  if(G.comboTimer>0){G.comboTimer-=dt;if(G.comboTimer<=0){G.comboCount=0;G.comboTimer=0}}
+  if(G.comboTimer>0){G.comboTimer-=dt;if(G.comboTimer<=0){G.comboCount=0;G.comboTimer=0;if(typeof updateComboDisplay==='function') updateComboDisplay();}}
   // emp: EMP 펄스
   if(upLv('emp')>0){
     G.empTimer+=dt;
@@ -93,6 +93,38 @@ function update(dt){
       if(upLv('resilience')>0&&G.hp<=G.maxHp*0.5) regenAmt*=2;
       G.hp=Math.min(G.maxHp,G.hp+regenAmt);
     }
+  }
+
+  // V4: 파편 트리 — 프레임별 업데이트
+  if(typeof updateShards==='function') updateShards(dt);
+
+  // V4: 폭풍의 심장 키스톤 — 3초마다 전체 적에게 낙뢰 (dmg ×5)
+  if(hasKeystone('ks_storm_heart')){
+    G.stormHeartTimer=(G.stormHeartTimer||0)+dt;
+    if(G.stormHeartTimer>=3){
+      G.stormHeartTimer=0;
+      const shDmg=Math.max(1,Math.floor(G.damage*5));
+      G.enemies.forEach(e2=>{if(e2.hp>0)damageEnemy(e2,shDmg)});
+      const shw=gameCanvas.width/dpr,shh=gameCanvas.height/dpr;
+      addShockwave(shw/2,shh/2,'#8844ff',250);
+      screenFlash('big');
+      sfx.zap(1);
+    }
+  }
+
+  // V4: 폭풍의 눈 Breakpoint — 코어 반경 지속 피해 존
+  if((upLv('storm_eye')||0)>0){
+    const sew=gameCanvas.width/dpr,seh=gameCanvas.height/dpr;
+    const secx=sew/2,secy=seh/2;
+    const seLv=upLv('storm_eye');
+    const seRadius=80+seLv*20;
+    const seDps=seLv*3+G.damage*0.15*seLv;
+    G.enemies.forEach(e2=>{
+      if(e2.hp<=0)return;
+      if(Math.hypot(e2.x-secx,e2.y-secy)<=seRadius){
+        damageEnemy(e2,Math.max(1,Math.floor(seDps*dt)));
+      }
+    });
   }
 
   // 자동 공격
@@ -303,7 +335,7 @@ function update(dt){
         // iron_core: 퍼센트 피해 감소
         if(upLv('iron_core')>0) dmg=Math.max(1,Math.ceil(dmg*(1-upLv('iron_core')*0.05)));
         // energy_shield: 에너지 100 이상 시 피해 감소
-        if(upLv('energy_shield')>0&&G.energy>=100) dmg=Math.max(1,Math.ceil(dmg*(1-upLv('energy_shield')*0.15)));
+        if(upLv('energy_shield')>0&&G.hp>=G.maxHp*0.8) dmg=Math.max(1,Math.ceil(dmg*(1-upLv('energy_shield')*0.15)));
         // dodge: 15% 회피 (스킬) + dodge_up 업그레이드
         const totalDodge=(hasSkill('dodge')?0.15:0)+upLv('dodge_up')*0.03;
         if(totalDodge>0&&Math.random()<totalDodge){
@@ -325,17 +357,16 @@ function update(dt){
           sfx.hit();
           screenShake(true);
           showFloatText(cx,cy-20,'-'+dmg,'critical');
-          // absorb: 피해의 30%를 에너지로 (스킬)
+          // absorb / absorption: 받은 피해의 일부를 HP로 전환 (에너지 시스템 제거 이후)
           if(hasSkill('absorb')){
-            const absorbed=Math.ceil(dmg*0.3);
-            G.energy+=absorbed;G.totalEnergy+=absorbed;
-            showFloatText(cx,cy-35,'+'+absorbed,'energy-gain');
+            const heal=Math.ceil(dmg*0.3);
+            G.hp=Math.min(G.maxHp,G.hp+heal);
+            showFloatText(cx,cy-35,'+'+heal+' HP','energy-gain');
           }
-          // absorption: 업그레이드 에너지 변환
           if(upLv('absorption')>0){
-            const abAmt=Math.ceil(dmg*upLv('absorption')*0.05);
-            G.energy+=abAmt;G.totalEnergy+=abAmt;
-            showFloatText(cx,cy-45,'+'+abAmt,'energy-gain');
+            const heal=Math.ceil(dmg*upLv('absorption')*0.05);
+            G.hp=Math.min(G.maxHp,G.hp+heal);
+            showFloatText(cx,cy-45,'+'+heal+' HP','energy-gain');
           }
         }
         // thorns: 반사 번개 (스킬)
@@ -348,6 +379,7 @@ function update(dt){
             zapBolts.push(createZapBolt(cx,cy,tt.x,tt.y));
             damageEnemy(tt,thornDmg);
             addSparks(tt.x,tt.y,3,'#ff44ff');
+            showFloatText(tt.x,tt.y-20,'반사!','chain');
           }
         }
         // thorns_up: 업그레이드 반사
@@ -393,6 +425,10 @@ function update(dt){
     G.enemies.forEach(me=>{
       if(me.markTimer>0) me.markTimer-=dt;
     });
+    // B-리팩토링 신규 메커니즘 (유틸/폭풍 빌드 기믹)
+    if(typeof applyMagnetPull==='function') applyMagnetPull(G.enemies, cx, cy, dt);
+    if(typeof applyStormEye==='function') applyStormEye(G.enemies, cx, cy, dt);
+    if(typeof applyBlackhole==='function') applyBlackhole(G.enemies, cx, cy, dt);
 
     // 보스 압박 - 가까워지면 지진파 (투사체 대신)
     G.enemies.forEach(e=>{
@@ -409,7 +445,7 @@ function update(dt){
           if(upLv('titan_guard')>0) quakeDmg=Math.max(1,quakeDmg-upLv('titan_guard')*2);
           if(upLv('shield_wall')>0) quakeDmg=Math.max(1,Math.ceil(quakeDmg*(1-upLv('shield_wall')*0.08)));
           if(upLv('iron_core')>0) quakeDmg=Math.max(1,Math.ceil(quakeDmg*(1-upLv('iron_core')*0.05)));
-          if(upLv('energy_shield')>0&&G.energy>=100) quakeDmg=Math.max(1,Math.ceil(quakeDmg*(1-upLv('energy_shield')*0.15)));
+          if(upLv('energy_shield')>0&&G.hp>=G.maxHp*0.8) quakeDmg=Math.max(1,Math.ceil(quakeDmg*(1-upLv('energy_shield')*0.15)));
           if(bossDist<250){
             const _bDodge=(hasSkill('dodge')?0.15:0)+upLv('dodge_up')*0.03;
             if(_bDodge>0&&Math.random()<_bDodge){
@@ -459,18 +495,18 @@ function update(dt){
           if(upLv('titan_guard')>0) pDmg=Math.max(1,pDmg-upLv('titan_guard')*2);
           if(upLv('shield_wall')>0) pDmg=Math.max(1,Math.ceil(pDmg*(1-upLv('shield_wall')*0.08)));
           if(upLv('iron_core')>0) pDmg=Math.max(1,Math.ceil(pDmg*(1-upLv('iron_core')*0.05)));
-          if(upLv('energy_shield')>0&&G.energy>=100) pDmg=Math.max(1,Math.ceil(pDmg*(1-upLv('energy_shield')*0.15)));
+          if(upLv('energy_shield')>0&&G.hp>=G.maxHp*0.8) pDmg=Math.max(1,Math.ceil(pDmg*(1-upLv('energy_shield')*0.15)));
           G.hp-=pDmg;
           screenShake(true);
           showFloatText(cx,cy-20,'-'+pDmg,'critical');
           if(hasSkill('absorb')){
-            const absorbed=Math.ceil(pDmg*0.3);
-            G.energy+=absorbed;G.totalEnergy+=absorbed;
-            showFloatText(cx,cy-35,'+'+absorbed,'energy-gain');
+            const heal=Math.ceil(pDmg*0.3);
+            G.hp=Math.min(G.maxHp,G.hp+heal);
+            showFloatText(cx,cy-35,'+'+heal+' HP','energy-gain');
           }
           if(upLv('absorption')>0){
-            const abAmt=Math.ceil(pDmg*upLv('absorption')*0.05);
-            G.energy+=abAmt;G.totalEnergy+=abAmt;
+            const heal=Math.ceil(pDmg*upLv('absorption')*0.05);
+            G.hp=Math.min(G.maxHp,G.hp+heal);
           }
         }
         sfx.hit();
@@ -492,7 +528,8 @@ function update(dt){
 }
 
 function startWave(){
-  G.currentWaveType=getWaveType(G.wave);
+  // waveClear에서 미리 확정된 타입 사용 (없으면 (최초 실행) 새로 결정)
+  if(!G.currentWaveType) G.currentWaveType=getWaveType(G.wave);
   const wc=getWaveConfig(G.wave);
   G.waveState='active';
   G.enemies=[];
@@ -526,13 +563,14 @@ function startWave(){
 function waveClear(){
   G.waveState='ready';
   G.waveTimer=0;
-  G.currentWaveType='normal';
-  // wave_bonus: 승전 보상 (스킬)
-  if(hasSkill('wave_bonus')){
+  // 다음 웨이브 타입을 미리 확정 — "대기 중..." 2초 동안 로스터가 정확히 예고
+  G.currentWaveType=getWaveType(G.wave+1);
+  // wave_bonus (스킬): 승전 시 XP 보너스 (에너지 대체)
+  if(hasSkill('wave_bonus')&&typeof gainXP==='function'){
     const bonus=Math.floor(5+G.wave*3);
-    G.energy+=bonus;G.totalEnergy+=bonus;
+    gainXP(bonus);
     const bw=gameCanvas.width/dpr,bh=gameCanvas.height/dpr;
-    showFloatText(bw/2,bh/2-40,'+'+bonus+' '+t('msg.bonus'),'energy-gain');
+    showFloatText(bw/2,bh/2-40,'+'+bonus+' XP','energy-gain');
   }
   // wave_heal: 웨이브 클리어 시 HP 회복
   if(upLv('wave_heal')>0){
@@ -541,26 +579,29 @@ function waveClear(){
     const bw2=gameCanvas.width/dpr,bh2=gameCanvas.height/dpr;
     showFloatText(bw2/2,bh2/2-70,'+'+healAmt+' HP','energy-gain');
   }
-  // victory: 승전 보상 (업그레이드)
+  // victory: 승전 보상 — 에너지 대신 XP 표시 (실제 gainXP는 waveClear 끝에서 별도 적용)
   if(upLv('victory')>0){
     const vBonus=upLv('victory')*15;
-    G.energy+=vBonus;G.totalEnergy+=vBonus;
     const bw=gameCanvas.width/dpr,bh=gameCanvas.height/dpr;
-    showFloatText(bw/2,bh/2-55,'+'+vBonus+' '+t('msg.victory'),'energy-gain');
+    showFloatText(bw/2,bh/2-55,'+'+vBonus+' XP','energy-gain');
   }
   // 업그레이드 선택 (홀수 웨이브 클리어 시)
   const shouldSelect=G.wave%2===1||G.wave===1;
   G.wave++;
   G.bossProjectiles=[];
   sfx.waveClear();
-  showWavePopup('WAVE CLEAR!');
+  showWavePopup(t('msg.wave_clear').toUpperCase());
   checkEvolution();
   saveGame();
   // 업그레이드 선택 팝업 (웨이브 증가 후)
-  if(shouldSelect){
-    const available=UPGRADE_POOL.filter(u=>!G.unlockedUpgrades.includes(u.id)&&u.unlockWave<=G.wave);
-    if(available.length>0) setTimeout(()=>showUpgradeSelection(),800);
+  // R4: 기존 웨이브 업글 팝업 비활성화 (트리가 관리)
+  // if(shouldSelect){ ... showUpgradeSelection() ... }
+  // 유틸 victory 노드: 웨이브 클리어 시 XP 보너스
+  if(upLv('victory')>0&&typeof gainXP==='function'){
+    gainXP(upLv('victory')*15);
   }
+  // R6: 업적 인-런 체크
+  if(typeof checkAchievements==='function') checkAchievements();
 }
 
 function gameOver(){
@@ -569,7 +610,7 @@ function gameOver(){
     G.rebirthUsed=true;
     G.hp=Math.ceil(G.maxHp*upLv('rebirth')*0.2);
     const bw=gameCanvas.width/dpr,bh=gameCanvas.height/dpr;
-    showFloatText(bw/2,bh/2-30,'REBIRTH!','chain');
+    showFloatText(bw/2,bh/2-30,t('msg.rebirth').toUpperCase(),'chain');
     addShockwave(bw/2,bh/2,'#ffdd00',200);
     addShockwave(bw/2,bh/2,'#ff8800',140);
     screenFlash('big');
@@ -577,7 +618,36 @@ function gameOver(){
     return;
   }
   sfx.gameOver();
+  sfx.stopBgm(1500);  // 게임오버 → BGM 페이드아웃
   screenFlash('big');
+
+  // R5: 런 종료 — RP 계산 & 업적 체크 (런 최종 결과 기준)
+  checkAchievements();
+  const runRp=computeRunRP();
+  if(runRp>0){ G.rp+=runRp; saveMeta(); }
+  // 마지막 런 스냅샷 (랜딩 화면 표시용)
+  try{
+    localStorage.setItem('lightningLastRun',JSON.stringify({wave:G.wave,level:G.level,kills:G.totalKills,rp:runRp}));
+  }catch(e){}
+  // 게임오버 화면에 RP 표시 (stats grid 바깥 featured 카드)
+  const gameOverEl=document.getElementById('game-over');
+  let rpCard=document.getElementById('go-rp-card');
+  if(runRp>0){
+    if(!rpCard){
+      rpCard=document.createElement('div');
+      rpCard.id='go-rp-card';
+      rpCard.innerHTML='<div class="go-rp-label">🌟 영구 성장 포인트 획득</div><div class="go-rp-value"><span id="go-rp-value-num">+'+runRp+'</span> <span class="go-rp-unit">RP</span></div>';
+      // stats grid 바로 아래 배치
+      const statsGrid=document.getElementById('go-stats-grid');
+      if(statsGrid&&statsGrid.parentNode) statsGrid.parentNode.insertBefore(rpCard, statsGrid.nextSibling);
+    }else{
+      const num=document.getElementById('go-rp-value-num');
+      if(num) num.textContent='+'+runRp;
+      rpCard.style.display='';
+    }
+  }else if(rpCard){
+    rpCard.style.display='none';
+  }
 
   const evo=EVOLUTIONS[G.evolutionStage];
   // 호칭
@@ -586,28 +656,33 @@ function gameOver(){
   // 핵심 스탯
   document.getElementById('go-wave').textContent=G.wave;
   document.getElementById('go-kills').textContent=formatNum(G.totalKills);
-  document.getElementById('go-energy').textContent=formatNum(G.totalEnergy);
+  // 에너지 스탯 제거 → 레벨로 교체
+  const lvEl=document.getElementById('go-level');
+  if(lvEl) lvEl.textContent='Lv.'+G.level;
   document.getElementById('go-evo-stage').textContent=`Lv.${G.evolutionStage+1}`;
   document.getElementById('go-dmg').textContent=G.damage;
   document.getElementById('go-auto').textContent=G.autoRate.toFixed(1);
-  // 업그레이드 상세
+  // 업그레이드 상세 (빈 섹션은 숨김)
   const upgEl=document.getElementById('go-upgrade-detail');
+  const upgSec=document.getElementById('go-upgrades-section');
   upgEl.innerHTML='';
+  let upgCount=0;
   G.unlockedUpgrades.forEach(id=>{
     const lv=upLv(id);
     if(lv===0)return;
     const data=getUpgradeData(id);
     if(!data)return;
+    upgCount++;
     const d=document.createElement('div');d.className='go-upg-item';
     d.innerHTML=`<span class="go-upg-name">${data.icon} ${t('up.'+id)}</span><span class="go-upg-lv">Lv.${lv}</span>`;
     upgEl.appendChild(d);
   });
-  // 획득 스킬
+  if(upgSec) upgSec.style.display=upgCount>0?'':'none';
+  // 획득 스킬 (빈 섹션은 숨김)
   const skillEl=document.getElementById('go-skill-list');
+  const skillSec=document.getElementById('go-skills-section');
   skillEl.innerHTML='';
-  if(G.specialSkills.length===0){
-    skillEl.innerHTML='<span style="font-size:.7em;color:rgba(255,255,255,.3)">'+t('ui.none')+'</span>';
-  }else{
+  if(G.specialSkills.length>0){
     G.specialSkills.forEach(id=>{
       const sk=SKILL_POOL.find(s=>s.id===id);
       if(!sk)return;
@@ -617,6 +692,7 @@ function gameOver(){
       skillEl.appendChild(tag);
     });
   }
+  if(skillSec) skillSec.style.display=G.specialSkills.length>0?'':'none';
 
   // 닉네임 입력 초기화
   const nickInput=document.getElementById('go-nickname');
@@ -628,6 +704,7 @@ function gameOver(){
   savedMsg.style.display='none';
 
   document.getElementById('game-over').classList.add('show');
+  document.body.classList.add('state-gameover');
   localStorage.removeItem('lightningGame2');
   setTimeout(()=>nickInput.focus(),400);
 }
@@ -640,16 +717,21 @@ function togglePause(){
 
 function resetGame(){
   // 모든 팝업 강제 닫기
-  ['pause-popup','game-over','skill-popup','upgrade-popup','evolution-popup','ranking-popup'].forEach(id=>{
+  ['pause-popup','game-over','skill-popup','upgrade-popup','evolution-popup','ranking-popup','levelup-popup'].forEach(id=>{
     const el=document.getElementById(id);
     if(el)el.classList.remove('show');
   });
+  document.body.classList.remove('state-gameover');
+  // BGM 재시작 (새 런) — 단, 게임 컨테이너가 활성일 때만 (메인으로 돌아간 경우 제외)
+  const inGame=document.getElementById('game-container').classList.contains('active');
+  if(inGame&&sfx.bgmVolume>0&&!sfx._bgmStarted) sfx.startBgm();
   // 모든 블로킹 상태 해제
   G.paused=false;
   G.skillSelecting=false;
   G.upgradeSelecting=false;
+  G.levelUpSelecting=false;
   // 게임 상태 초기화
-  G.energy=0;G.totalEnergy=0;G.kills=0;G.totalKills=0;
+  G.kills=0;G.totalKills=0;
   G.hp=100;G.maxHp=100;G.hpRegen=0;
   G.damage=1;G.autoRate=0;G.chainCount=0;
   G.specialSkills=[];G.shieldActive=false;G.shieldTimer=0;G.stormTimer=0;G.staticTimer=0;
@@ -662,6 +744,19 @@ function resetGame(){
   G.rageStacks=0;G.rageTimer=0;G.comboCount=0;G.comboTimer=0;
   G.upgradeShieldActive=false;G.upgradeShieldTimer=0;G.empTimer=0;
   G.rebirthUsed=false;
+  // R1: XP/레벨 초기화
+  G.xp=0;G.level=1;G.skillPoints=0;G.totalLevels=0;G.levelUpQueue=0;
+  // R4: 키스톤 초기화 (런 한정)
+  G.keystones={};G.treeOpen=false;
+  // R5: 메타 시작 보너스 적용 (RP/메타업글은 영구 유지)
+  const mHp=getMetaEffect('maxHp');
+  const mSp=getMetaEffect('sp');
+  const mDmg=getMetaEffect('damage');
+  const mAuto=getMetaEffect('autoRate');
+  if(mHp>0){ G.maxHp+=mHp; G.hp=G.maxHp; }
+  if(mSp>0) G.skillPoints+=mSp;
+  if(mDmg>0) G.damage+=mDmg;
+  if(mAuto>0) G.autoRate+=mAuto;
   zapBolts=[];fxEffects=[];G.bossProjectiles=[];G.orbitals=[];
   // 화면 흔들림 제거
   const gameArea=document.getElementById('game-area');
@@ -682,13 +777,27 @@ window.forceReset=function(){
 // ================================================================
 function handleClick(px,py){
   sfx.init();sfx.resume();
-  if(G.hp<=0||G.skillSelecting||G.upgradeSelecting)return;
+  if(G.hp<=0||G.skillSelecting||G.upgradeSelecting||G.levelUpSelecting)return;
 
   const now=Date.now();
   const baseCd=hasSkill('quickcharge')?90:150;
-  const cd=Math.max(50,baseCd-upLv('quick')*8);
+  let cd=Math.max(50,baseCd-upLv('quick')*8);
+  // ⏳ 시간의 주인 쿨다운 -40%
+  if(typeof getClickCdMult==='function') cd=Math.max(40, cd*getClickCdMult());
   if(now-G.lastClickTime<cd)return;
   G.lastClickTime=now;
+
+  // ⚡ 뇌신의 화신 (Thunder Avatar): 클릭당 HP -3 (자기 소모)
+  if(hasKeystone('ks_click_master')){
+    G.hp=Math.max(0, G.hp-3);
+    if(G.hp<=0){ gameOver(); return; }
+  }
+  // 🩸 피의 의지 (bloodlust): 업글 보유 시 클릭당 5% HP 소모, 스택 +1 (다음 클릭 부스트)
+  if(upLv('bloodlust')>0 && G.hp>G.maxHp*0.15){
+    const cost=Math.ceil(G.maxHp*0.05);
+    G.hp=Math.max(1, G.hp-cost);
+    if(typeof addBloodlustStack==='function') addBloodlustStack();
+  }
 
   // 근접 타게팅: 커서 원 범위 내 가장 가까운 적 자동 선택
   const rangeBonus=upLv('range')*5+upLv('bolt_size')*10+upLv('field_expand')*8;
@@ -699,7 +808,10 @@ function handleClick(px,py){
   G.enemies.forEach(e=>{
     if(e.hp<=0)return;
     const d=Math.hypot(e.x-px,e.y-py);
-    if(d<CLICK_RADIUS&&d<minDist){minDist=d;hit=e}
+    // 보스/대형 적: 몸체 반지름만큼 거리 할인 (외곽 클릭도 인식)
+    const bodyR=Math.max(0,(e.size||12)*0.9);
+    const effD=Math.max(0, d-bodyR);
+    if(effD<CLICK_RADIUS&&d<minDist){minDist=d;hit=e}
   });
 
   let hitProj=-1;
@@ -715,14 +827,17 @@ function handleClick(px,py){
     if(hasSkill('multishot')){
       const nearby=G.enemies.filter(e=>e!==hit&&e.hp>0)
         .sort((a,b)=>Math.hypot(a.x-hit.x,a.y-hit.y)-Math.hypot(b.x-hit.x,b.y-hit.y));
+      let multiFired=false;
       for(let m=0;m<Math.min(2,nearby.length);m++){
         if(Math.hypot(nearby[m].x-hit.x,nearby[m].y-hit.y)<150){
           const mdmg=Math.max(1,Math.floor(G.damage*0.4));
           zapBolts.push(createZapBolt(hit.x,hit.y,nearby[m].x,nearby[m].y));
           damageEnemy(nearby[m],mdmg);
           addSparks(nearby[m].x,nearby[m].y,3,'#ffee00');
+          multiFired=true;
         }
       }
+      if(multiFired) showFloatText(hit.x,hit.y-25,'산란!','chain');
     }
     if(hasSkill('pierce')){
       const w2=gameCanvas.width/dpr,h2=gameCanvas.height/dpr;
@@ -736,6 +851,7 @@ function handleClick(px,py){
         zapBolts.push(createZapBolt(hit.x,hit.y,behind[0].x,behind[0].y));
         damageEnemy(behind[0],pdmg);
         addSparks(behind[0].x,behind[0].y,4,evoColor());
+        showFloatText(behind[0].x,behind[0].y-25,'관통!','chain');
       }
     }
     // multi: 다중 낙뢰 업그레이드
@@ -760,11 +876,10 @@ function handleClick(px,py){
   }else{
     const alive=G.enemies.filter(e=>e.hp>0);
     if(alive.length===0){
-      G.energy+=1;G.totalEnergy+=1;
+      // 빈 클릭 — 효과 없음 (과거: +1 에너지 표시, 에너지 시스템 제거 후 의미 상실)
       sfx.zap(0.3);
       const w=gameCanvas.width/dpr,h=gameCanvas.height/dpr;
       addSparks(w/2,h/2,3,evoColor());
-      showFloatText(px,py,'+1','energy-gain');
     }else{
       sfx.zap(0.1);
       addSparks(px,py,2,'#555555');
@@ -782,11 +897,13 @@ function handleClick(px,py){
 function saveGame(){
   if(G.hp<=0)return; // 게임오버 상태에서는 저장하지 않음
   try{
-    const save={energy:G.energy,totalEnergy:G.totalEnergy,kills:G.kills,totalKills:G.totalKills,
+    const save={kills:G.kills,totalKills:G.totalKills,
       hp:G.hp,maxHp:G.maxHp,hpRegen:G.hpRegen,damage:G.damage,autoRate:G.autoRate,
       chainCount:G.chainCount,wave:G.wave,evolutionStage:G.evolutionStage,
       upgrades:G.upgrades,unlockedUpgrades:G.unlockedUpgrades,
-      specialSkills:G.specialSkills,rebirthUsed:G.rebirthUsed};
+      specialSkills:G.specialSkills,rebirthUsed:G.rebirthUsed,
+      xp:G.xp,level:G.level,skillPoints:G.skillPoints,totalLevels:G.totalLevels,
+      keystones:G.keystones||{}};
     localStorage.setItem('lightningGame2',JSON.stringify(save));
   }catch(e){}
 }
@@ -820,6 +937,13 @@ function loadGame(){
       G.upgradeShieldActive=false;G.upgradeShieldTimer=0;
       G.empTimer=G.empTimer||0;
       G.rebirthUsed=G.rebirthUsed||false;
+      // V4: 파편 시스템 상태 초기화 (런타임 전용, 저장 안 함)
+      G.shards=[];G._shardIdCounter=0;G.stormHeartTimer=0;
+      // V4: 폐기된 키스톤 정리 (이전 브랜치 세이브와의 충돌 방지)
+      if(G.keystones){
+        const removed=['ks_click_master','ks_storm_lord','ks_glass_cannon','ks_void','ks_collector'];
+        removed.forEach(k=>{ if(G.keystones[k]){ delete G.keystones[k]; } });
+      }
       recalcStats();
     }
   }catch(e){}
@@ -850,6 +974,12 @@ function initEvents(){
 
   // 업그레이드 버튼은 rebuildUpgradeGrid에서 동적으로 이벤트 바인딩
 
+  // more-menu 닫기 헬퍼
+  const closeMoreMenu=()=>{
+    const mm=document.getElementById('more-menu');
+    if(mm) mm.classList.add('hidden');
+  };
+
   document.getElementById('lang-btn').addEventListener('click',e=>{
     e.stopPropagation();
     const newLang=LANG==='ko'?'en':'ko';
@@ -860,23 +990,118 @@ function initEvents(){
     updateSkillDisplay();
     updateUI();
     updateEnemyRoster();
+    closeMoreMenu();
   });
 
   document.getElementById('sound-btn').addEventListener('click',e=>{
-    e.stopPropagation();sfx.init();
-    const on=sfx.toggle();
-    document.getElementById('sound-btn').querySelector('.top-btn-icon').textContent=on?'🔊':'🔇';
-    document.getElementById('sound-btn').classList.toggle('muted',!on);
+    e.stopPropagation();
+    sfx.init();
+    // 이전: mute 토글 → 이제: 사운드 설정 팝오버 오픈
+    openSoundSettings();
+    closeMoreMenu();
+  });
+  // 초기 아이콘 동기화 — 저장된 볼륨이 0이면 🔇 로 시작
+  setTimeout(()=>{ try{ syncSoundBtnIcon&&syncSoundBtnIcon(); }catch(e){} }, 0);
+
+  // ─────── 사운드 설정 팝오버 ───────
+  function openSoundSettings(){
+    const pop=document.getElementById('sound-settings');
+    if(!pop) return;
+    pop.classList.remove('hidden');
+    refreshSoundBars();
+    // BGM 볼륨이 0 초과인데 아직 재생 안 됐으면 이 사용자 제스처로 시작 시도
+    if(sfx.bgmVolume>0 && !sfx._bgmStarted) sfx.startBgm();
+  }
+  function closeSoundSettings(){
+    const pop=document.getElementById('sound-settings');
+    if(pop) pop.classList.add('hidden');
+  }
+  function refreshSoundBars(){
+    document.querySelectorAll('.sound-bars').forEach(row=>{
+      const type=row.dataset.type;
+      const cur=type==='sfx'?sfx.sfxVolume:sfx.bgmVolume;
+      row.querySelectorAll('.sound-bar').forEach(btn=>{
+        const lv=parseInt(btn.dataset.level,10);
+        btn.classList.toggle('active', lv===cur);
+      });
+    });
+    syncSoundBtnIcon();
+  }
+  // 사운드 버튼 아이콘/라벨을 현재 볼륨 상태에 맞춰 갱신
+  function syncSoundBtnIcon(){
+    const sb=document.getElementById('sound-btn');
+    if(!sb) return;
+    const iconEl=sb.querySelector('span:first-child');
+    const labelEl=sb.querySelector('span:nth-child(2)');
+    const both0=sfx.sfxVolume===0&&sfx.bgmVolume===0;
+    const anyMute=sfx.sfxVolume===0||sfx.bgmVolume===0;
+    let icon='🔊';
+    if(both0) icon='🔇';
+    else if(anyMute) icon='🔉';
+    if(iconEl) iconEl.textContent=icon;
+    sb.classList.toggle('muted', both0);
+    // 라벨에 현재 레벨 요약 표시
+    if(labelEl){
+      const name=(typeof t==='function')?t('ui.sound'):'사운드';
+      labelEl.textContent=`${name} ${sfx.sfxVolume}/${sfx.bgmVolume}`;
+    }
+  }
+  document.getElementById('sound-settings-close').addEventListener('click',closeSoundSettings);
+  // 바 클릭으로 볼륨 변경
+  document.querySelectorAll('.sound-bars .sound-bar').forEach(btn=>{
+    btn.addEventListener('click',e=>{
+      e.stopPropagation();
+      sfx.init();
+      const lv=parseInt(btn.dataset.level,10);
+      const type=btn.parentElement.dataset.type;
+      if(type==='sfx'){ sfx.setSfxVolume(lv); sfx.zap(0.5); }
+      else{
+        sfx.setBgmVolume(lv);
+        if(lv>0){
+          if(!sfx._bgmStarted) sfx.startBgm();
+        }else{
+          sfx.stopBgm(300);
+        }
+      }
+      refreshSoundBars();
+    });
+  });
+  // 바깥 클릭 시 닫기
+  document.addEventListener('click',e=>{
+    const pop=document.getElementById('sound-settings');
+    if(pop&&!pop.classList.contains('hidden')&&!pop.contains(e.target)&&e.target.id!=='sound-btn'){
+      closeSoundSettings();
+    }
   });
 
-  document.getElementById('evo-ok').addEventListener('click',()=>{
-    document.getElementById('evolution-popup').classList.remove('show');saveGame();
-  });
-  document.getElementById('evolution-popup').addEventListener('click',()=>{
-    document.getElementById('evolution-popup').classList.remove('show');saveGame();
-  });
+  // 진화 토스트: 클릭 시 즉시 닫기 (자동 사라짐 타이머가 있어도 수동 dismiss 가능)
+  const evoPopup=document.getElementById('evolution-popup');
+  if(evoPopup){
+    evoPopup.addEventListener('click',()=>{
+      evoPopup.classList.add('closing');
+      if(G._evoToastTimer) clearTimeout(G._evoToastTimer);
+      setTimeout(()=>evoPopup.classList.remove('show','closing'),300);
+      saveGame();
+    });
+  }
 
   document.getElementById('go-retry').addEventListener('click',()=>resetGame());
+  const goHome=document.getElementById('go-home');
+  if(goHome) goHome.addEventListener('click',()=>{
+    // 런 상태 정리 후 랜딩으로 복귀
+    sfx.stopBgm(800);  // 메인으로 → BGM 페이드아웃
+    document.body.classList.remove('state-gameover');
+    document.getElementById('game-over').classList.remove('show');
+    document.getElementById('game-container').classList.remove('active');
+    document.getElementById('landing-screen').classList.remove('hidden');
+    const footer=document.getElementById('game-footer');
+    if(footer) footer.classList.remove('hidden');
+    if(window.startLandingAnim) window.startLandingAnim();
+    if(typeof updateLandingRpDisplay==='function') updateLandingRpDisplay();
+    if(typeof showLandingLastRun==='function') showLandingLastRun();
+    // 런 상태만 리셋 (메타/RP는 유지)
+    if(typeof resetGame==='function') resetGame();
+  });
 
   // 랭킹: 닉네임 저장
   document.getElementById('go-save-rank').addEventListener('click',async()=>{
@@ -899,22 +1124,73 @@ function initEvents(){
   // 랭킹: 게임오버에서 랭킹 보기
   document.getElementById('go-view-rank').addEventListener('click',()=>showRankingPopup());
 
-  // 랭킹: 상단 버튼
+  // 랭킹: 더보기 메뉴 버튼
   document.getElementById('ranking-btn').addEventListener('click',e=>{
     e.stopPropagation();
     if(!G.paused&&G.hp>0&&G.waveState!=='ready'){togglePause()}
     showRankingPopup();
+    closeMoreMenu();
   });
 
   // 랭킹: 탭 전환
   document.querySelectorAll('.rank-tab').forEach(tab=>{
     tab.addEventListener('click',()=>showRankingPopup(tab.dataset.sort));
   });
+  // 랭킹: 난이도 필터 탭
+  document.querySelectorAll('.rank-diff-tab').forEach(tab=>{
+    tab.addEventListener('click',()=>setRankDiffFilter(tab.dataset.diff));
+  });
 
   // 랭킹: 닫기
   document.getElementById('ranking-close').addEventListener('click',()=>hideRankingPopup());
 
   document.getElementById('pause-btn').addEventListener('click',()=>togglePause());
+  // U1: 더보기 드롭다운
+  const moreBtn=document.getElementById('more-btn');
+  const moreMenu=document.getElementById('more-menu');
+  if(moreBtn&&moreMenu){
+    moreBtn.addEventListener('click',e=>{
+      e.stopPropagation();
+      moreMenu.classList.toggle('hidden');
+    });
+    document.addEventListener('click',e=>{
+      if(!moreMenu.classList.contains('hidden')&&!moreMenu.contains(e.target)&&e.target!==moreBtn){
+        moreMenu.classList.add('hidden');
+      }
+    });
+  }
+  // R3: 스킬 트리 버튼 / 메타 팝업 / 닫기
+  const treeBtn=document.getElementById('tree-btn');
+  if(treeBtn) treeBtn.addEventListener('click',()=>{ if(G.treeOpen) closeTreePopup(); else openTreePopup(false); });
+  const treeClose=document.getElementById('tree-close');
+  if(treeClose) treeClose.addEventListener('click',()=>closeTreePopup());
+  const metaClose=document.getElementById('meta-close');
+  if(metaClose) metaClose.addEventListener('click',()=>hideMetaPopup());
+  document.addEventListener('keydown',e=>{
+    // 입력 필드 타이핑 중에는 단축키 무시
+    const tag=(e.target&&e.target.tagName||'').toLowerCase();
+    if(tag==='input'||tag==='textarea') return;
+    if(e.key==='Escape'){
+      const mm=document.getElementById('more-menu');
+      if(mm&&!mm.classList.contains('hidden')){ mm.classList.add('hidden'); return; }
+      if(G.treeOpen){ closeTreePopup(); return; }
+      const metaShow=document.getElementById('meta-popup')?.classList?.contains('show');
+      if(metaShow){ hideMetaPopup(); return; }
+      const rankShow=document.getElementById('ranking-popup')?.classList?.contains('show');
+      if(rankShow){ hideRankingPopup(); return; }
+      // 게임오버 상태에서 Esc → 다시 시작
+      if(document.body.classList.contains('state-gameover')){ resetGame(); return; }
+      // 기본: 일시정지 토글 (웨이브 진행 중에만)
+      if(G.hp>0&&!G.skillSelecting&&!G.upgradeSelecting) togglePause();
+    }
+    // T 또는 1: 스킬 트리 토글 (우상단까지 마우스 이동 불필요)
+    if(e.key==='t'||e.key==='T'||e.key==='1'){
+      if(G.treeOpen){ closeTreePopup(); }
+      else if(G.hp>0&&!G.skillSelecting&&!G.upgradeSelecting&&!G.levelUpSelecting&&!document.body.classList.contains('state-gameover')){
+        openTreePopup(false);
+      }
+    }
+  });
 
   document.getElementById('pause-resume').addEventListener('click',()=>togglePause());
   document.getElementById('pause-reset').addEventListener('click',()=>{
@@ -938,20 +1214,14 @@ function initEvents(){
   document.getElementById('pause-sound').addEventListener('click',()=>{
     sfx.init();
     const on=sfx.toggle();
-    document.getElementById('sound-btn').querySelector('.top-btn-icon').textContent=on?'🔊':'🔇';
-    document.getElementById('sound-btn').classList.toggle('muted',!on);
+    syncSoundBtnIcon();
     document.getElementById('pause-sound').textContent=(on?'🔊 ':'🔇 ')+t('ui.sound');
     document.getElementById('pause-sound').classList.toggle('muted',!on);
   });
 
   window.addEventListener('keydown',(e)=>{
-    if(e.key==='Escape'){
-      if(document.getElementById('ranking-popup').classList.contains('show')){
-        hideRankingPopup();return;
-      }
-      togglePause();
-      return;
-    }
+    // Esc 처리는 document 레벨 핸들러에 위임 (중복 방지) — 여기서는 Space 등만 처리
+    if(e.key==='Escape') return;
     if(G.paused)return;
     // 스페이스바: 진화 팝업 닫기 또는 공격
     if(e.key===' '||e.code==='Space'){
@@ -994,17 +1264,64 @@ function toggleLandingLang(){
   const newLang=LANG==='ko'?'en':'ko';
   setLang(newLang);
   document.title=t('ui.title');
-  document.getElementById('landing-title').textContent=newLang==='ko'?'⚡ 라이트닝 키우기':'⚡ LIGHTNING RAISING';
+  // 아이콘 브랜드(⚡)는 별도 요소이므로 타이틀 텍스트에 포함하지 않음
+  document.getElementById('landing-title').textContent=newLang==='ko'?'라이트닝 키우기':'LIGHTNING RAISING';
+  const tagEl=document.getElementById('landing-tagline');
+  if(tagEl) tagEl.textContent=newLang==='ko'?'번개를 진화시키며 끝없는 웨이브에 도전':'Raise your lightning, conquer endless waves';
   const startBtn=document.getElementById('landing-start');
   startBtn.textContent=newLang==='ko'?'⚡ 게임 시작':'⚡ PLAY';
+  // 원형 언어 아이콘 — 텍스트 오버플로우 방지, tooltip으로 안내
   const langBtn=document.getElementById('landing-lang');
-  langBtn.textContent=newLang==='ko'?'🌐 English':'🌐 한국어';
-  const navBtns=document.querySelectorAll('.landing-btn');
+  if(langBtn){ langBtn.textContent='🌐'; langBtn.title=newLang==='ko'?'Language: English':'언어: 한국어'; }
+  // 메타 카드 텍스트 (RP 배지는 별도 업데이트)
+  const metaTitle=document.querySelector('#landing-meta-card .meta-card-title');
+  const metaSub=document.querySelector('#landing-meta-card .meta-card-sub');
+  if(metaTitle) metaTitle.textContent=t('ui.meta_growth');
+  if(metaSub) metaSub.textContent=t('ui.meta_sub');
+  // 마지막 런 라벨 + 통계 문자열 재생성
+  if(typeof showLandingLastRun==='function') showLandingLastRun();
+  const navBtns=document.querySelectorAll('#landing-nav .landing-btn');
   const labels=newLang==='ko'?['🏆 랭킹','❓ 도움말','📖 소개']:['🏆 Ranking','❓ Help','📖 About'];
   navBtns.forEach((b,i)=>{if(labels[i])b.textContent=labels[i]});
-  const landLinks=document.querySelectorAll('#landing-links a');
-  if(landLinks[0])landLinks[0].textContent=t('ui.privacy');
-  if(landLinks[1])landLinks[1].textContent=t('ui.terms');
+  const footLinks=document.querySelectorAll('#landing-footer a');
+  if(footLinks[0])footLinks[0].textContent=t('ui.privacy');
+  if(footLinks[1])footLinks[1].textContent=t('ui.terms');
+}
+
+// 랜딩 RP 표시 갱신 (영구 성장 카드)
+function updateLandingRpDisplay(){
+  const el=document.getElementById('landing-rp-display');
+  if(el) el.textContent='RP '+formatNum(G.rp||0);
+}
+// 랜딩 마지막 런 기록 표시 (localStorage lightningLastRun)
+function showLandingLastRun(){
+  const el=document.getElementById('landing-lastrun');
+  const statsEl=document.getElementById('landing-lastrun-stats');
+  const labelEl=document.querySelector('#landing-lastrun .lastrun-label');
+  if(!el||!statsEl) return;
+  if(labelEl) labelEl.textContent=t('ui.last_run');
+  try{
+    const d=localStorage.getItem('lightningLastRun');
+    if(d){
+      const s=JSON.parse(d);
+      statsEl.textContent=`${t('ui.wave')} ${s.wave} · Lv ${s.level} · +${s.rp} RP`;
+      el.classList.remove('hidden');
+    }
+  }catch(e){}
+}
+
+// 난이도 버튼 초기화 — 현재 선택 표시 + 클릭 바인딩
+function initDifficultyButtons(){
+  const current=G.difficulty||'normal';
+  document.querySelectorAll('.diff-btn').forEach(btn=>{
+    btn.classList.toggle('active', btn.dataset.diff===current);
+    btn.addEventListener('click',()=>{
+      const d=btn.dataset.diff;
+      G.difficulty=d;
+      try{ localStorage.setItem('lightningDifficulty',d); }catch(e){}
+      document.querySelectorAll('.diff-btn').forEach(b=>b.classList.toggle('active', b.dataset.diff===d));
+    });
+  });
 }
 
 function initLanding(){
@@ -1013,27 +1330,51 @@ function initLanding(){
     const d=localStorage.getItem('lightningGame2');
     if(d){const s=JSON.parse(d);if(!s.hp||s.hp<=0)localStorage.removeItem('lightningGame2');}
   }catch(e){localStorage.removeItem('lightningGame2');}
+  // R5: 메타 프로그레션 로드 (랜딩에서 영구 성장 버튼 사용 가능)
+  if(typeof loadMeta==='function') loadMeta();
+  // R6: 스킬트리 도입으로 구버전 세이브 무효화 (업글 풀 변경되어 충돌 가능)
+  try{
+    const d=localStorage.getItem('lightningGame2');
+    if(d){
+      const s=JSON.parse(d);
+      if(!s.xp&&!s.level){ localStorage.removeItem('lightningGame2'); }
+    }
+  }catch(e){}
+  // U-Landing: RP 배지 & 마지막 런 표시 & 난이도 버튼
+  updateLandingRpDisplay();
+  showLandingLastRun();
+  initDifficultyButtons();
   // 우주 운석 애니메이션 시작
   if(window.startLandingAnim)window.startLandingAnim();
-  // 초기 언어 반영
+  // 초기 언어 반영 (아이콘은 별도 브랜드, 언어 버튼은 원형 아이콘만)
   if(LANG==='en'){
     document.title=t('ui.title');
-    document.getElementById('landing-title').textContent='⚡ LIGHTNING RAISING';
+    document.getElementById('landing-title').textContent='LIGHTNING RAISING';
+    const tagEl=document.getElementById('landing-tagline');
+    if(tagEl) tagEl.textContent='Raise your lightning, conquer endless waves';
     document.getElementById('landing-start').textContent='⚡ PLAY';
-    document.getElementById('landing-lang').textContent='🌐 한국어';
-    const navBtns=document.querySelectorAll('.landing-btn');
+    const langBtn=document.getElementById('landing-lang');
+    if(langBtn){ langBtn.textContent='🌐'; langBtn.title='Language: 한국어'; }
+    const metaTitle=document.querySelector('#landing-meta-card .meta-card-title');
+    const metaSub=document.querySelector('#landing-meta-card .meta-card-sub');
+    if(metaTitle) metaTitle.textContent='Meta Growth';
+    if(metaSub) metaSub.textContent='Spend RP on starting bonuses';
+    const navBtns=document.querySelectorAll('#landing-nav .landing-btn');
     ['🏆 Ranking','❓ Help','📖 About'].forEach((l,i)=>{if(navBtns[i])navBtns[i].textContent=l});
-    const landLinks=document.querySelectorAll('#landing-links a');
-    if(landLinks[0])landLinks[0].textContent=t('ui.privacy');
-    if(landLinks[1])landLinks[1].textContent=t('ui.terms');
+    const footLinks=document.querySelectorAll('#landing-footer a');
+    if(footLinks[0])footLinks[0].textContent=t('ui.privacy');
+    if(footLinks[1])footLinks[1].textContent=t('ui.terms');
   }
   document.getElementById('landing-start').addEventListener('click',()=>{
     if(window.stopLandingAnim)window.stopLandingAnim();
     document.getElementById('landing-screen').classList.add('hidden');
     startGame();
   });
-  // 랜딩에서도 랭킹 닫기·탭 작동하도록
+  // 랜딩에서도 랭킹 닫기·탭·난이도 필터 작동하도록
   document.getElementById('ranking-close').addEventListener('click',()=>hideRankingPopup());
+  document.querySelectorAll('.rank-diff-tab').forEach(tab=>{
+    tab.addEventListener('click',()=>setRankDiffFilter(tab.dataset.diff));
+  });
   document.querySelectorAll('.rank-tab').forEach(tab=>{
     tab.addEventListener('click',()=>showRankingPopup(tab.dataset.sort));
   });
@@ -1043,7 +1384,16 @@ function startGame(){
   document.getElementById('game-container').classList.add('active');
   const footer=document.getElementById('game-footer');
   if(footer)footer.classList.add('hidden');
+  // BGM 시작 (사용자 클릭 직후 → autoplay 제한 통과). 볼륨 0이면 생략
+  sfx.init();
+  if(sfx.bgmVolume>0) sfx.startBgm();
   loadGame();
+  if(typeof loadMeta==='function') loadMeta();
+  // R5: 메타 시작 보너스 적용 (새 런 시작 시)
+  const mSp=(typeof getMetaEffect==='function'?getMetaEffect('sp'):0);
+  const mDmg=(typeof getMetaEffect==='function'?getMetaEffect('damage'):0);
+  if(mSp>0&&G.level<=1) G.skillPoints=Math.max(G.skillPoints,mSp);
+  if(mDmg>0&&G.level<=1) G.damage=Math.max(G.damage,1+mDmg);
   recalcStats();
   applyI18nHTML();
   rebuildUpgradeGrid();
