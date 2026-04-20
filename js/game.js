@@ -1083,13 +1083,26 @@ function strikeEnemy(enemy,isDirect){
   let critChance=upLv('crit')*0.03;
   if(isDirect&&upLv('precision')>0) critChance+=upLv('precision')*0.04;
   if(hasSkill('critical')) critChance+=0.15;
+  // V4: execution_mastery Breakpoint — 일반 크리 배율 -10%/랭크 (트레이드오프)
+  const execMasteryLv=upLv('execution_mastery')||0;
   if(critChance>0&&Math.random()<critChance){
     // 기본 2x (3→2), 상승폭도 하향
-    const critMult=2+upLv('crit')*0.1+upLv('crit_dmg')*0.15;  // lv10: 2+1+1.5 = 4.5x (was 9.5x)
+    let critMult=2+upLv('crit')*0.1+upLv('crit_dmg')*0.15;  // lv10: 2+1+1.5 = 4.5x
+    if(execMasteryLv>0) critMult*=Math.max(0.3, 1 - execMasteryLv*0.1); // 최소 0.3배까지 하향
     dmg*=critMult;
     isCrit=true;
   }
   if(isCrit&&upLv('lifeline')>0) G.hp=Math.min(G.maxHp,G.hp+upLv('lifeline')*2);
+
+  // V4: execution_mastery — 적 HP ≤ 20% 시, 고정값 피해로 방어·감소 우회
+  //  fixed = (본체 클릭 dmg + maxHp × 0.02) × 랭크
+  if(execMasteryLv>0 && enemy.hp<=enemy.maxHp*0.2){
+    const fixed=Math.floor((G.damage + G.maxHp*0.02) * execMasteryLv);
+    if(fixed > dmg){
+      dmg=fixed;
+      if(isDirect&&Math.random()<0.5) showFloatText(enemy.x,enemy.y-35,'처형!','critical');
+    }
+  }
 
   // 최종 반올림 (Math.ceil 체이닝 제거 → 누적 오차 해소)
   dmg=Math.max(1,Math.ceil(dmg));
@@ -1147,11 +1160,49 @@ function strikeEnemy(enemy,isDirect){
     addShockwave(enemy.x,enemy.y,'#ff44aa',80);
   }
 
+  // V4: penetration_mastery Breakpoint (낙뢰 T3) — 클릭 일직선 관통
+  //  클릭 공격이 코어→적 방향 직선상의 다른 적 N체 관통 (+1/랭크, 각 관통 -15% dmg)
+  if(isDirect && (upLv('penetration_mastery')||0) > 0){
+    const pmLv=upLv('penetration_mastery');
+    const maxPierce=pmLv;  // 관통 횟수 = 랭크
+    // 코어→적 방향 유닛 벡터
+    const adx=enemy.x-cx, ady=enemy.y-cy;
+    const alen=Math.hypot(adx,ady)||1;
+    const ux=adx/alen, uy=ady/alen;
+    // 원래 적 뒤쪽(코어 반대 방향)의 적들만 후보 (거리 투영 > 원적과의 거리)
+    const originalDist=alen;
+    const candidates=G.enemies
+      .filter(e=>e!==enemy&&e.hp>0)
+      .map(e=>{
+        const ex=e.x-cx, ey=e.y-cy;
+        const proj=ex*ux+ey*uy;  // 방향 투영 길이
+        const perp=Math.abs(ex*uy-ey*ux);  // 수직 거리
+        return {enemy:e, proj, perp};
+      })
+      .filter(c=>c.proj>originalDist*0.3 && c.perp<40)  // 일직선 근처, 원적보다 뒤/중간
+      .sort((a,b)=>a.proj-b.proj);
+    if(candidates.length>0){
+      showFloatText(enemy.x,enemy.y-30,'관통!','chain');
+    }
+    for(let i=0;i<Math.min(maxPierce,candidates.length);i++){
+      const t=candidates[i].enemy;
+      const pierceDmg=Math.max(1, Math.ceil(dmg * Math.pow(0.85, i+1)));  // 15%/hop 감소
+      setTimeout(()=>{
+        if(t.hp<=0) return;
+        zapBolts.push(createZapBolt(enemy.x,enemy.y,t.x,t.y));
+        damageEnemy(t, pierceDmg, null, null, false, false);
+        addSparks(t.x,t.y,3,'#ffdd44');
+      }, (i+1)*40);
+    }
+  }
+
   // chain lightning
   if(G.chainCount>0){
-    let chainMult=hasSkill('chain_boost')?0.75:0.5;
-    chainMult+=upLv('chain_dmg')*0.1;
+    let chainMultBase=hasSkill('chain_boost')?0.75:0.5;
+    chainMultBase+=upLv('chain_dmg')*0.1;
     const chainRange=200+upLv('chain_range')*30;
+    // V4: chain_awakening Breakpoint (폭풍 T3) — 체인 hop마다 +15% 대신 기본 -감소 취소
+    const chainAwakened=(upLv('chain_awakening')||0)>0;
     const nearEnemies=[...G.enemies]
       .filter(e=>e!==enemy&&e.hp>0)
       .sort((a,b)=>{
@@ -1164,18 +1215,22 @@ function strikeEnemy(enemy,isDirect){
       const target=nearEnemies[i];
       const dist=Math.hypot(target.x-enemy.x,target.y-enemy.y);
       if(dist>chainRange)break;
+      // 체인 배율: 기본은 감쇠(hop마다 chainMultBase^n), awakened면 증폭(1.15^hop)
+      const hopMult = chainAwakened
+        ? Math.pow(1.15, i+1)           // +15%/hop
+        : chainMultBase;                 // 기존: 고정 chainMultBase
       setTimeout(()=>{
         if(target.hp<=0)return;
         zapBolts.push(createZapBolt(enemy.x,enemy.y,target.x,target.y));
         sfx.chain();
-        let chainDmg=Math.ceil(dmg*chainMult);
+        let chainDmg=Math.ceil(dmg*hopMult);
         // chain_crit: 체인 크리티컬
         if(upLv('chain_crit')>0&&Math.random()<upLv('chain_crit')*0.05){
           chainDmg=Math.ceil(chainDmg*2);
           showFloatText(target.x,target.y-20,'CHAIN CRIT!','critical');
         }
         damageEnemy(target,chainDmg,null,null,true);
-        addSparks(target.x,target.y,4,'#b44aff');
+        addSparks(target.x,target.y,4,chainAwakened?'#ffcc44':'#b44aff');
       },(i+1)*60);
     }
   }
