@@ -80,18 +80,23 @@ function spawnShardsOnKill(enemy){
   const basicLv = upLv('shard_basic')||0;
   if(basicLv <= 0) return;
 
-  // 생성 수 = shard_count (1~6, 기본 1)
-  const count = 1 + (upLv('shard_count')||0);
+  // 생성 수 = shard_basic 랭크 + shard_count 랭크 (기본 1 + 보강)
+  const count = basicLv + (upLv('shard_count')||0);
   // ks_core_split: 코어 분할은 파편 수 ×3
   const mult = hasKeystone('ks_core_split') ? 3 : 1;
+  const totalCount = count * mult;
 
   // 기본 피해 = 본체 클릭 데미지 × 0.3 × (1 + shard_damage×0.1)
   const baseDmg = Math.max(1, Math.floor(
     G.damage * 0.3 * (1 + (upLv('shard_damage')||0)*0.1)
   ));
 
-  for(let i=0;i<count*mult;i++){
-    const angle = (i/(count*mult))*Math.PI*2 + Math.random()*0.3;
+  // 🔧 각도 기준을 런마다 랜덤 오프셋 → 1개짜리도 우측으로만 치우치지 않음
+  const angleOffset = Math.random() * Math.PI * 2;
+  for(let i=0;i<totalCount;i++){
+    // 여러 개면 원주 균등 분산 + 살짝의 jitter; 1개면 순수 랜덤 방향
+    const base = totalCount>1 ? (i/totalCount)*Math.PI*2 : 0;
+    const angle = angleOffset + base + (Math.random()-0.5)*0.4;
     createShard(enemy.x, enemy.y, baseDmg, {direction: angle});
   }
 }
