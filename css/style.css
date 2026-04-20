@@ -36,10 +36,9 @@ body{font-family:'Noto Sans KR','Malgun Gothic',sans-serif;background:#05051a;co
 #landing-screen.hidden{display:none}
 /* 운석/별 애니메이션 캔버스 — 배경의 핵심. 절대 가리지 않음. */
 #landing-canvas{position:absolute;inset:0;width:100%;height:100%;z-index:0;opacity:1}
-/* 비네트 + 중앙 블루 글로우 — 캔버스 위에 얇게, 가독성 확보 */
+/* 가독성용 얇은 비네트 — 캔버스의 네뷸러는 그대로 보이게 */
 #landing-overlay{position:absolute;inset:0;pointer-events:none;z-index:1;background:
-  radial-gradient(ellipse 70% 55% at center 50%, rgba(90,150,230,.10) 0%, transparent 65%),
-  radial-gradient(ellipse 140% 100% at center 50%, transparent 30%, rgba(3,4,13,.35) 70%, rgba(3,4,13,.75) 100%)}
+  radial-gradient(ellipse 160% 110% at center 50%, transparent 40%, rgba(3,4,13,.25) 78%, rgba(3,4,13,.55) 100%)}
 .se-header,.se-main,.se-bottom,.se-footer{position:relative;z-index:2}
 
 /* 공통 카드 라벨 */
@@ -72,7 +71,7 @@ body{font-family:'Noto Sans KR','Malgun Gothic',sans-serif;background:#05051a;co
 .se-threat-sep{opacity:.4}
 
 /* ─── 본문 ─── */
-.se-main{display:grid;grid-template-columns:minmax(200px,230px) 1fr minmax(220px,260px);gap:32px;align-items:start;padding:6px 0}
+.se-main{display:grid;grid-template-columns:minmax(180px,210px) 1fr minmax(190px,230px);gap:24px;align-items:start;padding:2px 0}
 
 /* 양 옆 카드 공통 */
 .se-card{background:rgba(10,16,36,.45);border:1px solid rgba(120,180,255,.18);border-radius:2px;padding:14px 18px;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);transition:border-color .2s, background .2s}
@@ -110,7 +109,7 @@ body{font-family:'Noto Sans KR','Malgun Gothic',sans-serif;background:#05051a;co
 .se-chapter-rule{flex:0 0 60px;height:1px;background:linear-gradient(90deg,transparent,rgba(200,220,255,.35),transparent)}
 
 /* 거대 타이틀 — 'ㄹ이트닝' 산세리프, '키우기' 이탤릭 세리프 + 번개 오버레이 */
-.se-hero-title{position:relative;z-index:1;font-family:'Noto Sans KR','Malgun Gothic',sans-serif;font-weight:300;font-size:clamp(2.4em,6.8vw,5.8em);letter-spacing:-3px;color:#eaf0fb;line-height:1;margin:6px 0 8px;text-shadow:0 0 50px rgba(120,180,255,.35),0 0 120px rgba(80,140,220,.18);max-width:100%;white-space:nowrap}
+.se-hero-title{position:relative;z-index:1;font-family:'Noto Sans KR','Malgun Gothic',sans-serif;font-weight:200;font-size:clamp(2.8em,9.5vw,8.5em);letter-spacing:-4px;color:#eaf0fb;line-height:1;margin:10px 0 12px;text-shadow:0 0 60px rgba(120,180,255,.4),0 0 140px rgba(80,140,220,.22);max-width:100%;white-space:nowrap}
 .se-title-main{font-family:'Noto Sans KR',sans-serif;font-weight:300;color:#f4f7ff}
 .se-title-accent{font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:400;letter-spacing:0;margin-left:.2em;position:relative;background:linear-gradient(180deg,#dfe8fa 0%,#a6c6ff 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent}
 .se-title-bolt{position:absolute;top:50%;left:58%;transform:translate(-50%,-48%) rotate(6deg);height:130%;width:auto;filter:drop-shadow(0 0 18px rgba(200,230,255,.75)) drop-shadow(0 0 36px rgba(140,200,255,.45));pointer-events:none;opacity:.9;z-index:-1}
