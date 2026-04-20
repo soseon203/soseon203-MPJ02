@@ -14,7 +14,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Sans+KR:wght@300;400;500;700;900&family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=72">
+  <link rel="stylesheet" href="css/style.css?v=73">
 </head>
 
 <body>
@@ -22,13 +22,13 @@
     <canvas id="landing-canvas"></canvas>
     <div id="landing-overlay"></div>
 
-    <!-- 상단 헤더: 좌 브랜드 / 우 챕터 -->
+    <!-- 상단 헤더 -->
     <header class="se-header">
       <div class="se-header-left">
         <div class="se-brand-mark">⚡</div>
         <div class="se-brand-text">
           <div class="se-brand-name">LR &middot; LIGHTNING RISING</div>
-          <div class="se-brand-tag">AN INFINITE WAVE GAME</div>
+          <div class="se-brand-tag">AN INFINITE WAVE SAGA</div>
         </div>
       </div>
       <div class="se-header-right">
@@ -36,37 +36,45 @@
           <span class="se-chapter-no">CHAPTER&nbsp;I</span>
           <span class="se-chapter-sep">·</span>
           <span class="se-chapter-name">THE EYE</span>
+          <span class="se-lang-toggle" id="landing-lang" onclick="toggleLandingLang()">
+            <span class="se-lang-opt active" data-lang="ko">KO</span>
+            <span class="se-lang-sep">/</span>
+            <span class="se-lang-opt" data-lang="en">EN</span>
+          </span>
         </div>
         <div class="se-threat-pill" data-threat="normal">
           <span class="se-dot"></span>
           <span class="se-threat-label">STEADY</span>
           <span class="se-threat-sep">·</span>
-          <span class="se-threat-level">THREAT 02</span>
+          <span class="se-threat-level">THREAT 03</span>
         </div>
       </div>
-      <button class="se-lang-btn" id="landing-lang" onclick="toggleLandingLang()" title="Language">🌐</button>
     </header>
 
-    <!-- 본문 그리드: 좌 LAST RUN / 중앙 HERO / 우 META GROWTH -->
+    <!-- 본문 그리드 -->
     <main class="se-main">
       <aside class="se-card se-card-left" id="landing-lastrun">
         <div class="se-card-label">── LAST RUN</div>
         <div class="se-card-stats">
           <div class="se-stat">
-            <div class="se-stat-val" id="se-last-wave">—</div>
             <div class="se-stat-key">WAVE</div>
+            <div class="se-stat-bar"></div>
+            <div class="se-stat-val" id="se-last-wave">—</div>
           </div>
           <div class="se-stat">
-            <div class="se-stat-val" id="se-last-kills">—</div>
             <div class="se-stat-key">KILLS</div>
+            <div class="se-stat-bar"></div>
+            <div class="se-stat-val" id="se-last-kills">—</div>
           </div>
           <div class="se-stat">
-            <div class="se-stat-val" id="se-last-level">—</div>
             <div class="se-stat-key">LEVEL</div>
+            <div class="se-stat-bar"></div>
+            <div class="se-stat-val" id="se-last-level">—</div>
           </div>
           <div class="se-stat">
-            <div class="se-stat-val" id="se-last-rp">—</div>
-            <div class="se-stat-key">RP</div>
+            <div class="se-stat-key">EVO</div>
+            <div class="se-stat-bar"></div>
+            <div class="se-stat-val" id="se-last-evo">—</div>
           </div>
         </div>
       </aside>
@@ -74,51 +82,61 @@
       <section class="se-hero">
         <div class="se-hero-eye">
           <div class="se-eye-ring se-eye-ring-outer"></div>
+          <div class="se-eye-ring se-eye-ring-mid"></div>
           <div class="se-eye-ring se-eye-ring-inner"></div>
           <div class="se-eye-pupil"></div>
         </div>
-        <div class="se-hero-chapter">CHAPTER&nbsp;I &nbsp;·&nbsp; THE EYE OF THE STORM</div>
-        <h1 class="se-hero-title" id="landing-title">라이트닝 키우기</h1>
+        <div class="se-hero-chapter">
+          <span class="se-chapter-rule"></span>
+          <span>CHAPTER&nbsp;I &nbsp;·&nbsp; THE EYE OF THE STORM</span>
+          <span class="se-chapter-rule"></span>
+        </div>
+        <h1 class="se-hero-title" id="landing-title">
+          <span class="se-title-main">라이트닝</span>
+          <span class="se-title-accent">키우기
+            <svg class="se-title-bolt" viewBox="0 0 120 280" aria-hidden="true"><path d="M62 8 L18 150 L58 150 L34 272 L102 112 L62 112 Z" fill="url(#seBoltGrad)" stroke="#e6f1ff" stroke-width="1.4"/><defs><linearGradient id="seBoltGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#ffffff"/><stop offset="40%" stop-color="#bfe3ff"/><stop offset="100%" stop-color="#6ba8ff"/></linearGradient></defs></svg>
+          </span>
+        </h1>
         <div class="se-hero-motto">RISE &nbsp;·&nbsp; EVOLVE &nbsp;·&nbsp; DEFY THE STORM</div>
       </section>
 
       <aside class="se-card se-card-right" onclick="showMetaPopup()">
-        <div class="se-card-label">META GROWTH ──</div>
+        <div class="se-card-label">── META GROWTH</div>
         <div class="se-meta-value">
           <span class="se-meta-num" id="landing-rp-display">0</span>
           <span class="se-meta-unit">RP</span>
         </div>
+        <div class="se-meta-bar"><div class="se-meta-bar-fill" id="se-meta-bar"></div></div>
         <div class="se-meta-sub">
-          <span class="se-meta-tier">BEST TIER · —</span>
-          <span class="se-meta-hint">1 RP · 0 / 3 UNLOCKED</span>
+          <span id="se-meta-hint">NEXT TIER · 5 RP · 0 / 12 UNLOCKED</span>
         </div>
       </aside>
     </main>
 
-    <!-- 하단 컨트롤: 난이도 / ENTER / 기록+네비 -->
+    <!-- 하단: 난이도 / ENTER / 아카이브 -->
     <section class="se-bottom">
       <div class="se-intensity">
         <div class="se-section-label">── STORM INTENSITY</div>
         <div class="se-intensity-grid">
           <button class="se-diff diff-btn" data-diff="easy">
             <div class="se-diff-ko">평온</div>
-            <div class="se-diff-en">CALM</div>
+            <div class="se-diff-en">CALM &middot;</div>
             <div class="se-diff-no">01</div>
           </button>
           <button class="se-diff diff-btn active" data-diff="normal">
-            <div class="se-diff-ko">스테디</div>
-            <div class="se-diff-en">STEADY</div>
-            <div class="se-diff-no">02</div>
+            <div class="se-diff-ko">안정</div>
+            <div class="se-diff-en">STEADY &middot;</div>
+            <div class="se-diff-no">03</div>
           </button>
           <button class="se-diff diff-btn" data-diff="hard">
             <div class="se-diff-ko">격동</div>
-            <div class="se-diff-en">SEVERE</div>
-            <div class="se-diff-no">03</div>
+            <div class="se-diff-en">SEVERE &middot;</div>
+            <div class="se-diff-no">05</div>
           </button>
           <button class="se-diff diff-btn" data-diff="nightmare">
             <div class="se-diff-ko">광란</div>
-            <div class="se-diff-en">TEMPEST</div>
-            <div class="se-diff-no">04</div>
+            <div class="se-diff-en">TEMPEST &middot;</div>
+            <div class="se-diff-no">∞</div>
           </button>
         </div>
       </div>
@@ -126,11 +144,14 @@
       <div class="se-enter-col">
         <button class="se-enter" id="landing-start">
           <span class="se-enter-ico">⚡</span>
-          <span class="se-enter-text">ENTER<br>THE EYE</span>
+          <span class="se-enter-text">ENTER THE EYE</span>
         </button>
         <div class="se-enter-meta">
-          <div class="se-enter-meta-item"><span class="se-enter-meta-val" id="se-best-wave">0</span><span class="se-enter-meta-key">BEST WAVE</span></div>
-          <div class="se-enter-meta-item"><span class="se-enter-meta-val" id="se-total-runs">0</span><span class="se-enter-meta-key">런 기록</span></div>
+          <span class="se-enter-meta-item"><span class="se-enter-meta-key">RP</span><span class="se-enter-meta-val" id="se-enter-rp">0</span></span>
+          <span class="se-enter-meta-sep">·</span>
+          <span class="se-enter-meta-item"><span class="se-enter-meta-key">BEST WAVE</span><span class="se-enter-meta-val" id="se-best-wave">—</span></span>
+          <span class="se-enter-meta-sep">·</span>
+          <span class="se-enter-meta-item"><span class="se-enter-meta-key">EVO</span><span class="se-enter-meta-val" id="se-evo-name">전기 불꽃</span></span>
         </div>
       </div>
 
@@ -144,9 +165,12 @@
       </nav>
     </section>
 
-    <!-- 푸터: 챕터 / 잠긴 게이트 / 약관 -->
+    <!-- 푸터 -->
     <footer class="se-footer">
-      <div class="se-footer-l">CHAPTER I &nbsp;·&nbsp; THE EYE</div>
+      <div class="se-footer-l">
+        <span>CHAPTER I &nbsp;—&nbsp; THE EYE</span>
+        <span class="se-chapter-progress"><span class="se-chapter-progress-fill"></span></span>
+      </div>
       <div class="se-footer-c">
         <a href="privacy.html">PRIVACY</a>
         <span class="footer-sep">·</span>
@@ -412,17 +436,17 @@
 
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
-  <script src="js/firebase-config.js?v=72"></script>
-  <script src="js/locales.js?v=72"></script>
-  <script src="js/sound.js?v=72"></script>
-  <script src="js/config.js?v=72"></script>
-  <script src="js/game.js?v=72"></script>
-  <script src="js/tree.js?v=72"></script>
-  <script src="js/shards.js?v=72"></script>
-  <script src="js/render.js?v=72"></script>
-  <script src="js/ui.js?v=72"></script>
-  <script src="js/landing-anim.js?v=72"></script>
-  <script src="js/main.js?v=72"></script>
+  <script src="js/firebase-config.js?v=73"></script>
+  <script src="js/locales.js?v=73"></script>
+  <script src="js/sound.js?v=73"></script>
+  <script src="js/config.js?v=73"></script>
+  <script src="js/game.js?v=73"></script>
+  <script src="js/tree.js?v=73"></script>
+  <script src="js/shards.js?v=73"></script>
+  <script src="js/render.js?v=73"></script>
+  <script src="js/ui.js?v=73"></script>
+  <script src="js/landing-anim.js?v=73"></script>
+  <script src="js/main.js?v=73"></script>
 </body>
 
 </html>
