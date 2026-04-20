@@ -1268,50 +1268,51 @@ function toggleLandingLang(){
   const newLang=LANG==='ko'?'en':'ko';
   setLang(newLang);
   document.title=t('ui.title');
-  // 아이콘 브랜드(⚡)는 별도 요소이므로 타이틀 텍스트에 포함하지 않음
-  document.getElementById('landing-title').textContent=newLang==='ko'?'라이트닝 키우기':'LIGHTNING RAISING';
-  const tagEl=document.getElementById('landing-tagline');
-  if(tagEl) tagEl.textContent=newLang==='ko'?'번개를 진화시키며 끝없는 웨이브에 도전':'Raise your lightning, conquer endless waves';
-  const startBtn=document.getElementById('landing-start');
-  startBtn.textContent=newLang==='ko'?'⚡ 게임 시작':'⚡ PLAY';
-  // 원형 언어 아이콘 — 텍스트 오버플로우 방지, tooltip으로 안내
+  // Storm Eye 타이틀만 KO/EN 교체 — 나머지 영문 라벨(CHAPTER, ENTER THE EYE 등)은 고정
+  const titleEl=document.getElementById('landing-title');
+  if(titleEl) titleEl.textContent=newLang==='ko'?'라이트닝 키우기':'Lightning Raising';
   const langBtn=document.getElementById('landing-lang');
   if(langBtn){ langBtn.textContent='🌐'; langBtn.title=newLang==='ko'?'Language: English':'언어: 한국어'; }
-  // 메타 카드 텍스트 (RP 배지는 별도 업데이트)
-  const metaTitle=document.querySelector('#landing-meta-card .meta-card-title');
-  const metaSub=document.querySelector('#landing-meta-card .meta-card-sub');
-  if(metaTitle) metaTitle.textContent=t('ui.meta_growth');
-  if(metaSub) metaSub.textContent=t('ui.meta_sub');
-  // 마지막 런 라벨 + 통계 문자열 재생성
+  // 마지막 런 갱신
   if(typeof showLandingLastRun==='function') showLandingLastRun();
-  const navBtns=document.querySelectorAll('#landing-nav .landing-btn');
-  const labels=newLang==='ko'?['🏆 랭킹','❓ 도움말','📖 소개']:['🏆 Ranking','❓ Help','📖 About'];
-  navBtns.forEach((b,i)=>{if(labels[i])b.textContent=labels[i]});
-  const footLinks=document.querySelectorAll('#landing-footer a');
-  if(footLinks[0])footLinks[0].textContent=t('ui.privacy');
-  if(footLinks[1])footLinks[1].textContent=t('ui.terms');
+  if(typeof updateThreatPill==='function') updateThreatPill();
 }
 
-// 랜딩 RP 표시 갱신 (영구 성장 카드)
+// 랜딩 RP 표시 갱신 (Storm Eye 메타 카드)
 function updateLandingRpDisplay(){
   const el=document.getElementById('landing-rp-display');
-  if(el) el.textContent='RP '+formatNum(G.rp||0);
+  if(el) el.textContent=formatNum(G.rp||0);
 }
-// 랜딩 마지막 런 기록 표시 (localStorage lightningLastRun)
+// Storm Eye LAST RUN 카드 채우기
 function showLandingLastRun(){
-  const el=document.getElementById('landing-lastrun');
-  const statsEl=document.getElementById('landing-lastrun-stats');
-  const labelEl=document.querySelector('#landing-lastrun .lastrun-label');
-  if(!el||!statsEl) return;
-  if(labelEl) labelEl.textContent=t('ui.last_run');
+  const setTxt=(id,v)=>{ const el=document.getElementById(id); if(el) el.textContent=v; };
   try{
     const d=localStorage.getItem('lightningLastRun');
     if(d){
       const s=JSON.parse(d);
-      statsEl.textContent=`${t('ui.wave')} ${s.wave} · Lv ${s.level} · +${s.rp} RP`;
-      el.classList.remove('hidden');
+      setTxt('se-last-wave', s.wave||'—');
+      setTxt('se-last-kills', s.kills!=null?s.kills:'—');
+      setTxt('se-last-level', s.level||'—');
+      setTxt('se-last-rp', (s.rp!=null?('+'+s.rp):'—'));
+      // 하단 ENTER 영역 요약
+      setTxt('se-best-wave', s.bestWave||s.wave||0);
+      setTxt('se-total-runs', s.runs||1);
     }
   }catch(e){}
+}
+
+// Storm Eye THREAT 필 동기화 — 난이도에 따라 라벨/컬러 전환
+function updateThreatPill(){
+  const pill=document.querySelector('.se-threat-pill');
+  if(!pill) return;
+  const d=G.difficulty||'normal';
+  pill.dataset.threat=d;
+  const map={easy:{label:'CALM',no:'01'},normal:{label:'STEADY',no:'02'},hard:{label:'SEVERE',no:'03'},nightmare:{label:'TEMPEST',no:'04'}};
+  const info=map[d]||map.normal;
+  const labelEl=pill.querySelector('.se-threat-label');
+  const levelEl=pill.querySelector('.se-threat-level');
+  if(labelEl) labelEl.textContent=info.label;
+  if(levelEl) levelEl.textContent='THREAT '+info.no;
 }
 
 // 난이도 버튼 초기화 — 현재 선택 표시 + 클릭 바인딩
@@ -1324,8 +1325,10 @@ function initDifficultyButtons(){
       G.difficulty=d;
       try{ localStorage.setItem('lightningDifficulty',d); }catch(e){}
       document.querySelectorAll('.diff-btn').forEach(b=>b.classList.toggle('active', b.dataset.diff===d));
+      updateThreatPill();
     });
   });
+  updateThreatPill();
 }
 
 function initLanding(){
